@@ -10,7 +10,7 @@
 #define ENGINE_NAME "Apa Borsec"
 #endif
 
-class CGame
+class CGame sealed
 {
 
 private:

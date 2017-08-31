@@ -10,6 +10,7 @@
 #include <D3DX10.h>
 #include <dxgi.h>
 #include <wrl.h>
+#include <D3Dcompiler.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -25,6 +26,7 @@
 #pragma comment (lib, "d3dx10.lib")
 #pragma comment (lib, "dxguid.lib")
 #pragma comment (lib, "dxgi.lib")
+#pragma comment (lib, "D3Dcompiler.lib")
 
 
 #define ZeroMemoryAndDeclare(type, name) type name;\

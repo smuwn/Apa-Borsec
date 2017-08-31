@@ -2,7 +2,7 @@
 
 #include <Windows.h>
 
-class CHRTimer
+class CHRTimer sealed
 {
 private:
 	float m_frameTime;
