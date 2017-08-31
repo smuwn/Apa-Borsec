@@ -128,6 +128,7 @@ void CGame::InitD3D( bool bFullscreen )
 void CGame::Run( )
 {
 	MSG Message;
+	mTimer.Start( );
 	while ( true )
 	{
 		if ( PeekMessage( &Message, nullptr, 0, 0, PM_REMOVE ) )
@@ -139,6 +140,10 @@ void CGame::Run( )
 		}
 		else
 		{
+			if ( mTimer.GetTimeSinceLastStart( ) > 1.0f )
+			{
+				mTimer.Start( );
+			}
 			Update( );
 			Render( );
 		}
@@ -147,7 +152,10 @@ void CGame::Run( )
 
 void CGame::Update( )
 {
-
+	mTimer.Frame( );
+	wchar_t buffer[ 500 ];
+	swprintf_s( buffer, L"%s: %d, %.2f", ENGINE_NAME, mTimer.GetFPS( ), mTimer.GetFrameTime( ) );
+	SetWindowText( mhWnd, buffer );
 }
 
 void CGame::Render( )

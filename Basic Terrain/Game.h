@@ -1,6 +1,7 @@
 #pragma once
 
 #include "commonincludes.h"
+#include "HRTimer.h"
 
 #define GAME CGame::GetGameInstance( )
 #if defined UNICODE
@@ -19,7 +20,10 @@ private:
 	UINT mWidth;
 	UINT mHeight;
 
+	CHRTimer mTimer;
+
 	WCHAR* mGPUDescription;
+	
 
 private: // D3D Objects
 	Microsoft::WRL::ComPtr<ID3D11Device> mDevice;
