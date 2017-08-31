@@ -9,6 +9,7 @@
 #include <d3d10.h>
 #include <D3DX10.h>
 #include <dxgi.h>
+#include <wrl.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -23,10 +24,11 @@
 #pragma comment (lib, "d3d10.lib")
 #pragma comment (lib, "d3dx10.lib")
 #pragma comment (lib, "dxguid.lib")
+#pragma comment (lib, "dxgi.lib")
 
 
 #define ZeroMemoryAndDeclare(type, name) type name;\
-ZeroMemory(sizeof(type),&name);
+ZeroMemory(&name,sizeof(type));
 
 namespace DX
 {

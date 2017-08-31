@@ -19,6 +19,14 @@ private:
 	UINT mWidth;
 	UINT mHeight;
 
+	WCHAR* mGPUDescription;
+
+private: // D3D Objects
+	Microsoft::WRL::ComPtr<ID3D11Device> mDevice;
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext> mImmediateContext;
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> mBackbuffer;
+	Microsoft::WRL::ComPtr<IDXGISwapChain> mSwapChain;
+
 private:
 	static CGame* m_GameInstance;
 
@@ -27,8 +35,12 @@ private:
 	~CGame( );
 
 private:
-	void InitWindow( );
+	void InitWindow( bool bFullscreen );
+	void InitD3D( bool bFullscreen );
 	void DeleteWindow( );
+
+	void Update( );
+	void Render( );
 
 public:
 	static bool Initialize( HINSTANCE hInstance, bool bFullScreen = false );
@@ -39,8 +51,6 @@ private:
 	static LRESULT CALLBACK WndProc( HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam );
 
 public:
-	void OnCreate( );
-	void OnResize( );
 	void Run( );
 };
 
