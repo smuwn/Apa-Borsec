@@ -11,6 +11,8 @@
 #include <dxgi.h>
 #include <wrl.h>
 #include <D3Dcompiler.h>
+#include <comdecl.h>
+#include <comdef.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -32,12 +34,42 @@
 #define ZeroMemoryAndDeclare(type, name) type name;\
 ZeroMemory(&name,sizeof(type));
 
+
+#if _DEBUG || DEBUG
+#define CATCH catch(std::exception const& e) { \
+char buffer[500]; sprintf_s(buffer, "Error: %s", e.what()); \
+OutputDebugStringA(buffer); }\
+catch( ... ) { \
+OutputDebugStringA( "Unexpected error occured" );}
+#else
+#define CATCH catch(std::exception const& e) { \
+char buffer[500]; sprintf_s(buffer, "Error: %s", e.what());\
+MessageBoxA(NULL,buffer,"Error",MB_ICONERROR| MB_OK);}\
+catch (...) {\
+MessageBoxA(NULL,"Unexpected error occured", "Error", MB_ICONERROR| MB_OK);\
+}
+#endif
+
 namespace DX
 {
 	inline void ThrowIfFailed( HRESULT hr )
 	{
 		if ( FAILED( hr ) )
-			throw "DirectX Error";
+		{
+			_com_error err( hr );
+			const wchar_t* errorMessage = err.ErrorMessage( );
+			wchar_t buffer[ 500 ];
+#if DEBUG || _DEBUG
+			int line = __LINE__;
+			const char* file = __FILE__;
+			swprintf_s( buffer, L"DirectX Error occured at line %d in file %hs;\nMessage: %ws\n", line, file, errorMessage );
+			OutputDebugString( buffer );
+#else
+			swprintf_s( buffer, L"DirectX Error occured; Message: %ws", errorMessage );
+			MessageBox( NULL, buffer, L"Error", MB_ICONERROR | MB_OK );
+#endif
+			throw std::exception( "DirectX Error" );
+		}
 	};
 	inline void OutputVDebugString( const wchar_t * format, ... )
 	{

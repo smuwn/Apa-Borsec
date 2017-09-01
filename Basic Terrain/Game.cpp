@@ -13,10 +13,7 @@ CGame::CGame( HINSTANCE hInstance, bool bFullscreen ) :
 		InitWindow( bFullscreen );
 		InitD3D( bFullscreen );
 	}
-	catch ( ... )
-	{
-		throw std::exception( "Unexpected error occured" );
-	}
+	CATCH;
 }
 
 
@@ -82,9 +79,6 @@ void CGame::InitD3D( bool bFullscreen )
 	DXGI_ADAPTER_DESC GPU;
 	Adapter->GetDesc( &GPU );
 	mGPUDescription = GPU.Description;
-	Factory->Release( );
-	Adapter->Release( );
-	Output->Release( );
 	ZeroMemoryAndDeclare( DXGI_SWAP_CHAIN_DESC, swapDesc );
 	swapDesc.BufferCount = 1;
 	swapDesc.BufferDesc = FinalMode;
@@ -98,19 +92,14 @@ void CGame::InitD3D( bool bFullscreen )
 	swapDesc.SampleDesc.Count = 1;
 	swapDesc.SampleDesc.Quality = 0;
 
-	UINT flags;
-#if USE_MULTITHREADED
-	flags |= 0
-#else
-	flags |= D3D11_CREATE_DEVICE_FLAG::D3D11_CREATE_DEVICE_SINGLETHREADED;
-#endif
+	UINT flags = 0;
 #if DEBUG || _DEBUG
 	flags |= D3D11_CREATE_DEVICE_FLAG::D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
 	DX::ThrowIfFailed(
-		D3D11CreateDeviceAndSwapChain( nullptr, D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_HARDWARE, nullptr, flags,
-			nullptr, 0, D3D11_SDK_VERSION, &swapDesc, &mSwapChain, &mDevice, nullptr, &mImmediateContext )
+		D3D11CreateDeviceAndSwapChain( NULL, D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_HARDWARE, NULL, flags,
+			NULL, NULL, D3D11_SDK_VERSION, &swapDesc, &mSwapChain, &mDevice, NULL, &mImmediateContext )
 	);
 
 	ID3D11Texture2D * backBufferResource;
@@ -122,6 +111,9 @@ void CGame::InitD3D( bool bFullscreen )
 		)
 	);
 	backBufferResource->Release( );
+	Factory->Release( );
+	Adapter->Release( );
+	Output->Release( );
 
 }
 
