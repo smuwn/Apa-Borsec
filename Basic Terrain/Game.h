@@ -1,6 +1,7 @@
 #pragma once
 
-#include "commonincludes.h"
+#include "DefaultShader.h"
+#include "Model.h"
 #include "HRTimer.h"
 
 #define GAME CGame::GetGameInstance( )
@@ -21,6 +22,10 @@ private:
 	UINT mHeight;
 
 	CHRTimer mTimer;
+	D3D11_VIEWPORT mFullscreenViewport;
+
+	std::unique_ptr<CDefaultShader> mDefaultShader;
+	std::unique_ptr<CModel> mTriangle;
 
 	WCHAR* mGPUDescription;
 	
@@ -41,7 +46,11 @@ private:
 private:
 	void InitWindow( bool bFullscreen );
 	void InitD3D( bool bFullscreen );
+	void InitShaders( );
+	void InitModels( );
 	void DeleteWindow( );
+
+	void EnableBackbuffer( );
 
 	void Update( );
 	void Render( );

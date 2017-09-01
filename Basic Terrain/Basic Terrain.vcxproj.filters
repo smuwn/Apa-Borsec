@@ -13,8 +13,11 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\Interfaces">
-      <UniqueIdentifier>{82e68da5-313e-409a-b848-1b0e10345ede}</UniqueIdentifier>
+    <Filter Include="Shader Files">
+      <UniqueIdentifier>{4c160cdb-a8e0-4da5-a5f6-4dc7b1fa7b19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Helpers">
+      <UniqueIdentifier>{287ab74c-ebbf-4992-a15e-90abeeed10ac}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -27,11 +30,12 @@
     <ClCompile Include="HRTimer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="commonincludes.h">
-      <Filter>Header Files</Filter>
-    </None>
+    <ClCompile Include="DefaultShader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -40,5 +44,27 @@
     <ClInclude Include="HRTimer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ShaderHelper.h">
+      <Filter>Header Files\Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="DefaultShader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="VertexShader.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="PixelShader.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="commonincludes.h">
+      <Filter>Header Files\Helpers</Filter>
+    </None>
   </ItemGroup>
 </Project>

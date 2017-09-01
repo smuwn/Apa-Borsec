@@ -9,10 +9,11 @@
 #include <d3d10.h>
 #include <D3DX10.h>
 #include <dxgi.h>
-#include <wrl.h>
 #include <D3Dcompiler.h>
+#include <wrl.h>
 #include <comdecl.h>
 #include <comdef.h>
+#include <DirectXMath.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -21,6 +22,11 @@
 
 #include <random>
 #include <string>
+#include <array>
+#include <vector>
+#include <list>
+#include <algorithm>
+#include <memory>
 
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dx11.lib")
@@ -38,15 +44,15 @@ ZeroMemory(&name,sizeof(type));
 #if _DEBUG || DEBUG
 #define CATCH catch(std::exception const& e) { \
 char buffer[500]; sprintf_s(buffer, "Error: %s", e.what()); \
-OutputDebugStringA(buffer); }\
+OutputDebugStringA(buffer); PostQuitMessage(0); }\
 catch( ... ) { \
-OutputDebugStringA( "Unexpected error occured" );}
+OutputDebugStringA( "Unexpected error occured" ); PostQuitMessage(0);}
 #else
 #define CATCH catch(std::exception const& e) { \
 char buffer[500]; sprintf_s(buffer, "Error: %s", e.what());\
-MessageBoxA(NULL,buffer,"Error",MB_ICONERROR| MB_OK);}\
+MessageBoxA(NULL,buffer,"Error",MB_ICONERROR| MB_OK); PostQuitMessage(0);}\
 catch (...) {\
-MessageBoxA(NULL,"Unexpected error occured", "Error", MB_ICONERROR| MB_OK);\
+MessageBoxA(NULL,"Unexpected error occured", "Error", MB_ICONERROR| MB_OK); PostQuitMessage(0);\
 }
 #endif
 

@@ -12,6 +12,8 @@ CGame::CGame( HINSTANCE hInstance, bool bFullscreen ) :
 	{
 		InitWindow( bFullscreen );
 		InitD3D( bFullscreen );
+		InitShaders( );
+		InitModels( );
 	}
 	CATCH;
 }
@@ -49,6 +51,13 @@ void CGame::InitWindow( bool bFullscreen )
 	UpdateWindow( mhWnd );
 	ShowWindow( mhWnd, SW_SHOWNORMAL );
 	SetFocus( mhWnd );
+
+	mFullscreenViewport.Width = mWidth;
+	mFullscreenViewport.Height = mHeight;
+	mFullscreenViewport.TopLeftX = 0;
+	mFullscreenViewport.TopLeftY = 0;
+	mFullscreenViewport.MinDepth = 0.0f;
+	mFullscreenViewport.MaxDepth = 1.0f;
 }
 
 void CGame::InitD3D( bool bFullscreen )
@@ -117,6 +126,16 @@ void CGame::InitD3D( bool bFullscreen )
 
 }
 
+void CGame::InitShaders( )
+{
+	mDefaultShader = std::make_unique<CDefaultShader>( mDevice.Get( ), mImmediateContext.Get( ) );
+}
+
+void CGame::InitModels( )
+{
+	mTriangle = std::make_unique<CModel>( mDevice.Get( ), mImmediateContext.Get( ) );
+}
+
 void CGame::Run( )
 {
 	MSG Message;
@@ -153,8 +172,12 @@ void CGame::Update( )
 void CGame::Render( )
 {
 	static FLOAT BackColor[ 4 ] = { 0,0,0,0 };
+	EnableBackbuffer( );
 	mImmediateContext->ClearRenderTargetView( mBackbuffer.Get( ), BackColor );
 	
+	mTriangle->Render( );
+	mDefaultShader->Render( mTriangle->GetIndexCount( ) );
+
 	mSwapChain->Present( 1, 0 );
 }
 
@@ -162,6 +185,12 @@ void CGame::DeleteWindow( )
 {
 	UnregisterClass( ENGINE_NAME, mhInstance );
 	DestroyWindow( mhWnd );
+}
+
+void CGame::EnableBackbuffer( )
+{
+	mImmediateContext->RSSetViewports( 1, &mFullscreenViewport );
+	mImmediateContext->OMSetRenderTargets( 1, mBackbuffer.GetAddressOf( ), nullptr );
 }
 
 bool CGame::Initialize( HINSTANCE hInstance, bool bFullScreen )
