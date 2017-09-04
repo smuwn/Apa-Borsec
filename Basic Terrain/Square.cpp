@@ -4,7 +4,8 @@
 
 Square::Square( ID3D11Device * device, ID3D11DeviceContext * context,
 	std::shared_ptr<C2DShader> Shader,
-	UINT WindowWidth, UINT WindowHeight, UINT Width, UINT Height ) :
+	UINT WindowWidth, UINT WindowHeight, UINT Width, UINT Height,
+	LPWSTR Path ) :
 	mDevice( device ),
 	mContext( context ),
 	mWindowWidth( WindowWidth ),
@@ -19,6 +20,8 @@ Square::Square( ID3D11Device * device, ID3D11DeviceContext * context,
 	{
 		CreateBuffers( );
 		mWorld = DirectX::XMMatrixIdentity( );
+		if ( Path != L"" )
+			mTexture = std::make_unique<CTexture>( Path, mDevice );
 	}
 	CATCH;
 }
@@ -86,7 +89,7 @@ void Square::Render( DirectX::FXMMATRIX& Projection )
 	mContext->IASetVertexBuffers( 0, 1, mVertBuffer.GetAddressOf( ), &Stride, &Offset );
 	mContext->IASetIndexBuffer( mIndexBuffer.Get( ), DXGI_FORMAT::DXGI_FORMAT_R32_UINT, 0 );
 	mContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
-	mShader->Render( mIndexCount, mWorld, Projection );
+	mShader->Render( mIndexCount, mWorld, Projection, mTexture.get( ) );
 	mContext->RSSetState( DX::DefaultRS.Get( ) );
 
 	// Old toys

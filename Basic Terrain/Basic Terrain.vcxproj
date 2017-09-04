@@ -132,6 +132,7 @@
     <ClCompile Include="HRTimer.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Square.cpp" />
+    <ClCompile Include="Texture.cpp" />
     <ClCompile Include="wmain.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -145,6 +146,7 @@
     <ClInclude Include="Model.h" />
     <ClInclude Include="ShaderHelper.h" />
     <ClInclude Include="Square.h" />
+    <ClInclude Include="Texture.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="2DPixelShader.hlsl">

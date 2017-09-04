@@ -39,6 +39,11 @@ C2DShader::C2DShader( ID3D11Device * Device, ID3D11DeviceContext * Context ) :
 			D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER,sizeof(SPerObject ),
 			D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE
 			);
+		ShaderHelper::CreateBuffer(
+			mDevice, &mColorBuffer, D3D11_USAGE::D3D11_USAGE_DYNAMIC,
+			D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER, sizeof( SColor ),
+			D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE
+			);
 		ZeroMemoryAndDeclare( D3D11_SAMPLER_DESC, sampDesc );
 		sampDesc.AddressU =
 			sampDesc.AddressV =
@@ -67,7 +72,8 @@ C2DShader::~C2DShader( )
 }
 
 
-void C2DShader::Render( UINT IndexCount, DirectX::FXMMATRIX& World, DirectX::FXMMATRIX& Projection )
+void C2DShader::Render( UINT IndexCount, DirectX::FXMMATRIX& World, DirectX::FXMMATRIX& Projection,
+	CTexture * Texture, DirectX::XMFLOAT4 Color )
 {
 	// Old toys addresses
 	ID3D11VertexShader * oldVS = nullptr;
@@ -75,6 +81,8 @@ void C2DShader::Render( UINT IndexCount, DirectX::FXMMATRIX& World, DirectX::FXM
 	ID3D11InputLayout * oldLayout = nullptr;
 	ID3D11SamplerState * oldSampler = nullptr;
 	ID3D11Buffer * oldBuffer = nullptr;
+	ID3D11Buffer * oldPSBuffer = nullptr;
+	ID3D11ShaderResourceView * oldSRV = nullptr;
 
 	// Get the old toys
 	mContext->IAGetInputLayout( &oldLayout );
@@ -82,6 +90,8 @@ void C2DShader::Render( UINT IndexCount, DirectX::FXMMATRIX& World, DirectX::FXM
 	mContext->PSGetShader( &oldPS, nullptr, nullptr );
 	mContext->PSGetSamplers( 0, 1, &oldSampler );
 	mContext->VSGetConstantBuffers( 0, 1, &oldBuffer );
+	mContext->PSGetConstantBuffers( 0, 1, &oldPSBuffer );
+	mContext->PSGetShaderResources( 0, 1, &oldSRV );
 
 	// Replace the old toys
 	mContext->IASetInputLayout( mInputLayout.Get() );
@@ -92,12 +102,27 @@ void C2DShader::Render( UINT IndexCount, DirectX::FXMMATRIX& World, DirectX::FXM
 	D3D11_MAPPED_SUBRESOURCE MappedSubresource;
 	DirectX::XMMATRIX WVP = DirectX::XMMatrixTranspose( World * Projection );
 
-	HRESULT hr = mContext->Map( mPerObjectBuffer.Get( ), 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &MappedSubresource );
+	mContext->Map( mPerObjectBuffer.Get( ), 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &MappedSubresource );
 	
 	( ( SPerObject* ) MappedSubresource.pData )->WP = WVP;
 
 	mContext->Unmap( mPerObjectBuffer.Get( ), 0 );
 	mContext->VSSetConstantBuffers( 0, 1, mPerObjectBuffer.GetAddressOf( ) );
+
+	mContext->Map( mColorBuffer.Get( ), 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &MappedSubresource );
+
+	( ( SColor* ) MappedSubresource.pData )->Color = Color;
+	( ( SColor* ) MappedSubresource.pData )->HasTexture = ( Texture == nullptr || Texture == 0 ) ? FALSE : TRUE;
+
+	mContext->Unmap( mColorBuffer.Get( ), 0 );
+	mContext->PSSetConstantBuffers( 0, 1, mColorBuffer.GetAddressOf( ) );
+
+	if ( !( Texture == nullptr || Texture == 0 ) )
+	{
+		ID3D11ShaderResourceView* SRV = Texture->GetTexture( );
+		mContext->PSSetShaderResources( 0, 1, &SRV );
+	}
+
 	mContext->DrawIndexed( IndexCount, 0, 0 );
 
 	// Place back the old toys
@@ -106,4 +131,6 @@ void C2DShader::Render( UINT IndexCount, DirectX::FXMMATRIX& World, DirectX::FXM
 	mContext->PSSetShader( oldPS, nullptr, 0 );
 	mContext->PSSetSamplers( 0, 1, &oldSampler );
 	mContext->VSSetConstantBuffers( 0, 1, &oldBuffer );
+	mContext->PSSetConstantBuffers( 0, 1, &oldPSBuffer );
+	mContext->PSSetShaderResources( 0, 1, &oldSRV );
 }

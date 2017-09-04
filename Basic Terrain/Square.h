@@ -2,6 +2,7 @@
 
 #include "commonincludes.h"
 #include "C2DShader.h"
+#include "Texture.h"
 
 
 ALIGN16 class Square
@@ -23,6 +24,8 @@ private:
 
 	std::shared_ptr<C2DShader> mShader;
 
+	std::unique_ptr<CTexture> mTexture;
+
 	UINT mWindowWidth;
 	UINT mWindowHeight;
 	UINT mWidth;
@@ -41,7 +44,8 @@ private:
 public:
 	Square( ID3D11Device * device, ID3D11DeviceContext * context,
 		std::shared_ptr<C2DShader> Shader,
-		UINT WindowWidth, UINT WindowHeight, UINT Width, UINT Height );
+		UINT WindowWidth, UINT WindowHeight, UINT Width, UINT Height,
+		LPWSTR Path = L"");
 	~Square( );
 public:
 	void Render( DirectX::FXMMATRIX& Projection );

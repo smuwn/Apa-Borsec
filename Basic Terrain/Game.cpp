@@ -155,7 +155,7 @@ void CGame::InitModels( )
 void CGame::Init2D( )
 {
 	mSquare = std::make_unique<Square>( mDevice.Get( ), mImmediateContext.Get( ), m2DShader,
-		mWidth, mHeight, mWidth / 4, mHeight / 4 );
+		mWidth, mHeight, mWidth / 4, mHeight / 4, ( LPWSTR ) L"Images/Europe.jpg" );
 	mSquare->Rotate( 0.3f );
 	mSquare->TranslateTo( 1, 1 );
 }
