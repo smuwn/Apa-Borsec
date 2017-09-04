@@ -3,6 +3,7 @@
 #include "DefaultShader.h"
 #include "Model.h"
 #include "HRTimer.h"
+#include "Square.h"
 
 #define GAME CGame::GetGameInstance( )
 #if defined UNICODE
@@ -11,9 +12,10 @@
 #define ENGINE_NAME "Apa Borsec"
 #endif
 
-class CGame sealed
+ALIGN16 class CGame sealed
 {
-
+	static constexpr const float NearZ = 0.1f;
+	static constexpr const float FarZ = 100.0f;
 private:
 	HINSTANCE mhInstance;
 	HWND mhWnd;
@@ -23,12 +25,16 @@ private:
 
 	CHRTimer mTimer;
 	D3D11_VIEWPORT mFullscreenViewport;
-
-	std::unique_ptr<CDefaultShader> mDefaultShader;
+	
 	std::unique_ptr<CModel> mTriangle;
+	std::unique_ptr<Square> mSquare;
+
+	std::shared_ptr<CDefaultShader> mDefaultShader;
+	std::shared_ptr<C2DShader> m2DShader;
 
 	WCHAR* mGPUDescription;
 	
+	DirectX::XMMATRIX mOrthoMatrix;
 
 private: // D3D Objects
 	Microsoft::WRL::ComPtr<ID3D11Device> mDevice;
@@ -48,6 +54,7 @@ private:
 	void InitD3D( bool bFullscreen );
 	void InitShaders( );
 	void InitModels( );
+	void Init2D( );
 	void DeleteWindow( );
 
 	void EnableBackbuffer( );
@@ -65,5 +72,15 @@ private:
 
 public:
 	void Run( );
+
+public:
+	inline void* operator new ( size_t size )
+	{
+		return _aligned_malloc( size,16 );
+	};
+	inline void operator delete ( void* object )
+	{
+		_aligned_free( object );
+	}
 };
 

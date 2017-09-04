@@ -13,6 +13,12 @@ CModel::CModel( ID3D11Device * device, ID3D11DeviceContext * deviceContext ) :
 	CATCH;
 }
 
+CModel::~CModel( )
+{
+	mVertexBuffer.Reset( );
+	mIndexBuffer.Reset( );
+}
+
 void CModel::CreateTriangle( )
 {
 	SVertex vertices[ ] =
@@ -55,6 +61,3 @@ void CModel::Render( )
 	mContext->IASetVertexBuffers( 0, 1, mVertexBuffer.GetAddressOf( ), &Stride, &Offsets );
 	mContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 }
-
-CModel::~CModel( )
-{ }

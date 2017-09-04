@@ -6,7 +6,8 @@ CGame* CGame::m_GameInstance = nullptr;
 CGame::CGame( HINSTANCE hInstance, bool bFullscreen ) :
 	mhInstance( hInstance ),
 	mWidth( 800 ),
-	mHeight( 600 )
+	mHeight( 600 ),
+	mOrthoMatrix( DirectX::XMMATRIX( ) )
 {
 	try
 	{
@@ -14,6 +15,8 @@ CGame::CGame( HINSTANCE hInstance, bool bFullscreen ) :
 		InitD3D( bFullscreen );
 		InitShaders( );
 		InitModels( );
+		Init2D( );
+		mOrthoMatrix = DirectX::XMMatrixOrthographicLH( ( float ) mWidth, ( float ) mHeight, NearZ, FarZ );
 	}
 	CATCH;
 }
@@ -21,6 +24,17 @@ CGame::CGame( HINSTANCE hInstance, bool bFullscreen ) :
 
 CGame::~CGame( )
 {
+	mDefaultShader.reset( );
+	m2DShader.reset( );
+
+	mTriangle.reset( );
+	mSquare.reset( );
+
+	mDevice.Reset( );
+	mImmediateContext.Reset( );
+	mBackbuffer.Reset( );
+	mSwapChain.Reset( );
+
 	DeleteWindow( );
 }
 
@@ -52,8 +66,8 @@ void CGame::InitWindow( bool bFullscreen )
 	ShowWindow( mhWnd, SW_SHOWNORMAL );
 	SetFocus( mhWnd );
 
-	mFullscreenViewport.Width = mWidth;
-	mFullscreenViewport.Height = mHeight;
+	mFullscreenViewport.Width = ( FLOAT ) mWidth;
+	mFullscreenViewport.Height = ( FLOAT ) mHeight;
 	mFullscreenViewport.TopLeftX = 0;
 	mFullscreenViewport.TopLeftY = 0;
 	mFullscreenViewport.MinDepth = 0.0f;
@@ -119,6 +133,7 @@ void CGame::InitD3D( bool bFullscreen )
 			backBufferResource,nullptr, &mBackbuffer
 		)
 	);
+	DX::InitStates( mDevice.Get( ) );
 	backBufferResource->Release( );
 	Factory->Release( );
 	Adapter->Release( );
@@ -128,12 +143,21 @@ void CGame::InitD3D( bool bFullscreen )
 
 void CGame::InitShaders( )
 {
-	mDefaultShader = std::make_unique<CDefaultShader>( mDevice.Get( ), mImmediateContext.Get( ) );
+	mDefaultShader = std::make_shared<CDefaultShader>( mDevice.Get( ), mImmediateContext.Get( ) );
+	m2DShader = std::make_shared<C2DShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 }
 
 void CGame::InitModels( )
 {
 	mTriangle = std::make_unique<CModel>( mDevice.Get( ), mImmediateContext.Get( ) );
+}
+
+void CGame::Init2D( )
+{
+	mSquare = std::make_unique<Square>( mDevice.Get( ), mImmediateContext.Get( ), m2DShader,
+		mWidth, mHeight, mWidth / 4, mHeight / 4 );
+	mSquare->Rotate( 0.3f );
+	mSquare->TranslateTo( 1, 1 );
 }
 
 void CGame::Run( )
@@ -177,6 +201,8 @@ void CGame::Render( )
 	
 	mTriangle->Render( );
 	mDefaultShader->Render( mTriangle->GetIndexCount( ) );
+
+	mSquare->Render( mOrthoMatrix );
 
 	mSwapChain->Present( 1, 0 );
 }

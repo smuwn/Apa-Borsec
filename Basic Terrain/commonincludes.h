@@ -39,6 +39,8 @@
 
 #define ZeroMemoryAndDeclare(type, name) type name;\
 ZeroMemory(&name,sizeof(type));
+#define ZeroVariable(name) ZeroMemory(&name,sizeof(decltype(name)))
+#define ALIGN16 __declspec(align(16))
 
 
 #if _DEBUG || DEBUG
@@ -58,6 +60,8 @@ MessageBoxA(NULL,"Unexpected error occured", "Error", MB_ICONERROR| MB_OK); Post
 
 namespace DX
 {
+	extern Microsoft::WRL::ComPtr<ID3D11RasterizerState> NoCulling;
+	extern Microsoft::WRL::ComPtr<ID3D11RasterizerState> DefaultRS;
 	inline void ThrowIfFailed( HRESULT hr )
 	{
 		if ( FAILED( hr ) )
@@ -95,4 +99,5 @@ namespace DX
 			object = nullptr;
 		}
 	}
+	void InitStates( ID3D11Device* );
 }

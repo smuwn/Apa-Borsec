@@ -32,25 +32,35 @@ CDefaultShader::CDefaultShader( ID3D11Device * device, ID3D11DeviceContext * con
 	CATCH;
 }
 
+CDefaultShader::~CDefaultShader( )
+{
+	for ( int i = 0; i < 2; ++i )
+		mBlobs[ i ].Reset( );
+	mVertexShader.Reset( );
+	mPixelShader.Reset( );
+	mInputLayout.Reset( );
+}
+
 void CDefaultShader::Render( UINT indexCount )
 {
+	// Old toys addresses
 	ID3D11VertexShader * oldVS;
 	ID3D11PixelShader * oldPS;
 	ID3D11InputLayout * oldLayout;
 
+	// Get the old toys
 	mContext->IAGetInputLayout( &oldLayout );
 	mContext->VSGetShader( &oldVS, nullptr, nullptr );
 	mContext->PSGetShader( &oldPS, nullptr, nullptr );
 
+	// Replace the old toys with new toys
 	mContext->IASetInputLayout( mInputLayout.Get( ) );
 	mContext->VSSetShader( mVertexShader.Get( ), nullptr, 0 );
 	mContext->PSSetShader( mPixelShader.Get( ), nullptr, 0 );
 	mContext->DrawIndexed( indexCount, 0, 0 );
 
+	// Place back the old toys
 	mContext->IASetInputLayout( oldLayout );
 	mContext->VSSetShader( oldVS, nullptr, 0 );
 	mContext->PSSetShader( oldPS, nullptr, 0 );
 }
-
-CDefaultShader::~CDefaultShader( )
-{ }

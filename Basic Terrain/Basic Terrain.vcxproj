@@ -125,23 +125,44 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="C2DShader.cpp" />
+    <ClCompile Include="commonincludes.cpp" />
     <ClCompile Include="DefaultShader.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="HRTimer.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="Square.cpp" />
     <ClCompile Include="wmain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="commonincludes.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="C2DShader.h" />
     <ClInclude Include="DefaultShader.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="HRTimer.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ShaderHelper.h" />
+    <ClInclude Include="Square.h" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="2DPixelShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">(OutDir)\Shaders\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(LocalDebuggerWorkingDirectory)Shaders\%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="2DVertexShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">(OutDir)\Shaders\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(LocalDebuggerWorkingDirectory)Shaders\%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
     <FxCompile Include="PixelShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

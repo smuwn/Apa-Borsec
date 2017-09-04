@@ -48,4 +48,30 @@ namespace ShaderHelper
 
 	}
 
+	inline void CreateBuffer( ID3D11Device * device, ID3D11Buffer ** FinalBuffer,
+		D3D11_USAGE Usage, D3D11_BIND_FLAG flag, size_t DataSize, D3D11_CPU_ACCESS_FLAG CPUAccessFlag,
+		void* data = nullptr, UINT MiscFlag = 0, UINT StructureByteStride = 0 )
+	{
+		ZeroMemoryAndDeclare( D3D11_BUFFER_DESC, buffDesc );
+		ZeroMemoryAndDeclare( D3D11_SUBRESOURCE_DATA, buffData );
+		buffDesc.BindFlags = flag;
+		buffDesc.ByteWidth = DataSize;
+		buffDesc.CPUAccessFlags = CPUAccessFlag;
+		buffDesc.MiscFlags = MiscFlag;
+		buffDesc.StructureByteStride = StructureByteStride;
+		buffDesc.Usage = Usage;
+		if ( data /*!= nullptr*/ )
+		{
+			buffData.pSysMem = data;
+			DX::ThrowIfFailed(
+				device->CreateBuffer( &buffDesc, &buffData, FinalBuffer )
+				);
+		}
+		else
+		{
+			DX::ThrowIfFailed(
+				device->CreateBuffer( &buffDesc, nullptr, FinalBuffer )
+				);
+		}
+	}
 }
