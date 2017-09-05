@@ -156,8 +156,7 @@ void CGame::Init2D( )
 {
 	mSquare = std::make_unique<Square>( mDevice.Get( ), mImmediateContext.Get( ), m2DShader,
 		mWidth, mHeight, mWidth / 4, mHeight / 4, ( LPWSTR ) L"Images/Europe.jpg" );
-	mSquare->Rotate( 0.3f );
-	mSquare->TranslateTo( 1, 1 );
+	
 }
 
 void CGame::Run( )
@@ -198,9 +197,6 @@ void CGame::Render( )
 	static FLOAT BackColor[ 4 ] = { 0,0,0,0 };
 	EnableBackbuffer( );
 	mImmediateContext->ClearRenderTargetView( mBackbuffer.Get( ), BackColor );
-	
-	mTriangle->Render( );
-	mDefaultShader->Render( mTriangle->GetIndexCount( ) );
 
 	mSquare->Render( mOrthoMatrix );
 
