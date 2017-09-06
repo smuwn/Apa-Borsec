@@ -154,9 +154,12 @@ void CGame::InitModels( )
 
 void CGame::Init2D( )
 {
+	mArial73 = std::make_shared<CFont>( mDevice.Get( ), mImmediateContext.Get( ),
+		( LPWSTR ) L"Fonts/73Arial.fnt" );
 	mSquare = std::make_unique<Square>( mDevice.Get( ), mImmediateContext.Get( ), m2DShader,
-		mWidth, mHeight, mWidth / 4, mHeight / 4, ( LPWSTR ) L"Images/Europe.jpg" );
-	
+		mWidth, mHeight, mWidth / 4, mHeight / 4, ( LPWSTR ) L"Images/Europe.jpg");
+	mText = std::make_unique<CText>( mDevice.Get( ), mImmediateContext.Get( ),
+		m2DShader, mArial73, mWidth, mHeight );
 }
 
 void CGame::Run( )
@@ -187,9 +190,6 @@ void CGame::Run( )
 void CGame::Update( )
 {
 	mTimer.Frame( );
-	wchar_t buffer[ 500 ];
-	swprintf_s( buffer, L"%s: %d, %.2f", ENGINE_NAME, mTimer.GetFPS( ), mTimer.GetFrameTime( ) );
-	SetWindowText( mhWnd, buffer );
 }
 
 void CGame::Render( )
@@ -199,6 +199,12 @@ void CGame::Render( )
 	mImmediateContext->ClearRenderTargetView( mBackbuffer.Get( ), BackColor );
 
 	mSquare->Render( mOrthoMatrix );
+
+	char buffer[ 500 ] = { 0 };
+	sprintf_s( buffer, "FPS: %d", mTimer.GetFPS( ) );
+
+	mText->Render( mOrthoMatrix, buffer, 0, 0,
+		DirectX::XMFLOAT4( 1.0f, 1.0f, 0.0f, 1.0f ) );
 
 	mSwapChain->Present( 1, 0 );
 }

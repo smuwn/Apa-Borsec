@@ -27,6 +27,10 @@
 #include <list>
 #include <algorithm>
 #include <memory>
+#include <fstream>
+#include <sstream>
+#include <map>
+#include <unordered_map>
 
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dx11.lib")

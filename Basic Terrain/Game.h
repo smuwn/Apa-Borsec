@@ -4,6 +4,8 @@
 #include "Model.h"
 #include "HRTimer.h"
 #include "Square.h"
+#include "Font.h"
+#include "Text.h"
 
 #define GAME CGame::GetGameInstance( )
 #if defined UNICODE
@@ -28,6 +30,9 @@ private:
 	
 	std::unique_ptr<CModel> mTriangle;
 	std::unique_ptr<Square> mSquare;
+	std::unique_ptr<CText> mText;
+
+	std::shared_ptr<CFont> mArial73;
 
 	std::shared_ptr<CDefaultShader> mDefaultShader;
 	std::shared_ptr<C2DShader> m2DShader;

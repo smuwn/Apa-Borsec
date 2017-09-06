@@ -28,6 +28,7 @@ Square::Square( ID3D11Device * device, ID3D11DeviceContext * context,
 
 Square::~Square( )
 {
+	mShader.reset( );
 	mVertBuffer.Reset( );
 	mIndexBuffer.Reset( );
 }
