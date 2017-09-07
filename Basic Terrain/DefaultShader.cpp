@@ -34,7 +34,7 @@ CDefaultShader::CDefaultShader( ID3D11Device * device, ID3D11DeviceContext * con
 
 CDefaultShader::~CDefaultShader( )
 {
-	for ( int i = 0; i < 2; ++i )
+	for ( size_t i = 0; i < mBlobs.size( ); ++i )
 		mBlobs[ i ].Reset( );
 	mVertexShader.Reset( );
 	mPixelShader.Reset( );

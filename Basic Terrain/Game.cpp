@@ -24,11 +24,13 @@ CGame::CGame( HINSTANCE hInstance, bool bFullscreen ) :
 
 CGame::~CGame( )
 {
+	mInput.reset( );
+	mCamera.reset( );
 	mDefaultShader.reset( );
 	m2DShader.reset( );
-
+	m3DShader.reset( );
 	mTriangle.reset( );
-	mSquare.reset( );
+	mFPSText.reset( );
 
 	mDevice.Reset( );
 	mImmediateContext.Reset( );
@@ -138,17 +140,20 @@ void CGame::InitD3D( bool bFullscreen )
 	Factory->Release( );
 	Adapter->Release( );
 	Output->Release( );
-
+	mInput = std::make_shared<CInput>( );
+	mInput->Initialize( mhInstance, mhWnd );
 }
 
 void CGame::InitShaders( )
 {
 	mDefaultShader = std::make_shared<CDefaultShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	m2DShader = std::make_shared<C2DShader>( mDevice.Get( ), mImmediateContext.Get( ) );
+	m3DShader = std::make_shared<C3DShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 }
 
 void CGame::InitModels( )
 {
+	mCamera = std::make_unique<CCamera>( mInput, FOV, ( float ) mWidth / ( float ) mHeight, NearZ, FarZ );
 	mTriangle = std::make_unique<CModel>( mDevice.Get( ), mImmediateContext.Get( ) );
 }
 
@@ -156,10 +161,10 @@ void CGame::Init2D( )
 {
 	mArial73 = std::make_shared<CFont>( mDevice.Get( ), mImmediateContext.Get( ),
 		( LPWSTR ) L"Fonts/73Arial.fnt" );
-	mSquare = std::make_unique<Square>( mDevice.Get( ), mImmediateContext.Get( ), m2DShader,
-		mWidth, mHeight, mWidth / 4, mHeight / 4, ( LPWSTR ) L"Images/Europe.jpg");
-	mText = std::make_unique<CText>( mDevice.Get( ), mImmediateContext.Get( ),
-		m2DShader, mArial73, mWidth, mHeight );
+	mOpenSans32 = std::make_shared<CFont>( mDevice.Get( ), mImmediateContext.Get( ),
+		( LPWSTR ) L"Fonts/32OpenSans.fnt" );
+	mFPSText = std::make_unique<CText>( mDevice.Get( ), mImmediateContext.Get( ),
+		m2DShader, mOpenSans32, mWidth, mHeight );
 }
 
 void CGame::Run( )
@@ -177,6 +182,8 @@ void CGame::Run( )
 		}
 		else
 		{
+			if ( mInput->isKeyPressed( DIK_ESCAPE ) )
+				break;
 			if ( mTimer.GetTimeSinceLastStart( ) > 1.0f )
 			{
 				mTimer.Start( );
@@ -190,6 +197,8 @@ void CGame::Run( )
 void CGame::Update( )
 {
 	mTimer.Frame( );
+	mInput->Frame( );
+	mCamera->Frame( mTimer.GetFrameTime( ) );
 }
 
 void CGame::Render( )
@@ -198,12 +207,17 @@ void CGame::Render( )
 	EnableBackbuffer( );
 	mImmediateContext->ClearRenderTargetView( mBackbuffer.Get( ), BackColor );
 
-	mSquare->Render( mOrthoMatrix );
+	DirectX::XMMATRIX View, Projection;
+	View = mCamera->GetView( );
+	Projection = mCamera->GetProjection( );
+
+	mTriangle->Render( );
+	m3DShader->Render( mTriangle->GetIndexCount( ), DirectX::XMMatrixIdentity( ), View, Projection );
 
 	char buffer[ 500 ] = { 0 };
 	sprintf_s( buffer, "FPS: %d", mTimer.GetFPS( ) );
 
-	mText->Render( mOrthoMatrix, buffer, 0, 0,
+	mFPSText->Render( mOrthoMatrix, buffer, 0, 0,
 		DirectX::XMFLOAT4( 1.0f, 1.0f, 0.0f, 1.0f ) );
 
 	mSwapChain->Present( 1, 0 );

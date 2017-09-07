@@ -6,6 +6,9 @@
 #include "Square.h"
 #include "Font.h"
 #include "Text.h"
+#include "Input.h"
+#include "Camera.h"
+#include "C3DShader.h"
 
 #define GAME CGame::GetGameInstance( )
 #if defined UNICODE
@@ -18,6 +21,7 @@ ALIGN16 class CGame sealed
 {
 	static constexpr const float NearZ = 0.1f;
 	static constexpr const float FarZ = 100.0f;
+	static constexpr const float FOV = ( float ) D3DX_PI / 4.0f;
 private:
 	HINSTANCE mhInstance;
 	HWND mhWnd;
@@ -29,13 +33,18 @@ private:
 	D3D11_VIEWPORT mFullscreenViewport;
 	
 	std::unique_ptr<CModel> mTriangle;
-	std::unique_ptr<Square> mSquare;
-	std::unique_ptr<CText> mText;
+	std::unique_ptr<CCamera> mCamera;
+
+	std::unique_ptr<CText> mFPSText;
+
+	std::shared_ptr<CInput> mInput;
 
 	std::shared_ptr<CFont> mArial73;
+	std::shared_ptr<CFont> mOpenSans32;
 
 	std::shared_ptr<CDefaultShader> mDefaultShader;
 	std::shared_ptr<C2DShader> m2DShader;
+	std::shared_ptr<C3DShader> m3DShader;
 
 	WCHAR* mGPUDescription;
 	
@@ -46,6 +55,7 @@ private: // D3D Objects
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> mImmediateContext;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> mBackbuffer;
 	Microsoft::WRL::ComPtr<IDXGISwapChain> mSwapChain;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> mDSView;
 
 private:
 	static CGame* m_GameInstance;

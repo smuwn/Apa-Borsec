@@ -103,5 +103,10 @@ namespace DX
 			object = nullptr;
 		}
 	}
+	template <class type> 
+	type clamp( type x, type lower, type upper )
+	{
+		return max( lower, min( x, upper ) );
+	}
 	void InitStates( ID3D11Device* );
 }

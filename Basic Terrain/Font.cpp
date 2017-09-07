@@ -16,7 +16,7 @@ CFont::CFont( ID3D11Device * Device, ID3D11DeviceContext * Context, LPWSTR lpPat
 
 CFont::~CFont( )
 {
-	mTexture.reset( );
+	mFPSTexture.reset( );
 }
 
 void CFont::Build( void * Vertices, void * Indices, UINT & VertexCount, UINT & IndexCount, LPCSTR Message, float x, float y )
@@ -28,31 +28,40 @@ void CFont::Build( void * Vertices, void * Indices, UINT & VertexCount, UINT & I
 	SVertex * vertices = ( SVertex* ) Vertices;
 	DWORD * indices = ( DWORD* ) Indices;
 
+	float StartX = x;
+
+	int lastChar = -1;
 	for ( size_t i = 0; i < len; ++i )
 	{
 		int ch = Message[ i ];
 		SLetter* letter = mLetters[ ch ];
 		if ( letter == 0 )
-			continue;
+		{
+			letter = mLetters[ ( int )'=' ];
+		}
 		if ( Message[ i ] == '\n' )
 		{
-			// TODO: this condition;
+			y += mLineHeight;
+			x = StartX;
 		}
+		int Kerning = GetKerning( lastChar, ch );
+
+		int xOffset = ( int ) letter->xOffset + Kerning;
 		
 		// Top-left
-		vertices[ VertexCount ].Position = DirectX::XMFLOAT3( x - letter->xOffset, y - letter->yOffset, 0.0f );
+		vertices[ VertexCount ].Position = DirectX::XMFLOAT3( x + xOffset, y - letter->yOffset, 0.0f );
 		vertices[ VertexCount ].Texture = DirectX::XMFLOAT2( letter->u, letter->v );
 		indices[ IndexCount++ ] = VertexCount++;
 		
 
 		// Top-right
-		vertices[ VertexCount ].Position = DirectX::XMFLOAT3( x - letter->xOffset + letter->swidth, y - letter->yOffset, 0.0f );
+		vertices[ VertexCount ].Position = DirectX::XMFLOAT3( x + xOffset + letter->swidth, y - letter->yOffset, 0.0f );
 		vertices[ VertexCount ].Texture = DirectX::XMFLOAT2( letter->u + letter->width, letter->v );
 		indices[ IndexCount++ ] = VertexCount++;
 
 
 		// Bottom-right
-		vertices[ VertexCount ].Position = DirectX::XMFLOAT3( x - letter->xOffset + letter->swidth, y - letter->sheight - letter->yOffset, 0.0f );
+		vertices[ VertexCount ].Position = DirectX::XMFLOAT3( x + xOffset + letter->swidth, y - letter->sheight - letter->yOffset, 0.0f );
 		vertices[ VertexCount ].Texture = DirectX::XMFLOAT2( letter->u + letter->width, letter->v + letter->height );
 		indices[ IndexCount++ ] = VertexCount++;
 		
@@ -62,7 +71,7 @@ void CFont::Build( void * Vertices, void * Indices, UINT & VertexCount, UINT & I
 		IndexCount += 2;
 
 		// Bottom-left
-		vertices[ VertexCount ].Position = DirectX::XMFLOAT3( x - letter->xOffset, y - letter->sheight - letter->yOffset, 0.0f );
+		vertices[ VertexCount ].Position = DirectX::XMFLOAT3( x + xOffset, y - letter->sheight - letter->yOffset, 0.0f );
 		vertices[ VertexCount ].Texture = DirectX::XMFLOAT2( letter->u, letter->v + letter->height );
 		indices[ IndexCount++ ] = VertexCount++;
 
@@ -80,6 +89,14 @@ void CFont::ReadFile( LPWSTR Path )
 	int startpos;
 	ifFile >> temp >> temp; // info face=""
 	startpos = temp.find( L"\"" ) + 1;
+	if ( temp[ temp.size( ) - 1 ] != L'\"' )
+	{
+		wchar_t ch = 0;
+		while ( ch != L'\"' )
+		{
+			ifFile.get( ch );
+		}
+	}
 	mName = temp.substr( startpos, temp.size( ) - startpos - 1 );
 
 	ifFile >> temp; // size=
@@ -119,11 +136,11 @@ void CFont::ReadFile( LPWSTR Path )
 
 	ifFile >> temp; // scaleW
 	startpos = temp.find( L"=" ) + 1;
-	mTextureWidth = std::stoi( temp.substr( startpos, temp.size( ) - startpos ) );
+	mFPSTextureWidth = std::stoi( temp.substr( startpos, temp.size( ) - startpos ) );
 
 	ifFile >> temp; // scaleH
 	startpos = temp.find( L"=" ) + 1;
-	mTextureHeight = std::stoi( temp.substr( startpos, temp.size( ) - startpos ) );
+	mFPSTextureHeight = std::stoi( temp.substr( startpos, temp.size( ) - startpos ) );
 
 	ifFile >> temp; // pages
 	startpos = temp.find( L"=" ) + 1;
@@ -138,7 +155,7 @@ void CFont::ReadFile( LPWSTR Path )
 	ifFile >> temp; // file
 	startpos = temp.find( L"\"" ) + 1;
 	temp = temp.substr( startpos, temp.size( ) - startpos - 1 );
-	mTexture = std::make_unique<CTexture>( ( LPWSTR ) temp.c_str( ), mDevice );
+	mFPSTexture = std::make_unique<CTexture>( ( LPWSTR ) temp.c_str( ), mDevice );
 
 	int characterCount;
 	ifFile >> temp >> temp;
@@ -157,33 +174,33 @@ void CFont::ReadFile( LPWSTR Path )
 		ifFile >> temp; // x=
 		startpos = temp.find( L"=" ) + 1;
 		int x = std::stoi( temp.substr( startpos, temp.size( ) - startpos ) );
-		letter.u = float( x ) / float( mTextureWidth );
+		letter.u = float( x ) / float( mFPSTextureWidth );
 		ifFile >> temp; // y= 
 		startpos = temp.find( L"=" ) + 1;
 		int y = std::stoi( temp.substr( startpos, temp.size( ) - startpos ) );
-		letter.v = float( y ) / float( mTextureHeight );
+		letter.v = float( y ) / float( mFPSTextureHeight );
 
 		ifFile >> temp; // width=
 		startpos = temp.find( L"=" ) + 1;
 		int width = std::stoi( temp.substr( startpos, temp.size( ) - startpos ) );
-		letter.width = float( width ) / float( mTextureWidth );
+		letter.width = float( width ) / float( mFPSTextureWidth );
 		letter.swidth = float( width );
 
 		ifFile >> temp; // height=
 		startpos = temp.find( L"=" ) + 1;
 		int height = std::stoi( temp.substr( startpos, temp.size( ) - startpos ) );
-		letter.height = float( height ) / float( mTextureHeight );
+		letter.height = float( height ) / float( mFPSTextureHeight );
 		letter.sheight = float( height );
 
 		ifFile >> temp; // xoffset=
 		startpos = temp.find( L"=" ) + 1;
 		int xOffset = std::stoi( temp.substr( startpos, temp.size( ) - startpos ) );
-		letter.xOffset = ( float ) xOffset;// / float( mTextureWidth );
+		letter.xOffset = ( float ) xOffset;// / float( mFPSTextureWidth );
 
 		ifFile >> temp; // yoffset=
 		startpos = temp.find( L"=" ) + 1;
 		int yOffset = std::stoi( temp.substr( startpos, temp.size( ) - startpos ) );
-		letter.yOffset = ( float ) yOffset;// / float( mTextureHeight );
+		letter.yOffset = ( float ) yOffset;// / float( mFPSTextureHeight );
 
 		ifFile >> temp; // xadvance=
 
@@ -229,4 +246,14 @@ void CFont::ReadFile( LPWSTR Path )
 	}
 
 	ifFile.close( );
+}
+
+int CFont::GetKerning( int first, int second )
+{
+	for ( auto & iter : mKernings )
+	{
+		if ( iter.first == first && iter.second == second )
+			return iter.amount;
+	}
+	return 0;
 }

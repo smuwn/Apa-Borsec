@@ -49,7 +49,7 @@ C2DShader::C2DShader( ID3D11Device * Device, ID3D11DeviceContext * Context ) :
 			sampDesc.AddressV =
 			sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_MODE::D3D11_TEXTURE_ADDRESS_WRAP;
 		sampDesc.ComparisonFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_ALWAYS;
-		sampDesc.Filter = D3D11_FILTER::D3D11_FILTER_MIN_POINT_MAG_MIP_LINEAR;
+		sampDesc.Filter = D3D11_FILTER::D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 		sampDesc.MaxAnisotropy = 16;
 		sampDesc.MaxLOD = 0;
 		sampDesc.MinLOD = 0;
@@ -64,7 +64,7 @@ C2DShader::C2DShader( ID3D11Device * Device, ID3D11DeviceContext * Context ) :
 
 C2DShader::~C2DShader( )
 {
-	for ( int i = 0; i < 2; ++i )
+	for ( size_t i = 0; i < mBlobs.size( ); ++i )
 		mBlobs[ i ].Reset( );
 	mVertexShader.Reset( );
 	mPixelShader.Reset( );

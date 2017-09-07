@@ -24,7 +24,7 @@ private:
 
 	std::shared_ptr<C2DShader> mShader;
 
-	std::unique_ptr<CTexture> mTexture;
+	std::unique_ptr<CTexture> mFPSTexture;
 
 	UINT mWindowWidth;
 	UINT mWindowHeight;

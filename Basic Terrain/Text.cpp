@@ -53,7 +53,7 @@ void CText::Render( DirectX::FXMMATRIX& Matrix, LPCSTR Text, float X, float Y, D
 	mLastText = const_cast< LPSTR >( Text );
 
 	float CX, CY;
-	CX = float( mWindowWidth ) / 2.0f * -1 + X + 1;
+	CX = float( mWindowWidth ) / 2.0f * -1 + X;
 	CY = float( mWindowHeight ) / 2.0f - Y;
 	
 	D3D11_MAPPED_SUBRESOURCE Vertices, Indices;

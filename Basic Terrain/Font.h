@@ -17,10 +17,10 @@ public:
 		short ID;
 		float u; // (0-1) - Start U
 		float v; // (0-1) - Start V
-		float width; // (0-1) - End U = u+width
-		float height; // (0-1) - End V = v+height
-		float xOffset; // (0-1) - in texture space
-		float yOffset; // (0-1) - in texture space
+		float width;
+		float height; 
+		float xOffset; 
+		float yOffset; 
 		float xAdvance; // Advance X pixels when rendering
 		float swidth;
 		float sheight;
@@ -32,15 +32,15 @@ public:
 		int amount; // Pixels
 	};
 private:
-	std::unique_ptr<CTexture> mTexture;
+	std::unique_ptr<CTexture> mFPSTexture;
 	std::unordered_map<size_t,SLetter*> mLetters;
 	std::vector<SKerning> mKernings;
 	std::array<int, 4> mPadding;
 	std::wstring mName;
 	int mSize;
 	int mLineHeight;
-	int mTextureWidth;
-	int mTextureHeight;
+	int mFPSTextureWidth;
+	int mFPSTextureHeight;
 
 	ID3D11Device * mDevice;
 	ID3D11DeviceContext * mContext;
@@ -48,11 +48,14 @@ public:
 	CFont( ID3D11Device * Device, ID3D11DeviceContext * Context, LPWSTR lpPath  );
 	~CFont( );
 public:
-	CTexture * GetTexture( ) { return mTexture.get( ); };
+	CTexture * GetTexture( ) { return mFPSTexture.get( ); };
 	void Build( void* Vertices, void* Indices,
 		UINT& VertexCount, UINT& IndexCount,
 		LPCSTR Message, float x, float y );
+public:
+	inline int GetHeight( ) { return mLineHeight; };
 private:
 	void ReadFile( LPWSTR );
+	int GetKerning( int first, int second );
 };
 
