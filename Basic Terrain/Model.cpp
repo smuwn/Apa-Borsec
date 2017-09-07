@@ -9,6 +9,7 @@ CModel::CModel( ID3D11Device * device, ID3D11DeviceContext * deviceContext ) :
 	try
 	{
 		CreateTriangle( );
+		mWorld = DirectX::XMMatrixIdentity( );
 	}
 	CATCH;
 }

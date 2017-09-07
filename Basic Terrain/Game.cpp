@@ -135,6 +135,24 @@ void CGame::InitD3D( bool bFullscreen )
 			backBufferResource,nullptr, &mBackbuffer
 		)
 	);
+
+	ID3D11Texture2D * DSViewResource;
+	ZeroMemoryAndDeclare( D3D11_TEXTURE2D_DESC, texDesc );
+	texDesc.ArraySize = 1;
+	texDesc.BindFlags = D3D11_BIND_FLAG::D3D11_BIND_DEPTH_STENCIL;
+	texDesc.Format = DXGI_FORMAT::DXGI_FORMAT_D32_FLOAT;
+	texDesc.Width = mWidth;
+	texDesc.Height = mHeight;
+	texDesc.SampleDesc.Count = 1;
+	texDesc.SampleDesc.Quality = 0;
+	DX::ThrowIfFailed(
+		mDevice->CreateTexture2D( &texDesc, nullptr, &DSViewResource )
+		);
+	DX::ThrowIfFailed(
+		mDevice->CreateDepthStencilView( DSViewResource,nullptr,&mDSView )
+		);
+	DSViewResource->Release( );
+
 	DX::InitStates( mDevice.Get( ) );
 	backBufferResource->Release( );
 	Factory->Release( );
@@ -206,13 +224,14 @@ void CGame::Render( )
 	static FLOAT BackColor[ 4 ] = { 0,0,0,0 };
 	EnableBackbuffer( );
 	mImmediateContext->ClearRenderTargetView( mBackbuffer.Get( ), BackColor );
+	mImmediateContext->ClearDepthStencilView( mDSView.Get( ), D3D11_CLEAR_FLAG::D3D11_CLEAR_DEPTH, 1.0f, 0 );
 
 	DirectX::XMMATRIX View, Projection;
 	View = mCamera->GetView( );
 	Projection = mCamera->GetProjection( );
 
 	mTriangle->Render( );
-	m3DShader->Render( mTriangle->GetIndexCount( ), DirectX::XMMatrixIdentity( ), View, Projection );
+	m3DShader->Render( mTriangle->GetIndexCount( ), mTriangle->GetWorld( ), View, Projection );
 
 	char buffer[ 500 ] = { 0 };
 	sprintf_s( buffer, "FPS: %d", mTimer.GetFPS( ) );
@@ -232,7 +251,7 @@ void CGame::DeleteWindow( )
 void CGame::EnableBackbuffer( )
 {
 	mImmediateContext->RSSetViewports( 1, &mFullscreenViewport );
-	mImmediateContext->OMSetRenderTargets( 1, mBackbuffer.GetAddressOf( ), nullptr );
+	mImmediateContext->OMSetRenderTargets( 1, mBackbuffer.GetAddressOf( ), mDSView.Get( ) );
 }
 
 bool CGame::Initialize( HINSTANCE hInstance, bool bFullScreen )
