@@ -104,7 +104,7 @@ namespace DX
 		}
 	}
 	template <class type> 
-	type clamp( type x, type lower, type upper )
+	type clamp( type& x, type lower, type upper )
 	{
 		return max( lower, min( x, upper ) );
 	}

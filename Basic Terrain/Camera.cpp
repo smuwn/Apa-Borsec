@@ -24,8 +24,22 @@ CCamera::~CCamera( )
 
 void CCamera::Frame( float frameTime )
 {
+#if defined DEFINED_USE_ROTATION_ACCELERATION
+	mYRotationAcceleration += mInput->GetHorizontalMouseMove( ) * 0.001f;
+	mZRotationAcceleration += mInput->GetVerticalMouseMove( ) * 0.001f;
+
+	mYaw += ( mYRotationAcceleration * ( 1.0f - RotationFriction ) );
+	mYRotationAcceleration *= ( 1.0f - RotationFriction );
+
+	mPitch += ( mZRotationAcceleration * ( 1.0f - RotationFriction ) );
+	mZRotationAcceleration *= ( 1.0f - RotationFriction );
+
+#else
+
 	mYaw += mInput->GetHorizontalMouseMove( ) * 0.001f;
 	mPitch += mInput->GetVerticalMouseMove( ) * 0.001f;
+
+#endif
 	if ( mInput->isKeyPressed( DIK_W ) )
 		mForwardAcceleration += CamSpeed * frameTime;
 	if ( mInput->isKeyPressed( DIK_S ) )

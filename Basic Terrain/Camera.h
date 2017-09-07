@@ -3,6 +3,8 @@
 #include "commonincludes.h"
 #include "Input.h"
 
+#define DEFINED_USE_ROTATION_ACCELERATION
+
 ALIGN16 class CCamera
 {
 public:
@@ -13,7 +15,10 @@ public:
 	static const DirectX::XMMATRIX DefaultView;
 	static constexpr const float Friction = 0.1f;
 	static constexpr const float CamSpeed = 0.3f;
-	static constexpr const float MaxCamSpeed = 5;
+	static constexpr const float MaxCamSpeed = 10;
+#if defined DEFINED_USE_ROTATION_ACCELERATION
+	static constexpr const float RotationFriction = 0.2f;
+#endif
 private:
 	std::shared_ptr<CInput> mInput;
 
@@ -27,6 +32,11 @@ private:
 
 	float mForwardAcceleration = 0.0f;
 	float mRightAcceleration = 0.0f;
+
+#if	defined DEFINED_USE_ROTATION_ACCELERATION
+	float mYRotationAcceleration = 0.0f;
+	float mZRotationAcceleration = 0.0f;
+#endif
 
 	float mYaw = 0;
 	float mPitch = 0;

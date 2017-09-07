@@ -32,7 +32,7 @@ public:
 	void Render( );
 	inline UINT GetIndexCount( ) { return mNumIndices; };
 	inline UINT GetVertexCount( ) { return mNumVertices; };
-	inline DirectX::XMMATRIX &const GetWorld( ) { return mWorld; };
+	inline DirectX::XMMATRIX& GetWorld( ) { return mWorld; };
 	inline void Identity( ) { mWorld = DirectX::XMMatrixIdentity( ); };
 	inline void Scale( float S ) { mWorld *= DirectX::XMMatrixScaling( S, S, S ); };
 	inline void Translate( float x, float y, float z ) { mWorld *= DirectX::XMMatrixTranslation( x, y, z ); };
