@@ -6,7 +6,13 @@ int WINAPI wWinMain(
 	LPWSTR lpCmdLine, int iShow
 )
 {
-	if ( !GAME->Initialize( hInstance, false ) )
+	if ( !GAME->Initialize( hInstance, 
+#if DEBUG || _DEBUG
+		false 
+#else
+		true
+#endif
+		) )
 	{
 		return 1;
 	}
