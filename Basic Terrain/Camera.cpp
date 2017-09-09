@@ -40,7 +40,9 @@ void CCamera::Frame( float frameTime )
 	mPitch += mInput->GetVerticalMouseMove( ) * 0.001f;
 
 #endif
-	if ( mInput->isKeyPressed( DIK_W ) )
+	if ( mInput->isKeyPressed( DIK_LSHIFT ) )
+		frameTime *= 10;
+	if ( mInput->isKeyPressed( DIK_W ))
 		mForwardAcceleration += CamSpeed * frameTime;
 	if ( mInput->isKeyPressed( DIK_S ) )
 		mForwardAcceleration -= CamSpeed * frameTime;
@@ -49,6 +51,7 @@ void CCamera::Frame( float frameTime )
 	if ( mInput->isKeyPressed( DIK_A ) )
 		mRightAcceleration -= CamSpeed * frameTime;
 	DX::clamp( mForwardAcceleration, -MaxCamSpeed, MaxCamSpeed );
+	DX::clamp( mRightAcceleration, -MaxCamSpeed, MaxCamSpeed );
 
 	DirectX::XMMATRIX Rotation = DirectX::XMMatrixRotationRollPitchYaw( mPitch, mYaw, 0.0f );
 	mDirection = DirectX::XMVector3TransformCoord( Forward, Rotation );

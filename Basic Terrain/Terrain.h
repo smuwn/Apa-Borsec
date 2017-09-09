@@ -14,7 +14,12 @@ public:
 			:Position( x, y, z )
 		{ };
 	};
-
+	struct SHeightmap
+	{
+		float x;
+		float y;
+		float z;
+	};
 private:
 
 	std::vector<SVertex> mVertices;
@@ -24,6 +29,8 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mVertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mIndexBuffer;
+
+	std::vector<SHeightmap> mHeightmap;
 
 	UINT mVertexCount;
 	UINT mIndexCount;
@@ -35,9 +42,11 @@ private:
 	ID3D11DeviceContext * mContext;
 public:
 	CTerrain( ID3D11Device * Device, ID3D11DeviceContext * Context, std::shared_ptr< C3DShader > Shader );
-	CTerrain( ID3D11Device * Device, ID3D11DeviceContext * Context, std::shared_ptr< C3DShader > Shader, LPWSTR Heightmap );
+	CTerrain( ID3D11Device * Device, ID3D11DeviceContext * Context, std::shared_ptr< C3DShader > Shader, LPSTR Heightmap );
 	~CTerrain( );
 private:
+	void InitHeightmap( LPSTR Heightmap );
+	void InitHeightmapTerrain( );
 	void InitTerrain( );
 	void InitBuffers( );
 public:
