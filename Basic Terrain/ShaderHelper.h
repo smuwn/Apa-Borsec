@@ -49,7 +49,7 @@ namespace ShaderHelper
 	}
 
 	inline void CreateBuffer( ID3D11Device * device, ID3D11Buffer ** FinalBuffer,
-		D3D11_USAGE Usage, D3D11_BIND_FLAG flag, size_t DataSize, D3D11_CPU_ACCESS_FLAG CPUAccessFlag,
+		D3D11_USAGE Usage, D3D11_BIND_FLAG flag, size_t DataSize, int CPUAccessFlag,
 		void* data = nullptr, UINT MiscFlag = 0, UINT StructureByteStride = 0 )
 	{
 		ZeroMemoryAndDeclare( D3D11_BUFFER_DESC, buffDesc );

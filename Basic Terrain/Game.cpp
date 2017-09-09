@@ -173,6 +173,7 @@ void CGame::InitModels( )
 {
 	mCamera = std::make_unique<CCamera>( mInput, FOV, ( float ) mWidth / ( float ) mHeight, NearZ, FarZ );
 	mTriangle = std::make_unique<CModel>( mDevice.Get( ), mImmediateContext.Get( ) );
+	mTerrain = std::make_unique<CTerrain>( mDevice.Get( ), mImmediateContext.Get( ), m3DShader );
 }
 
 void CGame::Init2D( )
@@ -230,8 +231,7 @@ void CGame::Render( )
 	View = mCamera->GetView( );
 	Projection = mCamera->GetProjection( );
 
-	mTriangle->Render( );
-	m3DShader->Render( mTriangle->GetIndexCount( ), mTriangle->GetWorld( ), View, Projection );
+	mTerrain->Render( View, Projection );
 
 	char buffer[ 500 ] = { 0 };
 	sprintf_s( buffer, "FPS: %d", mTimer.GetFPS( ) );

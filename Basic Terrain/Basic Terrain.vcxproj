@@ -136,6 +136,7 @@
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Square.cpp" />
+    <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Text.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="wmain.cpp" />
@@ -155,6 +156,7 @@
     <ClInclude Include="Model.h" />
     <ClInclude Include="ShaderHelper.h" />
     <ClInclude Include="Square.h" />
+    <ClInclude Include="Terrain.h" />
     <ClInclude Include="Text.h" />
     <ClInclude Include="Texture.h" />
   </ItemGroup>

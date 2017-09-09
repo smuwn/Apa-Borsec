@@ -9,6 +9,7 @@
 #include "Input.h"
 #include "Camera.h"
 #include "C3DShader.h"
+#include "Terrain.h"
 
 #define GAME CGame::GetGameInstance( )
 #if defined UNICODE
@@ -34,6 +35,7 @@ private:
 	
 	std::unique_ptr<CModel> mTriangle;
 	std::unique_ptr<CCamera> mCamera;
+	std::unique_ptr<CTerrain> mTerrain;
 
 	std::unique_ptr<CText> mFPSText;
 

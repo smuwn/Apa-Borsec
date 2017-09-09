@@ -4,6 +4,7 @@ namespace DX
 {
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> NoCulling;
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> DefaultRS;
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> Wireframe;
 	void InitStates( ID3D11Device * Device )
 	{
 		ZeroMemoryAndDeclare( D3D11_RASTERIZER_DESC, rastDesc );
@@ -12,7 +13,11 @@ namespace DX
 		ThrowIfFailed( Device->CreateRasterizerState( &rastDesc, &NoCulling ) );
 		ZeroVariable( rastDesc );
 		rastDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_BACK;
-		rastDesc.FillMode = D3D11_FILL_SOLID;
+		rastDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_SOLID;
 		ThrowIfFailed( Device->CreateRasterizerState( &rastDesc, &DefaultRS ) );
+		ZeroVariable( rastDesc );
+		rastDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_BACK;
+		rastDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_WIREFRAME;
+		ThrowIfFailed( Device->CreateRasterizerState( &rastDesc, &Wireframe ) );
 	}
 }
