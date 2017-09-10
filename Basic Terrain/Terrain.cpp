@@ -15,7 +15,8 @@ CTerrain::CTerrain( ID3D11Device * Device, ID3D11DeviceContext * Context, std::s
 	CATCH;
 }
 
-CTerrain::CTerrain( ID3D11Device * Device, ID3D11DeviceContext * Context, std::shared_ptr<C3DShader> Shader, LPSTR Heightmap ) :
+CTerrain::CTerrain( ID3D11Device * Device, ID3D11DeviceContext * Context, std::shared_ptr<C3DShader> Shader, 
+	LPSTR Heightmap, LPSTR Normalmap ) :
 	mDevice( Device ),
 	mContext( Context ),
 	mShader( Shader )
@@ -24,6 +25,7 @@ CTerrain::CTerrain( ID3D11Device * Device, ID3D11DeviceContext * Context, std::s
 	{
 		InitHeightmap( Heightmap );
 		InitHeightmapTerrain( );
+		InitNormals( Normalmap );
 		InitBuffers( );
 	}
 	CATCH;
@@ -68,17 +70,17 @@ void CTerrain::InitHeightmap( LPSTR Path )
 	float height;
 	mHeightmap.resize( mRowCount * mColCount );
 
-	for ( int i = 0; i < mRowCount; ++i )
+	for ( size_t i = 0; i < mRowCount; ++i )
 	{
-		for ( int j = 0; j < mColCount; ++j )
+		for ( size_t j = 0; j < mColCount; ++j )
 		{
 			height = image[ k ];
 
 			int Index = mColCount * i + j;
 
-			mHeightmap[ Index ].x = ( float ) j;
-			mHeightmap[ Index ].y = height / 15.0f;
-			mHeightmap[ Index ].z = ( float ) i;
+			mHeightmap[ Index ].x = ( float ) j - mColCount / 2;
+			mHeightmap[ Index ].y = height / HeightFactor;
+			mHeightmap[ Index ].z = ( float ) i - mRowCount / 2;
 
 			k += 3;
 		}
@@ -134,8 +136,8 @@ void CTerrain::InitHeightmapTerrain( )
 
 void CTerrain::InitTerrain( )
 {
-	mRowCount = 50;
-	mColCount = 50;
+	mRowCount = 10;
+	mColCount = 10;
 
 
 	mIndexCount = ( mRowCount - 1 ) * ( mColCount - 1 ) * 6;
@@ -190,6 +192,64 @@ void CTerrain::InitTerrain( )
 	assert( IndexCount == mIndexCount );
 }
 
+void CTerrain::InitNormals( LPSTR Normalmap )
+{
+	FILE * Heightmap;
+	int error;
+	error = fopen_s( &Heightmap, Normalmap, "rb" );
+	if ( error )
+	{ // Couldn't open file
+		std::vector<DirectX::XMFLOAT3> unnormalized;
+		for ( size_t i = 0; i < mIndices.size( ) / 3; ++i )
+		{
+			float vecX, vecY, vecZ;
+			vecX = mVertices[ mIndices[ ( i * 3 ) + 1 ] ].Position.x - mVertices[ mIndices[ ( i * 3 ) + 0 ] ].Position.x;
+			vecY = mVertices[ mIndices[ ( i * 3 ) + 1 ] ].Position.y - mVertices[ mIndices[ ( i * 3 ) + 0 ] ].Position.y;
+			vecZ = mVertices[ mIndices[ ( i * 3 ) + 1 ] ].Position.z - mVertices[ mIndices[ ( i * 3 ) + 0 ] ].Position.z;
+			DirectX::XMVECTOR edge1 = DirectX::XMVectorSet( vecX, vecY, vecZ, 0.0f );
+
+
+			vecX = mVertices[ mIndices[ ( i * 3 ) + 2 ] ].Position.x - mVertices[ mIndices[ ( i * 3 ) + 0 ] ].Position.x;
+			vecY = mVertices[ mIndices[ ( i * 3 ) + 2 ] ].Position.y - mVertices[ mIndices[ ( i * 3 ) + 0 ] ].Position.y;
+			vecZ = mVertices[ mIndices[ ( i * 3 ) + 2 ] ].Position.z - mVertices[ mIndices[ ( i * 3 ) + 0 ] ].Position.z;
+			DirectX::XMVECTOR edge2 = DirectX::XMVectorSet( vecX, vecY, vecZ, 0.0f );
+
+			DirectX::XMFLOAT3 Normal;
+			DirectX::XMStoreFloat3( &Normal, DirectX::XMVector3Cross( edge1, edge2 ) );
+			unnormalized.push_back( Normal );
+		}
+
+		DirectX::XMVECTOR sumNormal;
+		int facesUsing;
+		float tX = 0, tY = 0, tZ = 0;
+		for ( size_t i = 0; i < mVertices.size( ); ++i )
+		{
+			facesUsing = 0;
+			sumNormal = DirectX::XMVectorSet( 0.0f, 0.0f, 0.0f, 0.0f );
+			for ( size_t j = 0; j < mIndices.size( ) / 3; ++j )
+			{
+				if ( mIndices[ ( j * 3 ) + 0 ] == i ||
+					mIndices[ ( j * 3 ) + 1 ] == i ||
+					mIndices[ ( j * 3 ) + 2 ] == i )
+				{
+					tX = DirectX::XMVectorGetX( sumNormal ) + unnormalized[ j ].x;
+					tY = DirectX::XMVectorGetY( sumNormal ) + unnormalized[ j ].y;
+					tZ = DirectX::XMVectorGetZ( sumNormal ) + unnormalized[ j ].z;
+
+					sumNormal = DirectX::XMVectorSet( tX, tY, tZ, 0.0f );
+					facesUsing++;
+				}
+			}
+			sumNormal = DirectX::XMVectorDivide( sumNormal,
+				DirectX::XMVectorSet(
+					( float ) facesUsing, ( float ) facesUsing, ( float ) facesUsing, ( float ) facesUsing
+					) );
+
+			DirectX::XMStoreFloat3( &mVertices[ i ].Normal, sumNormal );
+		}
+	}
+}
+
 void CTerrain::InitBuffers( )
 {
 	ShaderHelper::CreateBuffer( mDevice, mVertexBuffer.GetAddressOf( ),
@@ -206,8 +266,6 @@ void CTerrain::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection 
 	static UINT Offsets = 0;
 	mContext->IASetIndexBuffer( mIndexBuffer.Get( ), DXGI_FORMAT::DXGI_FORMAT_R32_UINT, 0 );
 	mContext->IASetVertexBuffers( 0, 1, mVertexBuffer.GetAddressOf( ), &Stride, &Offsets );
-	mContext->RSSetState( DX::Wireframe.Get( ) );
 	mContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 	mShader->Render( mIndexCount, DirectX::XMMatrixIdentity( ), View, Projection );
-	mContext->RSSetState( DX::DefaultRS.Get( ) );
 }

@@ -5,13 +5,18 @@
 
 class CTerrain
 {
+private:
+	static constexpr const float HeightFactor = 15.0f;
 public:
 	struct SVertex
 	{
 		DirectX::XMFLOAT3 Position;
-		SVertex( ) = default;
-		SVertex( float x, float y, float z )
-			:Position( x, y, z )
+		DirectX::XMFLOAT3 Normal;
+		SVertex( ) :
+			Normal( 0.0f, 1.0f, 0.0f )
+		{ };
+		SVertex( float x, float y, float z ) :
+			Position( x, y, z )
 		{ };
 	};
 	struct SHeightmap
@@ -42,11 +47,13 @@ private:
 	ID3D11DeviceContext * mContext;
 public:
 	CTerrain( ID3D11Device * Device, ID3D11DeviceContext * Context, std::shared_ptr< C3DShader > Shader );
-	CTerrain( ID3D11Device * Device, ID3D11DeviceContext * Context, std::shared_ptr< C3DShader > Shader, LPSTR Heightmap );
+	CTerrain( ID3D11Device * Device, ID3D11DeviceContext * Context, std::shared_ptr< C3DShader > Shader, 
+		LPSTR Heightmap, LPSTR Normalmap );
 	~CTerrain( );
 private:
 	void InitHeightmap( LPSTR Heightmap );
 	void InitHeightmapTerrain( );
+	void InitNormals( LPSTR Normalmap );
 	void InitTerrain( );
 	void InitBuffers( );
 public:

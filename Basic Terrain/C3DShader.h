@@ -5,9 +5,17 @@
 
 class C3DShader
 {
+public:
 	struct SPerObject
 	{
 		DirectX::XMMATRIX WVP;
+		DirectX::XMMATRIX World;
+	};
+	struct SLight
+	{
+		DirectX::XMFLOAT3 Dir;
+		float pad;
+		DirectX::XMFLOAT4 Color;
 	};
 private:
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> mVertexShader;
@@ -16,6 +24,7 @@ private:
 	std::array < Microsoft::WRL::ComPtr<ID3DBlob>, 2> mBlobs;
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mPerObjectBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> mLightBuffer;
 
 	ID3D11Device * mDevice;
 	ID3D11DeviceContext * mContext;
@@ -25,5 +34,6 @@ public:
 public:
 	void Render( UINT IndexCount, DirectX::FXMMATRIX& World,
 		DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection );
+	void SetLight( SLight const& Light );
 };
 

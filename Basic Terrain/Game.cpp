@@ -167,13 +167,17 @@ void CGame::InitShaders( )
 	mDefaultShader = std::make_shared<CDefaultShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	m2DShader = std::make_shared<C2DShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	m3DShader = std::make_shared<C3DShader>( mDevice.Get( ), mImmediateContext.Get( ) );
+	C3DShader::SLight light;
+	light.Dir = DirectX::XMFLOAT3( 1.0f, -0.4f, 0.0f );
+	light.Color = DirectX::XMFLOAT4( 1.0f, 1.0f, 1.0f, 1.0f );
+	m3DShader->SetLight( light );
 }
 
 void CGame::InitModels( )
 {
 	mCamera = std::make_unique<CCamera>( mInput, FOV, ( float ) mWidth / ( float ) mHeight, NearZ, FarZ );
 	mTriangle = std::make_unique<CModel>( mDevice.Get( ), mImmediateContext.Get( ) );
-	mTerrain = std::make_unique<CTerrain>( mDevice.Get( ), mImmediateContext.Get( ), m3DShader, ( LPSTR )"Data/Main.bmp" );
+	mTerrain = std::make_unique<CTerrain>( mDevice.Get( ), mImmediateContext.Get( ), m3DShader );
 }
 
 void CGame::Init2D( )

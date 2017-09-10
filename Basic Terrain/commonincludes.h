@@ -49,10 +49,10 @@ ZeroMemory(&name,sizeof(type));
 
 #if _DEBUG || DEBUG
 #define CATCH catch(std::exception const& e) { \
-char buffer[500]; sprintf_s(buffer, "Error: %s", e.what()); \
+char buffer[500]; sprintf_s(buffer, "Error: %s\n", e.what()); \
 OutputDebugStringA(buffer); PostQuitMessage(0); }\
 catch( ... ) { \
-OutputDebugStringA( "Unexpected error occured" ); PostQuitMessage(0);}
+OutputDebugStringA( "Unexpected error occured\n" ); PostQuitMessage(0);}
 #else
 #define CATCH catch(std::exception const& e) { \
 char buffer[500]; sprintf_s(buffer, "Error: %s", e.what());\

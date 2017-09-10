@@ -2,18 +2,23 @@
 cbuffer cbPerObject : register( b0 )
 {
     float4x4 WVP;
+    float4x4 World;
 };
 
 
 struct VSOut
 {
-    float4 Position : SV_POSITION;
+    float4 PositionH : SV_POSITION;
+    float4 PositionW : POSITION;
+    float3 NormalW : NORMAL;
 };
 
 
-VSOut main( float4 pos : POSITION )
+VSOut main( float3 pos : POSITION, float3 nor : NORMAL )
 {
     VSOut output = ( VSOut ) 0;
-    output.Position = mul( pos, WVP );
+    output.PositionH = mul( float4( pos, 1.0f ), WVP );
+    output.PositionW = mul( float4( pos, 1.0f ), World );
+    output.NormalW = mul( float4( nor, 1.0f ), World ).xyz;
 	return output;
 }
