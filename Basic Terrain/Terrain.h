@@ -57,6 +57,6 @@ private:
 	void InitTerrain( );
 	void InitBuffers( );
 public:
-	void Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection );
+	void Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection, bool bWireframe = false );
 };
 

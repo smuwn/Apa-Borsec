@@ -52,6 +52,8 @@ private:
 	
 	DirectX::XMMATRIX mOrthoMatrix;
 
+	bool bDrawWireframe = false;
+
 private: // D3D Objects
 	Microsoft::WRL::ComPtr<ID3D11Device> mDevice;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> mImmediateContext;

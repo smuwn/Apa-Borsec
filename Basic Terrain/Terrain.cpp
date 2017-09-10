@@ -244,9 +244,42 @@ void CTerrain::InitNormals( LPSTR Normalmap )
 				DirectX::XMVectorSet(
 					( float ) facesUsing, ( float ) facesUsing, ( float ) facesUsing, ( float ) facesUsing
 					) );
+			sumNormal = DirectX::XMVector3Normalize( sumNormal );
 
 			DirectX::XMStoreFloat3( &mVertices[ i ].Normal, sumNormal );
 		}
+		FILE * NormalmapFile;
+		fopen_s( &NormalmapFile, Normalmap, "wb" );
+
+
+		for ( size_t i = 0; i < mVertices.size( ); ++i )
+		{
+			float red = mVertices[ i ].Normal.x;
+			float green = mVertices[ i ].Normal.y;
+			float blue = mVertices[ i ].Normal.z;
+
+			fwrite( &red, sizeof( decltype(red) ), 1, NormalmapFile );
+			fwrite( &green, sizeof( decltype( green ) ), 1, NormalmapFile );
+			fwrite( &blue, sizeof( decltype( blue ) ), 1, NormalmapFile );
+			
+		}
+
+		fclose( NormalmapFile );
+	}
+	else
+	{ // There is a normal map file
+		for ( size_t i = 0; i < mVertices.size( ); ++i )
+		{
+			float red, green, blue;
+			fread( &red, sizeof( decltype( red ) ), 1, Heightmap );
+			fread( &green, sizeof( decltype( green ) ), 1, Heightmap );
+			fread( &blue, sizeof( decltype( blue ) ), 1, Heightmap );
+			mVertices[ i ].Normal.x = red;
+			mVertices[ i ].Normal.y = green;
+			mVertices[ i ].Normal.z = blue;
+		}
+		
+		fclose( Heightmap );
 	}
 }
 
@@ -260,12 +293,15 @@ void CTerrain::InitBuffers( )
 		sizeof( DWORD ) * mIndices.size( ), 0, &mIndices[ 0 ] );
 }
 
-void CTerrain::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection )
+void CTerrain::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection, bool bWireframe )
 {
 	static UINT Stride = sizeof( SVertex );
 	static UINT Offsets = 0;
 	mContext->IASetIndexBuffer( mIndexBuffer.Get( ), DXGI_FORMAT::DXGI_FORMAT_R32_UINT, 0 );
 	mContext->IASetVertexBuffers( 0, 1, mVertexBuffer.GetAddressOf( ), &Stride, &Offsets );
 	mContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+	if ( bWireframe )
+		mContext->RSSetState( DX::Wireframe.Get( ) );
 	mShader->Render( mIndexCount, DirectX::XMMatrixIdentity( ), View, Projection );
+	mContext->RSSetState( DX::DefaultRS.Get( ) );
 }

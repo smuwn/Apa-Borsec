@@ -17,6 +17,7 @@ CGame::CGame( HINSTANCE hInstance, bool bFullscreen ) :
 		InitModels( );
 		Init2D( );
 		mOrthoMatrix = DirectX::XMMatrixOrthographicLH( ( float ) mWidth, ( float ) mHeight, NearZ, FarZ );
+		mInput->addSpecialKey( DIK_B );
 	}
 	CATCH;
 }
@@ -31,6 +32,7 @@ CGame::~CGame( )
 	m3DShader.reset( );
 	mTriangle.reset( );
 	mFPSText.reset( );
+	mTerrain.reset( );
 
 	mDevice.Reset( );
 	mImmediateContext.Reset( );
@@ -177,7 +179,8 @@ void CGame::InitModels( )
 {
 	mCamera = std::make_unique<CCamera>( mInput, FOV, ( float ) mWidth / ( float ) mHeight, NearZ, FarZ );
 	mTriangle = std::make_unique<CModel>( mDevice.Get( ), mImmediateContext.Get( ) );
-	mTerrain = std::make_unique<CTerrain>( mDevice.Get( ), mImmediateContext.Get( ), m3DShader );
+	mTerrain = std::make_unique<CTerrain>( mDevice.Get( ), mImmediateContext.Get( ), m3DShader,
+		( LPSTR ) "Data/HM.bmp", ( LPSTR ) "Data/HM.normals" );
 }
 
 void CGame::Init2D( )
@@ -222,6 +225,8 @@ void CGame::Update( )
 	mTimer.Frame( );
 	mInput->Frame( );
 	mCamera->Frame( mTimer.GetFrameTime( ) );
+	if ( mInput->isSpecialKeyPressed( DIK_B ) )
+		bDrawWireframe = bDrawWireframe ? false : true;
 }
 
 void CGame::Render( )
@@ -235,7 +240,7 @@ void CGame::Render( )
 	View = mCamera->GetView( );
 	Projection = mCamera->GetProjection( );
 
-	mTerrain->Render( View, Projection );
+	mTerrain->Render( View, Projection, bDrawWireframe );
 
 	char buffer[ 500 ] = { 0 };
 	sprintf_s( buffer, "FPS: %d", mTimer.GetFPS( ) );
