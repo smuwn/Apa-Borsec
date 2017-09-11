@@ -248,14 +248,14 @@ void CTerrain::InitNormals( LPSTR Normalmap )
 		FILE * NormalmapFile;
 		fopen_s( &NormalmapFile, Normalmap, "wb" );
 
-		fwrite( &mFileHeader, sizeof( mFileHeader ), 1, NormalmapFile );
-		fwrite( &mInfoHeader, sizeof( mInfoHeader ), 1, NormalmapFile );
+		//fwrite( &mFileHeader, sizeof( mFileHeader ), 1, NormalmapFile );
+		//fwrite( &mInfoHeader, sizeof( mInfoHeader ), 1, NormalmapFile );
 
 		for ( size_t i = 0; i < mVertices.size( ); ++i )
 		{
-			float red = mVertices[ i ].Normal.x;
-			float green = mVertices[ i ].Normal.y;
-			float blue = mVertices[ i ].Normal.z;
+			float red = mVertices[ i ].Normal.x * 255;
+			float green = mVertices[ i ].Normal.y * 255;
+			float blue = mVertices[ i ].Normal.z * 255;
 
 			fwrite( &red, sizeof( decltype(red) ), 1, NormalmapFile );
 			fwrite( &green, sizeof( decltype( green ) ), 1, NormalmapFile );
@@ -273,9 +273,9 @@ void CTerrain::InitNormals( LPSTR Normalmap )
 			fread( &red, sizeof( decltype( red ) ), 1, Heightmap );
 			fread( &green, sizeof( decltype( green ) ), 1, Heightmap );
 			fread( &blue, sizeof( decltype( blue ) ), 1, Heightmap );
-			mVertices[ i ].Normal.x = red;
-			mVertices[ i ].Normal.y = green;
-			mVertices[ i ].Normal.z = blue;
+			mVertices[ i ].Normal.x = red / 255.f;
+			mVertices[ i ].Normal.y = green / 255.f;
+			mVertices[ i ].Normal.z = blue / 255.f;
 		}
 		
 		fclose( Heightmap );
