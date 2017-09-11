@@ -110,24 +110,37 @@ void CTerrain::InitHeightmapTerrain( )
 	mIndices.resize( mIndexCount );
 
 	int index = 0;
+
+	float tU = 0, tV = 0;
+	float VincrementValue = TextureRepeat / mRowCount;
+	float UincrementValue = TextureRepeat / mColCount;
+
 	for ( size_t i = 0; i < mRowCount - 1; ++i )
 	{
 		for ( size_t j = 0; j < mColCount - 1; ++j )
 		{
 			mIndices[ index + 0 ] = ( i + 1 ) * mColCount + j; // Bottom left
+			mVertices[ ( i + 1 ) * mColCount + j ].Texture = DirectX::XMFLOAT2( tU,tV + VincrementValue );
 			
 			mIndices[ index + 1 ] = ( i + 1 ) * mColCount + j + 1; // Bottom right
+			mVertices[ ( i + 1 ) * mColCount + j + 1 ].Texture = DirectX::XMFLOAT2( tU + UincrementValue, tV + VincrementValue );
 
 			mIndices[ index + 2 ] = i * mColCount + j; // Top left
+			mVertices[ i * mColCount + j ].Texture = DirectX::XMFLOAT2( tU, tV );
 
-			mIndices[ index + 3 ] = ( i + 1 ) * mColCount + j + 1; // Top left
+			mIndices[ index + 3 ] = ( i + 1 ) * mColCount + j + 1; // Bottom right
 
-			mIndices[ index + 4 ] = i * mColCount + j + 1; // Top rigt
+			mIndices[ index + 4 ] = i * mColCount + j + 1; // Top right
+			mVertices[ i * mColCount + j + 1 ].Texture = DirectX::XMFLOAT2( tU + UincrementValue, tV );
 
 			mIndices[ index + 5 ] = i * mColCount + j; // Top left
 
+			tU += UincrementValue;
+
 			index += 6;
 		}
+		tU = 0.0f;
+		tV += VincrementValue;
 	}
 }
 
@@ -290,6 +303,7 @@ void CTerrain::InitBuffers( )
 	ShaderHelper::CreateBuffer( mDevice, mIndexBuffer.GetAddressOf( ),
 		D3D11_USAGE::D3D11_USAGE_IMMUTABLE, D3D11_BIND_FLAG::D3D11_BIND_INDEX_BUFFER,
 		sizeof( DWORD ) * mIndices.size( ), 0, &mIndices[ 0 ] );
+	mTexture = std::make_unique<CTexture>( ( LPWSTR ) L"Data/dirt01.dds", mDevice );
 }
 
 void CTerrain::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection, bool bWireframe )
@@ -301,6 +315,7 @@ void CTerrain::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection,
 	mContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 	if ( bWireframe )
 		mContext->RSSetState( DX::Wireframe.Get( ) );
-	mShader->Render( mIndexCount, DirectX::XMMatrixIdentity( ), View, Projection );
+	mShader->Render( mIndexCount, DirectX::XMMatrixIdentity( ), View, Projection,
+		mTexture.get( ) );
 	mContext->RSSetState( DX::DefaultRS.Get( ) );
 }

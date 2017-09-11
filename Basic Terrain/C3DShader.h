@@ -2,6 +2,7 @@
 
 #include "commonincludes.h"
 #include "ShaderHelper.h"
+#include "Texture.h"
 
 class C3DShader
 {
@@ -26,6 +27,7 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mPerObjectBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mLightBuffer;
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> mWrapSampler;
 
 	ID3D11Device * mDevice;
 	ID3D11DeviceContext * mContext;
@@ -34,7 +36,8 @@ public:
 	~C3DShader( );
 public:
 	void Render( UINT IndexCount, DirectX::FXMMATRIX& World,
-		DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection );
+		DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection,
+		CTexture * texture );
 	void SetLight( SLight const& Light );
 };
 

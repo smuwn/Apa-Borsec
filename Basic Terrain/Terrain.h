@@ -7,10 +7,12 @@ class CTerrain
 {
 private:
 	static constexpr const float HeightFactor = 10.0f;
+	static constexpr const float TextureRepeat = 32;
 public:
 	struct SVertex
 	{
 		DirectX::XMFLOAT3 Position;
+		DirectX::XMFLOAT2 Texture;
 		DirectX::XMFLOAT3 Normal;
 		SVertex( ) :
 			Normal( 0.0f, 1.0f, 0.0f )
@@ -31,6 +33,8 @@ private:
 	std::vector<DWORD> mIndices;
 
 	std::shared_ptr<C3DShader> mShader;
+
+	std::unique_ptr<CTexture> mTexture;
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mVertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mIndexBuffer;

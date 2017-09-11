@@ -14,7 +14,7 @@ C3DShader::C3DShader( ID3D11Device * Device, ID3D11DeviceContext * Context ) :
 			mDevice, &mBlobs[ 0 ], reinterpret_cast< ID3D11DeviceChild** >( VS ) );
 		ShaderHelper::CreateShaderFromFile( L"Shaders/3DPixelShader.cso", "ps_4_0",
 			mDevice, &mBlobs[ 1 ], reinterpret_cast< ID3D11DeviceChild** >( PS ) );
-		D3D11_INPUT_ELEMENT_DESC layout[ 2 ];
+		D3D11_INPUT_ELEMENT_DESC layout[ 3 ];
 		layout[ 0 ].AlignedByteOffset = 0;
 		layout[ 0 ].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT;
 		layout[ 0 ].InputSlot = 0;
@@ -23,12 +23,19 @@ C3DShader::C3DShader( ID3D11Device * Device, ID3D11DeviceContext * Context ) :
 		layout[ 0 ].SemanticIndex = 0;
 		layout[ 0 ].SemanticName = "POSITION";
 		layout[ 1 ].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-		layout[ 1 ].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT;
+		layout[ 1 ].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT;
 		layout[ 1 ].InputSlot = 0;
 		layout[ 1 ].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
 		layout[ 1 ].InstanceDataStepRate = 0;
 		layout[ 1 ].SemanticIndex = 0;
-		layout[ 1 ].SemanticName = "NORMAL";
+		layout[ 1 ].SemanticName = "TEXCOORD";
+		layout[ 2 ].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+		layout[ 2 ].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT;
+		layout[ 2 ].InputSlot = 0;
+		layout[ 2 ].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
+		layout[ 2 ].InstanceDataStepRate = 0;
+		layout[ 2 ].SemanticIndex = 0;
+		layout[ 2 ].SemanticName = "NORMAL";
 		UINT layoutCount = ARRAYSIZE( layout );
 		DX::ThrowIfFailed(
 			mDevice->CreateInputLayout( layout, layoutCount,
@@ -40,6 +47,19 @@ C3DShader::C3DShader( ID3D11Device * Device, ID3D11DeviceContext * Context ) :
 		ShaderHelper::CreateBuffer( mDevice, &mLightBuffer,
 			D3D11_USAGE::D3D11_USAGE_DEFAULT, D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER,
 			sizeof( SLight ), 0 );
+		ZeroMemoryAndDeclare( D3D11_SAMPLER_DESC, sampDesc );
+		sampDesc.AddressU =
+			sampDesc.AddressV =
+			sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_MODE::D3D11_TEXTURE_ADDRESS_WRAP;
+		sampDesc.ComparisonFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_ALWAYS;
+		sampDesc.Filter = D3D11_FILTER::D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+		sampDesc.MaxAnisotropy = 16;
+		sampDesc.MaxLOD = 0;
+		sampDesc.MinLOD = 0;
+		sampDesc.MipLODBias = 3;
+		DX::ThrowIfFailed(
+			mDevice->CreateSamplerState( &sampDesc, &mWrapSampler )
+			);
 	}
 	CATCH;
 }
@@ -53,28 +73,12 @@ C3DShader::~C3DShader( )
 	mInputLayout.Reset( );
 	mPixelShader.Reset( );
 	mPerObjectBuffer.Reset( );
+	mWrapSampler.Reset( );
 }
 
-void C3DShader::Render( UINT IndexCount, DirectX::FXMMATRIX & World, DirectX::FXMMATRIX & View, DirectX::FXMMATRIX & Projection )
+void C3DShader::Render( UINT IndexCount, DirectX::FXMMATRIX & World, DirectX::FXMMATRIX & View, DirectX::FXMMATRIX & Projection,
+	CTexture * texture )
 {
-	// Old toys addresses
-	ID3D11VertexShader * oldVS = nullptr;
-	ID3D11PixelShader * oldPS = nullptr;
-	ID3D11InputLayout * oldLayout = nullptr;
-	ID3D11SamplerState * oldSampler = nullptr;
-	ID3D11Buffer * oldBuffer = nullptr;
-	ID3D11Buffer * oldPSBuffer = nullptr;
-	ID3D11ShaderResourceView * oldSRV = nullptr;
-
-	// Get the old toys
-	mContext->IAGetInputLayout( &oldLayout );
-	mContext->VSGetShader( &oldVS, nullptr, nullptr );
-	mContext->PSGetShader( &oldPS, nullptr, nullptr );
-	mContext->PSGetSamplers( 0, 1, &oldSampler );
-	mContext->VSGetConstantBuffers( 0, 1, &oldBuffer );
-	mContext->PSGetConstantBuffers( 0, 1, &oldPSBuffer );
-	mContext->PSGetShaderResources( 0, 1, &oldSRV );
-
 	// Replace the old toys
 	mContext->IASetInputLayout( mInputLayout.Get( ) );
 	mContext->VSSetShader( mVertexShader.Get( ), nullptr, 0 );
@@ -90,19 +94,14 @@ void C3DShader::Render( UINT IndexCount, DirectX::FXMMATRIX & World, DirectX::FX
 
 	mContext->Unmap( mPerObjectBuffer.Get( ), 0 );
 	mContext->VSSetConstantBuffers( 0, 1, mPerObjectBuffer.GetAddressOf( ) );
+	
+	mContext->PSSetSamplers( 0, 1, mWrapSampler.GetAddressOf( ) );
 
 	mContext->PSSetConstantBuffers( 0, 1, mLightBuffer.GetAddressOf( ) );
+	ID3D11ShaderResourceView * SRV = texture->GetTexture( );
+	mContext->PSSetShaderResources( 0, 1, &SRV );
 
 	mContext->DrawIndexed( IndexCount, 0, 0 );
-
-	// Place back the old toys
-	mContext->IASetInputLayout( oldLayout );
-	mContext->VSSetShader( oldVS, nullptr, 0 );
-	mContext->PSSetShader( oldPS, nullptr, 0 );
-	mContext->PSSetSamplers( 0, 1, &oldSampler );
-	mContext->VSSetConstantBuffers( 0, 1, &oldBuffer );
-	mContext->PSSetConstantBuffers( 0, 1, &oldPSBuffer );
-	mContext->PSSetShaderResources( 0, 1, &oldSRV );
 }
 
 
