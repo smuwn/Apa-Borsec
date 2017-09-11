@@ -6,7 +6,7 @@
 class CTerrain
 {
 private:
-	static constexpr const float HeightFactor = 15.0f;
+	static constexpr const float HeightFactor = 10.0f;
 public:
 	struct SVertex
 	{
@@ -36,6 +36,9 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mIndexBuffer;
 
 	std::vector<SHeightmap> mHeightmap;
+
+	BITMAPFILEHEADER mFileHeader;
+	BITMAPINFOHEADER mInfoHeader;
 
 	UINT mVertexCount;
 	UINT mIndexCount;

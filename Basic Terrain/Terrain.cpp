@@ -54,6 +54,9 @@ void CTerrain::InitHeightmap( LPSTR Path )
 	fread( &fileHeader, sizeof( BITMAPFILEHEADER ), 1, HeightmapFile );
 	fread( &infoHeader, sizeof( BITMAPINFOHEADER ), 1, HeightmapFile );
 
+	mFileHeader = fileHeader;
+	mInfoHeader = infoHeader;
+
 	mRowCount = infoHeader.biHeight;
 	mColCount = infoHeader.biWidth;
 
@@ -91,45 +94,39 @@ void CTerrain::InitHeightmap( LPSTR Path )
 
 void CTerrain::InitHeightmapTerrain( )
 {
-	mIndexCount = ( mRowCount - 1 ) * ( mColCount - 1 ) * 6;
-	mVertexCount = ( mRowCount - 1 ) * ( mColCount - 1 ) * 4;
+	int FaceCount = ( mRowCount - 1 ) * ( mColCount - 1 ) * 2;
+	mVertexCount = ( mRowCount ) * ( mColCount );
 
-	int VertexCount = 0;
-	int IndexCount = 0;
-
-	for ( size_t i = 0; i < ( mRowCount - 1 ); ++i )
-	{
-		for ( size_t j = 0; j < ( mColCount - 1 ); ++j )
+	mVertices.resize( mVertexCount );
+	for ( size_t i = 0; i < mRowCount; ++i )
+		for ( size_t j = 0; j < mColCount; ++j )
 		{
-			int index1 = mColCount * i + j; // Upper-left
-			int index2 = mColCount * i + ( j + 1 ); // Upper-right
-			int index3 = mColCount * ( i + 1 ) + ( j + 1 ); // Lower-right
-			int index4 = mColCount * ( i + 1 ) + j; // Lower-left
+			int index = i * mColCount + j;
+			mVertices[ index ].Position.x = ( float ) j;
+			mVertices[ index ].Position.z = ( float ) i;
+			mVertices[ index ].Position.y = mHeightmap[ index ].y;
+		}
+	mIndexCount = FaceCount * 3;
+	mIndices.resize( mIndexCount );
 
-			// Lower-right
-			mVertices.emplace_back( mHeightmap[ index3 ].x, mHeightmap[ index3 ].y, mHeightmap[ index3 ].z );
-			mIndices.emplace_back( VertexCount );
-			VertexCount++, IndexCount++;
+	int index = 0;
+	for ( size_t i = 0; i < mRowCount - 1; ++i )
+	{
+		for ( size_t j = 0; j < mColCount - 1; ++j )
+		{
+			mIndices[ index + 0 ] = ( i + 1 ) * mColCount + j; // Bottom left
+			
+			mIndices[ index + 1 ] = ( i + 1 ) * mColCount + j + 1; // Bottom right
 
-			// Upper-right
-			mVertices.emplace_back( mHeightmap[ index2 ].x, mHeightmap[ index2 ].y, mHeightmap[ index2 ].z );
-			mIndices.emplace_back( VertexCount );
-			VertexCount++, IndexCount++;
+			mIndices[ index + 2 ] = i * mColCount + j; // Top left
 
-			// Upper-left
-			mVertices.emplace_back( mHeightmap[ index1 ].x, mHeightmap[ index1 ].y, mHeightmap[ index1 ].z );
-			mIndices.emplace_back( VertexCount );
-			VertexCount++, IndexCount++;
+			mIndices[ index + 3 ] = ( i + 1 ) * mColCount + j + 1; // Top left
 
-			mIndices.emplace_back( VertexCount - 3 );
-			IndexCount++;
-			mIndices.emplace_back( VertexCount - 1 );
-			IndexCount++;
+			mIndices[ index + 4 ] = i * mColCount + j + 1; // Top rigt
 
-			// Lower-left
-			mVertices.emplace_back( mHeightmap[ index4 ].x, mHeightmap[ index4 ].y, mHeightmap[ index4 ].z );
-			mIndices.emplace_back( VertexCount );
-			VertexCount++, IndexCount++;
+			mIndices[ index + 5 ] = i * mColCount + j; // Top left
+
+			index += 6;
 		}
 	}
 }
@@ -240,17 +237,19 @@ void CTerrain::InitNormals( LPSTR Normalmap )
 					facesUsing++;
 				}
 			}
+			sumNormal = DirectX::XMVector3Normalize( sumNormal );
 			sumNormal = DirectX::XMVectorDivide( sumNormal,
 				DirectX::XMVectorSet(
 					( float ) facesUsing, ( float ) facesUsing, ( float ) facesUsing, ( float ) facesUsing
 					) );
-			sumNormal = DirectX::XMVector3Normalize( sumNormal );
 
 			DirectX::XMStoreFloat3( &mVertices[ i ].Normal, sumNormal );
 		}
 		FILE * NormalmapFile;
 		fopen_s( &NormalmapFile, Normalmap, "wb" );
 
+		fwrite( &mFileHeader, sizeof( mFileHeader ), 1, NormalmapFile );
+		fwrite( &mInfoHeader, sizeof( mInfoHeader ), 1, NormalmapFile );
 
 		for ( size_t i = 0; i < mVertices.size( ); ++i )
 		{

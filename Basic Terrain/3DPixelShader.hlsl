@@ -30,5 +30,5 @@ float4 main( PSIn input ) : SV_TARGET
         return Color * howMuchLight * Diffuse;
     }
 
-	return Color * 0.0;
+	return Color * 0.0f;
 }
