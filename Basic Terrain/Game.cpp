@@ -172,6 +172,7 @@ void CGame::InitShaders( )
 	C3DShader::SLight light;
 	light.Dir = DirectX::XMFLOAT3( 1.0f, -0.4f, 0.0f );
 	light.Color = DirectX::XMFLOAT4( 1.0f, 1.0f, 1.0f, 1.0f );
+	light.Ambient = DirectX::XMFLOAT4( 0.2f, 0.2f, 0.2f, 1.0f );
 	m3DShader->SetLight( light );
 }
 

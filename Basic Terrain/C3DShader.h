@@ -16,6 +16,7 @@ public:
 		DirectX::XMFLOAT3 Dir;
 		float pad;
 		DirectX::XMFLOAT4 Color;
+		DirectX::XMFLOAT4 Ambient;
 	};
 private:
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> mVertexShader;
