@@ -10,6 +10,7 @@
 #include "Camera.h"
 #include "C3DShader.h"
 #include "Terrain.h"
+#include "FrustumHelper.h"
 
 #define GAME CGame::GetGameInstance( )
 #if defined UNICODE
@@ -38,6 +39,7 @@ private:
 	std::unique_ptr<CTerrain> mTerrain;
 
 	std::unique_ptr<CText> mFPSText;
+	std::unique_ptr<CText> mFrustumTest;
 
 	std::shared_ptr<CInput> mInput;
 

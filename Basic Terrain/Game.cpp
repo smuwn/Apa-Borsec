@@ -192,6 +192,8 @@ void CGame::Init2D( )
 		( LPWSTR ) L"Fonts/32OpenSans.fnt" );
 	mFPSText = std::make_unique<CText>( mDevice.Get( ), mImmediateContext.Get( ),
 		m2DShader, mOpenSans32, mWidth, mHeight );
+	mFrustumTest = std::make_unique<CText>( mDevice.Get( ), mImmediateContext.Get( ),
+		m2DShader, mOpenSans32, mWidth, mHeight );
 }
 
 void CGame::Run( )
@@ -240,6 +242,13 @@ void CGame::Render( )
 	DirectX::XMMATRIX View, Projection;
 	View = mCamera->GetView( );
 	Projection = mCamera->GetProjection( );
+
+	if ( FrustumCulling::isPointInFrustum(
+		0.0f, 0.0f, 0.0f, FrustumCulling::ConstructFrustum( View, Projection )
+		) )
+	{
+		mFrustumTest->Render( mOrthoMatrix, "DA", 0, 69 );
+	}
 
 	mTerrain->Render( View, Projection, bDrawWireframe );
 
