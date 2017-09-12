@@ -63,7 +63,7 @@ namespace FrustumCulling
 		return Planes;
 	}
 	inline bool isPointInFrustum( float x, float y, float z,
-		std::array<DirectX::XMFLOAT4, 6> const& const Frustum )
+		std::array<DirectX::XMFLOAT4, 6> const& Frustum )
 	{
 		using namespace DirectX;
 		for ( size_t i = 0; i < Frustum.size( ); ++i )
@@ -78,7 +78,7 @@ namespace FrustumCulling
 	}
 	inline bool isAABBInFrustum( float minX, float minY, float minZ,
 		float maxX, float maxY, float maxZ,
-		std::array<DirectX::XMFLOAT4, 6> const& const Frustum )
+		std::array<DirectX::XMFLOAT4, 6> const& Frustum )
 	{
 		if ( isPointInFrustum( minX, minY, minZ, Frustum ) )
 			return true;
