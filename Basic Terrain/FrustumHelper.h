@@ -5,7 +5,7 @@
 
 namespace FrustumCulling
 {
-	inline std::array<DirectX::XMFLOAT4, 6> ConstructFrustum( DirectX::XMMATRIX& View, DirectX::XMMATRIX& Projection )
+	inline std::array<DirectX::XMFLOAT4, 6> ConstructFrustum( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection )
 	{
 		using namespace DirectX;
 		std::array<DirectX::XMFLOAT4, 6> Planes;

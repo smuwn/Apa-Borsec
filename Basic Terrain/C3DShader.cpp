@@ -104,6 +104,33 @@ void C3DShader::Render( UINT IndexCount, DirectX::FXMMATRIX & World, DirectX::FX
 	mContext->DrawIndexed( IndexCount, 0, 0 );
 }
 
+void C3DShader::RenderVertices( UINT IndexCount, DirectX::FXMMATRIX & World, DirectX::FXMMATRIX & View, DirectX::FXMMATRIX & Projection, CTexture * texture )
+{
+	// Replace the old toys
+	mContext->IASetInputLayout( mInputLayout.Get( ) );
+	mContext->VSSetShader( mVertexShader.Get( ), nullptr, 0 );
+	mContext->PSSetShader( mPixelShader.Get( ), nullptr, 0 );
+
+	D3D11_MAPPED_SUBRESOURCE MappedSubresource;
+	DirectX::XMMATRIX WVP = DirectX::XMMatrixTranspose( World * View * Projection );
+
+	mContext->Map( mPerObjectBuffer.Get( ), 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &MappedSubresource );
+
+	( ( SPerObject* ) MappedSubresource.pData )->WVP = WVP;
+	( ( SPerObject* ) MappedSubresource.pData )->World = DirectX::XMMatrixTranspose( World );
+
+	mContext->Unmap( mPerObjectBuffer.Get( ), 0 );
+	mContext->VSSetConstantBuffers( 0, 1, mPerObjectBuffer.GetAddressOf( ) );
+
+	mContext->PSSetSamplers( 0, 1, mWrapSampler.GetAddressOf( ) );
+
+	mContext->PSSetConstantBuffers( 0, 1, mLightBuffer.GetAddressOf( ) );
+	ID3D11ShaderResourceView * SRV = texture->GetTexture( );
+	mContext->PSSetShaderResources( 0, 1, &SRV );
+
+	mContext->Draw( IndexCount, 0 );
+}
+
 
 void C3DShader::SetLight( C3DShader::SLight const& Light )
 {

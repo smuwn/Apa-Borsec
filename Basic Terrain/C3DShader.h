@@ -38,6 +38,9 @@ public:
 	void Render( UINT IndexCount, DirectX::FXMMATRIX& World,
 		DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection,
 		CTexture * texture );
+	void RenderVertices( UINT IndexCount, DirectX::FXMMATRIX& World,
+		DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection,
+		CTexture * texture );
 	void SetLight( SLight const& Light );
 };
 
