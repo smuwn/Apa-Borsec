@@ -94,13 +94,25 @@ void CGame::InitD3D( bool bFullscreen )
 	DX::ThrowIfFailed( Output->GetDisplayModeList( DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM,
 		DXGI_ENUM_MODES_INTERLACED, &NumModes, Modes ) );
 	DXGI_MODE_DESC FinalMode;
+	bool bFound = false;
 	for ( size_t i = 0; i < NumModes; ++i )
 	{
 		if ( Modes[ i ].Width == mWidth && Modes[ i ].Height == mHeight )
 		{
 			FinalMode = DXGI_MODE_DESC( Modes[ i ] );
+			bFound = true;
 			break;
 		}
+	}
+	if ( !bFound )
+	{
+		FinalMode.Format = DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM;
+		FinalMode.Width = mWidth;
+		FinalMode.Height = mHeight;
+		FinalMode.RefreshRate.Denominator = 0;
+		FinalMode.RefreshRate.Numerator = 60;
+		FinalMode.Scaling = DXGI_MODE_SCALING::DXGI_MODE_SCALING_UNSPECIFIED;
+		FinalMode.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER::DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 	}
 	delete[ ] Modes;
 	DXGI_ADAPTER_DESC GPU;
@@ -125,7 +137,7 @@ void CGame::InitD3D( bool bFullscreen )
 #endif
 
 	DX::ThrowIfFailed(
-		D3D11CreateDeviceAndSwapChain( NULL, D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_HARDWARE, NULL, flags,
+		D3D11CreateDeviceAndSwapChain( NULL, D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_WARP, NULL, flags,
 			NULL, NULL, D3D11_SDK_VERSION, &swapDesc, &mSwapChain, &mDevice, NULL, &mImmediateContext )
 	);
 

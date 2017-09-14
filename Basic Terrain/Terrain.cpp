@@ -303,7 +303,7 @@ void CTerrain::InitBuffers( )
 	ShaderHelper::CreateBuffer( mDevice, mIndexBuffer.GetAddressOf( ),
 		D3D11_USAGE::D3D11_USAGE_IMMUTABLE, D3D11_BIND_FLAG::D3D11_BIND_INDEX_BUFFER,
 		sizeof( DWORD ) * mIndices.size( ), 0, &mIndices[ 0 ] );
-	mTexture = std::make_unique<CTexture>( ( LPWSTR ) L"Data/dirt01.dds", mDevice );
+	mTexture = std::make_unique<CTexture>( ( LPWSTR ) L"Data/dirt01.jpg", mDevice );
 }
 
 void CTerrain::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection, bool bWireframe )
