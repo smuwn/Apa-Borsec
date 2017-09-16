@@ -258,8 +258,8 @@ void QuadTree::RenderNode( SNode * Node, DirectX::FXMMATRIX& View, DirectX::FXMM
 	//if ( !FrustumCulling::isAABBInFrustum( minX, minY, minZ, maxX, maxY, maxZ, Frustum ) )
 		//return;
 	if ( !FrustumCulling::isCellInFrustum(
-		DirectX::XMFLOAT3( Node->mCenterX, CamHeight, Node->mCenterZ ), Node->mWidth / 2.0f,
-		Frustum ) )
+		DirectX::XMFLOAT3( Node->mCenterX, CamHeight, Node->mCenterZ ),
+		Node->mWidth / 2.0f,CamHeight, Frustum ) )
 		return;
 	
 	int count = 0;

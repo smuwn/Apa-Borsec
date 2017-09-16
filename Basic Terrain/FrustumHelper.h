@@ -113,19 +113,42 @@ namespace FrustumCulling
 		}
 		return true;
 	}
+	inline bool isRectangleInFrustum( DirectX::XMFLOAT3 Center,
+		float sizex, float sizey, float sizez, ViewFrustum const& Frustum )
+	{
+		using namespace DirectX;
+		XMVECTOR p;
+		XMFLOAT3 a( Center.x, Center.y, Center.z );
+
+		p = XMLoadFloat3( &a );
+
+		BOOL test = TRUE;
+		for ( INT i = 0; i < 6; i++ )
+		{
+			XMVECTOR plane = XMLoadFloat4( &Frustum[ i ] );
+			XMVECTOR axisvert = XMVectorSet( ( Frustum[ i ].x < 0.0f ) ? XMVectorGetX( p ) : XMVectorGetX( p ) + sizex,
+				( Frustum[ i ].y < 0.0f ) ? XMVectorGetY( p ) : XMVectorGetY( p ) + sizey,
+				( Frustum[ i ].z < 0.0f ) ? XMVectorGetZ( p ) : XMVectorGetZ( p ) + sizez, 0.0f );
+			if ( ( XMVectorGetX( XMPlaneDot( plane, axisvert ) ) + Frustum[ i ].w ) < 0.0f )
+			{
+				test = FALSE;
+				break;
+			}
+		}
+		if ( test )
+			return TRUE;
+
+		return FALSE;
+	}
 	inline bool isCellInFrustum( DirectX::XMFLOAT3 Center, float width,
+		float Height,
 		ViewFrustum const& Frustum )
 	{
-		if ( isSphereInFrustum( Center, width, Frustum ) )
+		if ( isSphereInFrustum( Center, width * 1.2f, Frustum ) )
 			return true;
-		float minX = Center.x - width;
-		float maxX = Center.x + width;
-		float minY = Center.y;
-		float maxY = Center.y;
-		float minZ = Center.z - width;
-		float maxZ = Center.z + width;
-		if ( isAABBInFrustum( minX, minY, minZ, maxX, maxY, maxZ, Frustum ) )
+		if ( isRectangleInFrustum( Center, width, Height, width, Frustum ) )
 			return true;
+		
 		return false;
 	}
 }
