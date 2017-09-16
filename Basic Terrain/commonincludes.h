@@ -67,6 +67,7 @@ namespace DX
 	extern Microsoft::WRL::ComPtr<ID3D11RasterizerState> NoCulling;
 	extern Microsoft::WRL::ComPtr<ID3D11RasterizerState> DefaultRS;
 	extern Microsoft::WRL::ComPtr<ID3D11RasterizerState> Wireframe;
+	extern Microsoft::WRL::ComPtr<ID3D11DepthStencilState> DS2D;
 	inline void ThrowIfFailed( HRESULT hr )
 	{
 		if ( FAILED( hr ) )

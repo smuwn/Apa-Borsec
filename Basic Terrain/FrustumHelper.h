@@ -144,7 +144,7 @@ namespace FrustumCulling
 		float Height,
 		ViewFrustum const& Frustum )
 	{
-		if ( isSphereInFrustum( Center, width * 1.2f, Frustum ) )
+		if ( isSphereInFrustum( Center, width * 1.5f, Frustum ) )
 			return true;
 		if ( isRectangleInFrustum( Center, width, Height, width, Frustum ) )
 			return true;

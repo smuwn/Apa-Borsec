@@ -5,6 +5,7 @@ namespace DX
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> NoCulling;
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> DefaultRS;
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> Wireframe;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> DS2D;
 	void InitStates( ID3D11Device * Device )
 	{
 		ZeroMemoryAndDeclare( D3D11_RASTERIZER_DESC, rastDesc );
@@ -19,5 +20,9 @@ namespace DX
 		rastDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_BACK;
 		rastDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_WIREFRAME;
 		ThrowIfFailed( Device->CreateRasterizerState( &rastDesc, &Wireframe ) );
+		ZeroMemoryAndDeclare( D3D11_DEPTH_STENCIL_DESC, dsDesc );
+		dsDesc.DepthEnable = FALSE;
+		dsDesc.StencilEnable = FALSE;
+		ThrowIfFailed( Device->CreateDepthStencilState( &dsDesc, &DS2D ) );
 	}
 }

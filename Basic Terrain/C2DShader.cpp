@@ -123,7 +123,9 @@ void C2DShader::Render( UINT IndexCount, DirectX::FXMMATRIX& World, DirectX::FXM
 		mContext->PSSetShaderResources( 0, 1, &SRV );
 	}
 
+	mContext->OMSetDepthStencilState( DX::DS2D.Get( ), 0 );
 	mContext->DrawIndexed( IndexCount, 0, 0 );
+	mContext->OMSetDepthStencilState( nullptr, 0 );
 
 	// Place back the old toys
 	mContext->IASetInputLayout( oldLayout );

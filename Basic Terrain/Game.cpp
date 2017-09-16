@@ -202,7 +202,7 @@ void CGame::InitModels( )
 	mCamera = std::make_unique<CCamera>( mInput, FOV, ( float ) mWidth / ( float ) mHeight, NearZ, FarZ );
 	mTriangle = std::make_unique<CModel>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mTerrain = std::make_shared<CTerrain>( mDevice.Get( ), mImmediateContext.Get( ), m3DShader,
-		( LPSTR ) "Data/Main.bmp", ( LPSTR ) "Data/Main.normals" );
+		( LPSTR ) "Data/HM.bmp", ( LPSTR ) "Data/HM.normals" );
 	mLineManager = std::make_shared<CLineManager>( mDevice.Get( ), mImmediateContext.Get( ), mLineShader);
 	mQuadTree = std::make_unique<QuadTree>( mDevice.Get( ), mImmediateContext.Get( ),
 		m3DShader, mTerrain, mLineManager );
@@ -289,7 +289,7 @@ void CGame::Render( )
 	mFrustumTest->Render( mOrthoMatrix, buffer,
 		0, 69 );
 
-	mSwapChain->Present( 0, 0 );
+	mSwapChain->Present( 1, 0 );
 }
 
 void CGame::DeleteWindow( )
