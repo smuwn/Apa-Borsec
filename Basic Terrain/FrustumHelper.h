@@ -113,16 +113,16 @@ namespace FrustumCulling
 		}
 		return true;
 	}
-	inline bool isCubeInFrustum( DirectX::XMFLOAT3 Center, float width,
+	inline bool isCellInFrustum( DirectX::XMFLOAT3 Center, float width,
 		ViewFrustum const& Frustum )
 	{
 		if ( isSphereInFrustum( Center, width, Frustum ) )
 			return true;
 		float minX = Center.x - width;
-		float minY = 0.0f;
-		float minZ = Center.z - width;
 		float maxX = Center.x + width;
-		float maxY = 0.0;
+		float minY = Center.y;
+		float maxY = Center.y;
+		float minZ = Center.z - width;
 		float maxZ = Center.z + width;
 		if ( isAABBInFrustum( minX, minY, minZ, maxX, maxY, maxZ, Frustum ) )
 			return true;

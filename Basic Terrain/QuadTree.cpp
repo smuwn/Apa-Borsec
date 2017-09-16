@@ -247,7 +247,7 @@ void QuadTree::RenderNodeLines( QuadTree::SNode* Node  )
 }
 
 void QuadTree::RenderNode( SNode * Node, DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection,
-	FrustumCulling::ViewFrustum const& Frustum, int& DrawnVertices )
+	FrustumCulling::ViewFrustum const& Frustum, int& DrawnVertices, float CamHeight )
 {
 	float minX = Node->mCenterX - Node->mWidth / 2.0f;
 	float minY = 0.0f;
@@ -257,8 +257,8 @@ void QuadTree::RenderNode( SNode * Node, DirectX::FXMMATRIX& View, DirectX::FXMM
 	float maxZ = Node->mCenterZ + Node->mWidth / 2.0f;
 	//if ( !FrustumCulling::isAABBInFrustum( minX, minY, minZ, maxX, maxY, maxZ, Frustum ) )
 		//return;
-	if ( !FrustumCulling::isCubeInFrustum(
-		DirectX::XMFLOAT3( Node->mCenterX, 0.0f, Node->mCenterZ ), Node->mWidth / 2.0f,
+	if ( !FrustumCulling::isCellInFrustum(
+		DirectX::XMFLOAT3( Node->mCenterX, CamHeight, Node->mCenterZ ), Node->mWidth / 2.0f,
 		Frustum ) )
 		return;
 	
@@ -267,7 +267,7 @@ void QuadTree::RenderNode( SNode * Node, DirectX::FXMMATRIX& View, DirectX::FXMM
 	{
 		if ( Node->mNodes[ i ] != 0 )
 		{
-			RenderNode( Node->mNodes[ i ], View, Projection, Frustum, DrawnVertices );
+			RenderNode( Node->mNodes[ i ], View, Projection, Frustum, DrawnVertices,CamHeight );
 		}
 	}
 	if ( count > 0 )
@@ -287,7 +287,7 @@ void QuadTree::RenderNode( SNode * Node, DirectX::FXMMATRIX& View, DirectX::FXMM
 }
 
 void QuadTree::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection,
-	FrustumCulling::ViewFrustum const& Frustum, int& DrawnTriangles )
+	FrustumCulling::ViewFrustum const& Frustum, int& DrawnTriangles, float CamHeight )
 {
-	RenderNode( mParentNode, View, Projection, Frustum, DrawnTriangles );
+	RenderNode( mParentNode, View, Projection, Frustum, DrawnTriangles, CamHeight );
 }

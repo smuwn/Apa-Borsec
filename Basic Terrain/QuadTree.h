@@ -44,7 +44,7 @@ public:
 	~QuadTree( );
 public:
 	void Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection,
-		FrustumCulling::ViewFrustum const& Frustum, int& DrawnTriangles );
+		FrustumCulling::ViewFrustum const& Frustum, int& DrawnTriangles, float CamHeight );
 	void RenderLines( );
 private:
 	void CalculateMeshDimensions( float& CenterX, float& CenterZ, float& width );
@@ -56,6 +56,6 @@ private:
 	
 	void RenderNodeLines( SNode* Node );
 	void RenderNode( SNode * Node, DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection,
-		FrustumCulling::ViewFrustum const& Frustum, int& DrawnTriangles );
+		FrustumCulling::ViewFrustum const& Frustum, int& DrawnTriangles, float CamHeight );
 };
 

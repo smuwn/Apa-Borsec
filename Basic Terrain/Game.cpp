@@ -265,8 +265,11 @@ void CGame::Render( )
 	mImmediateContext->ClearDepthStencilView( mDSView.Get( ), D3D11_CLEAR_FLAG::D3D11_CLEAR_DEPTH, 1.0f, 0 );
 
 	DirectX::XMMATRIX View, Projection;
+	DirectX::XMFLOAT3 CamPos;
 	View = mCamera->GetView( );
 	Projection = mCamera->GetProjection( );
+	CamPos = mCamera->GetCamPos( );
+	
 	FrustumCulling::ViewFrustum Frustum = FrustumCulling::ConstructFrustum( View, Projection );
 
 	//mTerrain->Render( View, Projection, bDrawWireframe );
@@ -275,7 +278,7 @@ void CGame::Render( )
 	mLineManager->End( );
 	mLineManager->Render( View, Projection );
 	int Drawn = 0;
-	mQuadTree->Render( View, Projection, Frustum, Drawn );
+	mQuadTree->Render( View, Projection, Frustum, Drawn,CamPos.y );
 
 	char buffer[ 500 ] = { 0 };
 	sprintf_s( buffer, "FPS: %d", mTimer.GetFPS( ) );
@@ -286,7 +289,7 @@ void CGame::Render( )
 	mFrustumTest->Render( mOrthoMatrix, buffer,
 		0, 69 );
 
-	mSwapChain->Present( 1, 0 );
+	mSwapChain->Present( 0, 0 );
 }
 
 void CGame::DeleteWindow( )

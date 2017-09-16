@@ -50,6 +50,8 @@ public:
 public:
 	inline DirectX::XMMATRIX& GetView( ) { return mView; };
 	inline DirectX::XMMATRIX& GetProjection( ) { return mProjection; };
+	inline DirectX::XMFLOAT3 GetCamPos( )
+	{ DirectX::XMFLOAT3 Pos; DirectX::XMStoreFloat3( &Pos, mPosition ); return Pos; };
 public:
 	inline void* operator new ( size_t size )
 	{
