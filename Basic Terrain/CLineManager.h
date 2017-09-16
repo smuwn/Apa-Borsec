@@ -5,7 +5,7 @@
 
 class CLineManager
 {
-	static constexpr const unsigned int MAX_LINES = 1024;
+	static constexpr const unsigned int MAX_LINES = 1024*1024;
 public:
 	struct SVertex
 	{

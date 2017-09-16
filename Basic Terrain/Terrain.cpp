@@ -10,8 +10,8 @@ CTerrain::CTerrain( ID3D11Device * Device, ID3D11DeviceContext * Context, std::s
 	try
 	{
 		InitTerrain( );
-		InitBuffers( );
-		mTexture = std::make_unique<CTexture>( ( LPWSTR ) L"Data/dirt.jpg", mDevice );
+		//InitBuffers( );
+		mTexture = std::make_shared<CTexture>( ( LPWSTR ) L"Data/Dirt01.dds", mDevice );
 	}
 	CATCH;
 }
@@ -27,8 +27,8 @@ CTerrain::CTerrain( ID3D11Device * Device, ID3D11DeviceContext * Context, std::s
 		InitHeightmap( Heightmap );
 		InitHeightmapTerrain( );
 		InitNormals( Normalmap );
-		InitBuffers( );
-		mTexture = std::make_unique<CTexture>( ( LPWSTR ) L"Data/dirt.jpg", mDevice );
+		//InitBuffers( );
+		mTexture = std::make_shared<CTexture>( ( LPWSTR ) L"Data/Dirt01.dds", mDevice );
 	}
 	CATCH;
 }

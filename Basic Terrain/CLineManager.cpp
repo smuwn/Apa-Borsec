@@ -38,7 +38,6 @@ void CLineManager::Begin( )
 void CLineManager::End( )
 {
 	mContext->Unmap( mVertBuffer.Get( ), 0 );
-	mVertexToAdd = 0;
 }
 
 void CLineManager::Line( DirectX::XMFLOAT3 const & From, DirectX::XMFLOAT3 const & To )
@@ -59,5 +58,8 @@ void CLineManager::Render( DirectX::FXMMATRIX & View, DirectX::FXMMATRIX & Proje
 	static UINT Offset = 0;
 	mContext->IASetVertexBuffers( 0, 1, mVertBuffer.GetAddressOf( ), &Stride, &Offset );
 	mContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_LINELIST );
+	mContext->RSSetState( DX::NoCulling.Get( ) );
 	mShader->Render( mVertexToAdd, View, Projection );
+	mContext->RSSetState( DX::DefaultRS.Get( ) );
+	mVertexToAdd = 0;
 }

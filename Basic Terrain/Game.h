@@ -13,6 +13,7 @@
 #include "FrustumHelper.h"
 #include "LineShader.h"
 #include "CLineManager.h"
+#include "QuadTree.h"
 
 #define GAME CGame::GetGameInstance( )
 #if defined UNICODE
@@ -38,9 +39,11 @@ private:
 	
 	std::unique_ptr<CModel> mTriangle;
 	std::unique_ptr<CCamera> mCamera;
-	std::unique_ptr<CTerrain> mTerrain;
 
+	std::shared_ptr<CTerrain> mTerrain;
 	std::shared_ptr<CLineManager> mLineManager;
+
+	std::unique_ptr<QuadTree> mQuadTree;
 
 	std::unique_ptr<CText> mFPSText;
 	std::unique_ptr<CText> mFrustumTest;

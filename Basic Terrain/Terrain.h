@@ -5,6 +5,7 @@
 
 class CTerrain
 {
+	friend class QuadTree;
 private:
 	static constexpr const float HeightFactor = 10.0f;
 	static constexpr const float TextureRepeat = 32;
@@ -34,7 +35,7 @@ private:
 
 	std::shared_ptr<C3DShader> mShader;
 
-	std::unique_ptr<CTexture> mTexture;
+	std::shared_ptr<CTexture> mTexture;
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mVertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mIndexBuffer;

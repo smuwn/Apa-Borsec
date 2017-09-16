@@ -5,7 +5,8 @@
 
 namespace FrustumCulling
 {
-	inline std::array<DirectX::XMFLOAT4, 6> ConstructFrustum( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection )
+	typedef std::array<DirectX::XMFLOAT4, 6> ViewFrustum;
+	inline ViewFrustum ConstructFrustum( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection )
 	{
 		using namespace DirectX;
 		std::array<DirectX::XMFLOAT4, 6> Planes;
@@ -63,7 +64,7 @@ namespace FrustumCulling
 		return Planes;
 	}
 	inline bool isPointInFrustum( float x, float y, float z,
-		std::array<DirectX::XMFLOAT4, 6> const& Frustum )
+		ViewFrustum const& Frustum )
 	{
 		using namespace DirectX;
 		for ( size_t i = 0; i < Frustum.size( ); ++i )
@@ -78,7 +79,7 @@ namespace FrustumCulling
 	}
 	inline bool isAABBInFrustum( float minX, float minY, float minZ,
 		float maxX, float maxY, float maxZ,
-		std::array<DirectX::XMFLOAT4, 6> const& Frustum )
+		ViewFrustum const& Frustum )
 	{
 		if ( isPointInFrustum( minX, minY, minZ, Frustum ) )
 			return true;
@@ -95,6 +96,35 @@ namespace FrustumCulling
 		if ( isPointInFrustum( minX, maxY, maxZ, Frustum ) )
 			return true;
 		if ( isPointInFrustum( maxX, maxY, maxZ, Frustum ) )
+			return true;
+		return false;
+	}
+	inline bool isSphereInFrustum( DirectX::XMFLOAT3 Center, float radius,
+		ViewFrustum const& Frustum )
+	{
+		using namespace DirectX;
+		for ( int i = 0; i < 6; ++i )
+		{
+			XMVECTOR Plane = XMLoadFloat4( &Frustum[ i ] );
+			if ( XMVectorGetX(
+				XMPlaneDot( Plane, DirectX::XMVectorSet( Center.x, Center.y, Center.z, 1.0f ) )
+			) < -radius )
+				return false;
+		}
+		return true;
+	}
+	inline bool isCubeInFrustum( DirectX::XMFLOAT3 Center, float width,
+		ViewFrustum const& Frustum )
+	{
+		if ( isSphereInFrustum( Center, width, Frustum ) )
+			return true;
+		float minX = Center.x - width;
+		float minY = 0.0f;
+		float minZ = Center.z - width;
+		float maxX = Center.x + width;
+		float maxY = 0.0;
+		float maxZ = Center.z + width;
+		if ( isAABBInFrustum( minX, minY, minZ, maxX, maxY, maxZ, Frustum ) )
 			return true;
 		return false;
 	}

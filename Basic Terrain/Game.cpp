@@ -201,9 +201,12 @@ void CGame::InitModels( )
 {
 	mCamera = std::make_unique<CCamera>( mInput, FOV, ( float ) mWidth / ( float ) mHeight, NearZ, FarZ );
 	mTriangle = std::make_unique<CModel>( mDevice.Get( ), mImmediateContext.Get( ) );
-	mTerrain = std::make_unique<CTerrain>( mDevice.Get( ), mImmediateContext.Get( ), m3DShader,
+	mTerrain = std::make_shared<CTerrain>( mDevice.Get( ), mImmediateContext.Get( ), m3DShader,
 		( LPSTR ) "Data/HM.bmp", ( LPSTR ) "Data/HM.normals" );
 	mLineManager = std::make_shared<CLineManager>( mDevice.Get( ), mImmediateContext.Get( ), mLineShader);
+	mQuadTree = std::make_unique<QuadTree>( mDevice.Get( ), mImmediateContext.Get( ),
+		m3DShader, mTerrain, mLineManager );
+	mTerrain.reset( );
 }
 
 void CGame::Init2D( )
@@ -264,27 +267,24 @@ void CGame::Render( )
 	DirectX::XMMATRIX View, Projection;
 	View = mCamera->GetView( );
 	Projection = mCamera->GetProjection( );
+	FrustumCulling::ViewFrustum Frustum = FrustumCulling::ConstructFrustum( View, Projection );
 
-	if ( FrustumCulling::isPointInFrustum(
-		0.0f, 0.0f, 0.0f, FrustumCulling::ConstructFrustum( View, Projection )
-		) )
-	{
-		mFrustumTest->Render( mOrthoMatrix, "DA", 0, 69 );
-	}
-	
+	//mTerrain->Render( View, Projection, bDrawWireframe );
 	mLineManager->Begin( );
-	mLineManager->Line( DirectX::XMFLOAT3( 0, 0, 0 ), DirectX::XMFLOAT3( 0, 69, 0 ) );
-	mLineManager->Line( DirectX::XMFLOAT3( 0, 69, 0 ), DirectX::XMFLOAT3( 69, 69, 0 ) );
-	mLineManager->Render( View, Projection );
+	mQuadTree->RenderLines( );
 	mLineManager->End( );
-
-	mTerrain->Render( View, Projection, bDrawWireframe );
+	mLineManager->Render( View, Projection );
+	int Drawn = 0;
+	mQuadTree->Render( View, Projection, Frustum, Drawn );
 
 	char buffer[ 500 ] = { 0 };
 	sprintf_s( buffer, "FPS: %d", mTimer.GetFPS( ) );
-
 	mFPSText->Render( mOrthoMatrix, buffer, 0, 0,
 		DirectX::XMFLOAT4( 1.0f, 1.0f, 0.0f, 1.0f ) );
+
+	sprintf_s( buffer, "Drawn vertices: %d", Drawn );
+	mFrustumTest->Render( mOrthoMatrix, buffer,
+		0, 69 );
 
 	mSwapChain->Present( 1, 0 );
 }
