@@ -282,7 +282,7 @@ void QuadTree::RenderNode( SNode * Node, DirectX::FXMMATRIX& View, DirectX::FXMM
 	
 	mShader->RenderVertices( Node->mTriangleCount * 3,
 		DirectX::XMMatrixIdentity( ), View, Projection, mTexture.get( ) );
-	DrawnVertices += Node->mTriangleCount * 3;
+	DrawnVertices += Node->mTriangleCount;
 
 }
 

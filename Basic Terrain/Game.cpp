@@ -202,7 +202,7 @@ void CGame::InitModels( )
 	mCamera = std::make_unique<CCamera>( mInput, FOV, ( float ) mWidth / ( float ) mHeight, NearZ, FarZ );
 	mTriangle = std::make_unique<CModel>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mTerrain = std::make_shared<CTerrain>( mDevice.Get( ), mImmediateContext.Get( ), m3DShader,
-		( LPSTR ) "Data/HM.bmp", ( LPSTR ) "Data/HM.normals" );
+		( LPSTR ) "Data/Main.bmp", ( LPSTR ) "Data/Main.normals" );
 	mLineManager = std::make_shared<CLineManager>( mDevice.Get( ), mImmediateContext.Get( ), mLineShader);
 	mQuadTree = std::make_unique<QuadTree>( mDevice.Get( ), mImmediateContext.Get( ),
 		m3DShader, mTerrain, mLineManager );
@@ -285,7 +285,7 @@ void CGame::Render( )
 	mFPSText->Render( mOrthoMatrix, buffer, 0, 0,
 		DirectX::XMFLOAT4( 1.0f, 1.0f, 0.0f, 1.0f ) );
 
-	sprintf_s( buffer, "Drawn vertices: %d", Drawn );
+	sprintf_s( buffer, "Drawn faces: %d", Drawn );
 	mFrustumTest->Render( mOrthoMatrix, buffer,
 		0, 69 );
 
