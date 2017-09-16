@@ -128,12 +128,14 @@
     <ClCompile Include="C2DShader.cpp" />
     <ClCompile Include="C3DShader.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CLineManager.cpp" />
     <ClCompile Include="commonincludes.cpp" />
     <ClCompile Include="DefaultShader.cpp" />
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="HRTimer.cpp" />
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="LineShader.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Square.cpp" />
     <ClCompile Include="Terrain.cpp" />
@@ -148,12 +150,14 @@
     <ClInclude Include="C2DShader.h" />
     <ClInclude Include="C3DShader.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CLineManager.h" />
     <ClInclude Include="DefaultShader.h" />
     <ClInclude Include="Font.h" />
     <ClInclude Include="FrustumHelper.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="HRTimer.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="LineShader.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ShaderHelper.h" />
     <ClInclude Include="Square.h" />
@@ -190,6 +194,22 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(LocalDebuggerWorkingDirectory)Shaders\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)Shaders\%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="LinePixelShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(LocalDebuggerWorkingDirectory)Shaders\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)Shaders\%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="LineVertexShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(LocalDebuggerWorkingDirectory)Shaders\%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)Shaders\%(Filename).cso</ObjectFileOutput>

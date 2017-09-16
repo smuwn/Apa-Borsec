@@ -55,7 +55,7 @@ namespace ShaderHelper
 		ZeroMemoryAndDeclare( D3D11_BUFFER_DESC, buffDesc );
 		ZeroMemoryAndDeclare( D3D11_SUBRESOURCE_DATA, buffData );
 		buffDesc.BindFlags = flag;
-		buffDesc.ByteWidth = DataSize;
+		buffDesc.ByteWidth = (UINT)DataSize;
 		buffDesc.CPUAccessFlags = CPUAccessFlag;
 		buffDesc.MiscFlags = MiscFlag;
 		buffDesc.StructureByteStride = StructureByteStride;

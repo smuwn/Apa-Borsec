@@ -11,6 +11,8 @@
 #include "C3DShader.h"
 #include "Terrain.h"
 #include "FrustumHelper.h"
+#include "LineShader.h"
+#include "CLineManager.h"
 
 #define GAME CGame::GetGameInstance( )
 #if defined UNICODE
@@ -38,6 +40,8 @@ private:
 	std::unique_ptr<CCamera> mCamera;
 	std::unique_ptr<CTerrain> mTerrain;
 
+	std::shared_ptr<CLineManager> mLineManager;
+
 	std::unique_ptr<CText> mFPSText;
 	std::unique_ptr<CText> mFrustumTest;
 
@@ -49,6 +53,7 @@ private:
 	std::shared_ptr<CDefaultShader> mDefaultShader;
 	std::shared_ptr<C2DShader> m2DShader;
 	std::shared_ptr<C3DShader> m3DShader;
+	std::shared_ptr<LineShader> mLineShader;
 
 	WCHAR* mGPUDescription;
 	

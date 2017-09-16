@@ -135,9 +135,17 @@ void CGame::InitD3D( bool bFullscreen )
 #if DEBUG || _DEBUG
 	flags |= D3D11_CREATE_DEVICE_FLAG::D3D11_CREATE_DEVICE_DEBUG;
 #endif
+	
+	D3D_DRIVER_TYPE driver =
+#if NO_GPU
+		D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_WARP
+#else
+		D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_HARDWARE
+#endif
+		;
 
 	DX::ThrowIfFailed(
-		D3D11CreateDeviceAndSwapChain( NULL, D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_WARP, NULL, flags,
+		D3D11CreateDeviceAndSwapChain( NULL, driver, NULL, flags,
 			NULL, NULL, D3D11_SDK_VERSION, &swapDesc, &mSwapChain, &mDevice, NULL, &mImmediateContext )
 	);
 
@@ -186,6 +194,7 @@ void CGame::InitShaders( )
 	light.Color = DirectX::XMFLOAT4( 1.0f, 1.0f, 1.0f, 1.0f );
 	light.Ambient = DirectX::XMFLOAT4( 0.2f, 0.2f, 0.2f, 1.0f );
 	m3DShader->SetLight( light );
+	mLineShader = std::make_shared<LineShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 }
 
 void CGame::InitModels( )
@@ -194,6 +203,7 @@ void CGame::InitModels( )
 	mTriangle = std::make_unique<CModel>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mTerrain = std::make_unique<CTerrain>( mDevice.Get( ), mImmediateContext.Get( ), m3DShader,
 		( LPSTR ) "Data/HM.bmp", ( LPSTR ) "Data/HM.normals" );
+	mLineManager = std::make_shared<CLineManager>( mDevice.Get( ), mImmediateContext.Get( ), mLineShader);
 }
 
 void CGame::Init2D( )
@@ -261,6 +271,12 @@ void CGame::Render( )
 	{
 		mFrustumTest->Render( mOrthoMatrix, "DA", 0, 69 );
 	}
+	
+	mLineManager->Begin( );
+	mLineManager->Line( DirectX::XMFLOAT3( 0, 0, 0 ), DirectX::XMFLOAT3( 0, 69, 0 ) );
+	mLineManager->Line( DirectX::XMFLOAT3( 0, 69, 0 ), DirectX::XMFLOAT3( 69, 69, 0 ) );
+	mLineManager->Render( View, Projection );
+	mLineManager->End( );
 
 	mTerrain->Render( View, Projection, bDrawWireframe );
 

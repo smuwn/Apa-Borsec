@@ -73,9 +73,9 @@ void CTerrain::InitHeightmap( LPSTR Path )
 	float height;
 	mHeightmap.resize( mRowCount * mColCount );
 
-	for ( size_t i = 0; i < mRowCount; ++i )
+	for (UINT i = 0; i < mRowCount; ++i )
 	{
-		for ( size_t j = 0; j < mColCount; ++j )
+		for (UINT j = 0; j < mColCount; ++j )
 		{
 			height = image[ k ];
 
@@ -98,8 +98,8 @@ void CTerrain::InitHeightmapTerrain( )
 	mVertexCount = ( mRowCount ) * ( mColCount );
 
 	mVertices.resize( mVertexCount );
-	for ( size_t i = 0; i < mRowCount; ++i )
-		for ( size_t j = 0; j < mColCount; ++j )
+	for (UINT i = 0; i < mRowCount; ++i )
+		for (UINT j = 0; j < mColCount; ++j )
 		{
 			int index = i * mColCount + j;
 			mVertices[ index ].Position.x = ( float ) j;
@@ -115,9 +115,9 @@ void CTerrain::InitHeightmapTerrain( )
 	float VincrementValue = TextureRepeat / mRowCount;
 	float UincrementValue = TextureRepeat / mColCount;
 
-	for ( size_t i = 0; i < mRowCount - 1; ++i )
+	for (UINT i = 0; i < mRowCount - 1; ++i )
 	{
-		for ( size_t j = 0; j < mColCount - 1; ++j )
+		for (UINT j = 0; j < mColCount - 1; ++j )
 		{
 			mIndices[ index + 0 ] = ( i + 1 ) * mColCount + j; // Bottom left
 			mVertices[ ( i + 1 ) * mColCount + j ].Texture = DirectX::XMFLOAT2( tU,tV + VincrementValue );
@@ -303,7 +303,7 @@ void CTerrain::InitBuffers( )
 	ShaderHelper::CreateBuffer( mDevice, mIndexBuffer.GetAddressOf( ),
 		D3D11_USAGE::D3D11_USAGE_IMMUTABLE, D3D11_BIND_FLAG::D3D11_BIND_INDEX_BUFFER,
 		sizeof( DWORD ) * mIndices.size( ), 0, &mIndices[ 0 ] );
-	mTexture = std::make_unique<CTexture>( ( LPWSTR ) L"Data/dirt01.jpg", mDevice );
+	mTexture = std::make_unique<CTexture>( ( LPWSTR ) L"Data/dirt.jpg", mDevice );
 }
 
 void CTerrain::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection, bool bWireframe )
