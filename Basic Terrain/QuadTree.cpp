@@ -306,8 +306,6 @@ bool QuadTree::GetHeightAt( float X, float Z, float& Height )
 	if ( Node == nullptr )
 		return false;
 
-	Height = 70;
-
 	for ( int i = 0; i < Node->mTriangleCount; ++i )
 	{
 		DirectX::XMFLOAT3 V1 = Node->mVertices[ i * 3 + 0 ].Position;
@@ -319,7 +317,8 @@ bool QuadTree::GetHeightAt( float X, float Z, float& Height )
 		}
 	}
 
-	return true;
+	// Will never get to this point
+	return false;
 }
 
 QuadTree::SNode * QuadTree::FindNode( QuadTree::SNode * StartNode, float X, float Z )
