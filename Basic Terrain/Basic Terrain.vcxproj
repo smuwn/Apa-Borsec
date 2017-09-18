@@ -152,6 +152,7 @@
     <ClInclude Include="C3DShader.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CLineManager.h" />
+    <ClInclude Include="commonmath.h" />
     <ClInclude Include="DefaultShader.h" />
     <ClInclude Include="Font.h" />
     <ClInclude Include="FrustumHelper.h" />

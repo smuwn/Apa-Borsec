@@ -32,6 +32,8 @@ CGame::~CGame( )
 	m3DShader.reset( );
 	mTriangle.reset( );
 	mFPSText.reset( );
+	mDrawnFacesText.reset( );
+	mOutsideTerrainText.reset( );
 	mTerrain.reset( );
 
 	mDevice.Reset( );
@@ -217,7 +219,9 @@ void CGame::Init2D( )
 		( LPWSTR ) L"Fonts/32OpenSans.fnt" );
 	mFPSText = std::make_unique<CText>( mDevice.Get( ), mImmediateContext.Get( ),
 		m2DShader, mOpenSans32, mWidth, mHeight );
-	mFrustumTest = std::make_unique<CText>( mDevice.Get( ), mImmediateContext.Get( ),
+	mDrawnFacesText = std::make_unique<CText>( mDevice.Get( ), mImmediateContext.Get( ),
+		m2DShader, mOpenSans32, mWidth, mHeight );
+	mOutsideTerrainText = std::make_unique<CText>( mDevice.Get( ), mImmediateContext.Get( ),
 		m2DShader, mOpenSans32, mWidth, mHeight );
 }
 
@@ -252,6 +256,7 @@ void CGame::Update( )
 {
 	mTimer.Frame( );
 	mInput->Frame( );
+
 	mCamera->Frame( mTimer.GetFrameTime( ) );
 	if ( mInput->isSpecialKeyPressed( DIK_B ) )
 		bDrawWireframe = bDrawWireframe ? false : true;
@@ -269,6 +274,7 @@ void CGame::Render( )
 	View = mCamera->GetView( );
 	Projection = mCamera->GetProjection( );
 	CamPos = mCamera->GetCamPos( );
+	float Height = 69;
 	
 	FrustumCulling::ViewFrustum Frustum = FrustumCulling::ConstructFrustum( View, Projection );
 
@@ -288,8 +294,21 @@ void CGame::Render( )
 		DirectX::XMFLOAT4( 1.0f, 1.0f, 0.0f, 1.0f ) );
 
 	sprintf_s( buffer, "Drawn faces: %d", Drawn );
-	mFrustumTest->Render( mOrthoMatrix, buffer,
-		0, 69 );
+	mDrawnFacesText->Render( mOrthoMatrix, buffer,
+		0, 33 );
+
+	if ( mQuadTree->GetHeightAt( CamPos.x, CamPos.z, Height ) )
+	{
+		sprintf_s( buffer, "Height at %.2f,%.2f is %.2f", CamPos.x, CamPos.z, Height );
+		mOutsideTerrainText->Render( mOrthoMatrix, buffer,
+			0, 66 );
+	}
+	else
+	{
+		sprintf_s( buffer, "Outside terrain" );
+		mOutsideTerrainText->Render( mOrthoMatrix, buffer,
+			0, 66, DirectX::XMFLOAT4( 1.0f, 0.0f, 0.0f, 1.0f ) );
+	}
 
 	mSwapChain->Present( 1, 0 );
 }

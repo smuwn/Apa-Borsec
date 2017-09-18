@@ -25,7 +25,7 @@
 ALIGN16 class CGame sealed
 {
 	static constexpr const float NearZ = 0.1f;
-	static constexpr const float FarZ = 1000.0f;
+	static constexpr const float FarZ = 200.0f;
 	static constexpr const float FOV = ( float ) D3DX_PI / 4.0f;
 private:
 	HINSTANCE mhInstance;
@@ -46,7 +46,8 @@ private:
 	std::unique_ptr<QuadTree> mQuadTree;
 
 	std::unique_ptr<CText> mFPSText;
-	std::unique_ptr<CText> mFrustumTest;
+	std::unique_ptr<CText> mDrawnFacesText;
+	std::unique_ptr<CText> mOutsideTerrainText;
 
 	std::shared_ptr<CInput> mInput;
 

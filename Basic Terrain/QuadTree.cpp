@@ -261,8 +261,6 @@ void QuadTree::RenderNode( SNode * Node, DirectX::FXMMATRIX& View, DirectX::FXMM
 	float maxX = Node->mCenterX + Node->mWidth / 2.0f;
 	float maxY = 0.0f;
 	float maxZ = Node->mCenterZ + Node->mWidth / 2.0f;
-	//if ( !FrustumCulling::isAABBInFrustum( minX, minY, minZ, maxX, maxY, maxZ, Frustum ) )
-		//return;
 	if ( !FrustumCulling::isCellInFrustum(
 		DirectX::XMFLOAT3( Node->mCenterX, CamHeight, Node->mCenterZ ),
 		Node->mWidth / 2.0f,CamHeight, Frustum ) )
@@ -301,3 +299,107 @@ void QuadTree::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection,
 	RenderNode( mParentNode, View, Projection, Frustum, DrawnTriangles, CamHeight );
 	mContext->RSSetState( DX::DefaultRS.Get( ) );
 }
+
+bool QuadTree::GetHeightAt( float X, float Z, float& Height )
+{
+	SNode * Node = FindNode( mParentNode, X, Z );
+	if ( Node == nullptr )
+		return false;
+
+	Height = 70;
+
+	for ( int i = 0; i < Node->mTriangleCount; ++i )
+	{
+		DirectX::XMFLOAT3 V1 = Node->mVertices[ i * 3 + 0 ].Position;
+		DirectX::XMFLOAT3 V2 = Node->mVertices[ i * 3 + 1 ].Position;
+		DirectX::XMFLOAT3 V3 = Node->mVertices[ i * 3 + 2 ].Position;
+		if ( GetTriangleHeight( X, Z, Height, V1, V2, V3 ) )
+		{
+			return true;
+		}
+	}
+
+	return true;
+}
+
+QuadTree::SNode * QuadTree::FindNode( QuadTree::SNode * StartNode, float X, float Z )
+{
+	float minX = StartNode->mCenterX - StartNode->mWidth / 2.0f;
+	float maxX = StartNode->mCenterX + StartNode->mWidth / 2.0f;
+	float minZ = StartNode->mCenterZ - StartNode->mWidth / 2.0f;
+	float maxZ = StartNode->mCenterZ + StartNode->mWidth / 2.0f;
+
+	if ( ( X < minX ) || ( X > maxX ) || ( Z < minZ ) || ( Z > maxZ ) )
+		return nullptr;
+
+	int count = 0;
+	SNode * result = nullptr;
+	for ( int i = 0; i < 4; ++i )
+		if ( StartNode->mNodes[ i ] != 0 )
+		{
+			count++;
+			result = FindNode( StartNode->mNodes[ i ], X, Z );
+			if ( result != nullptr )
+				break;
+		}
+	if ( count > 0 )
+		return result;
+	//else
+	return StartNode;
+
+}
+
+bool QuadTree::GetTriangleHeight( float X, float Z, float & height, DirectX::XMFLOAT3 & V1, DirectX::XMFLOAT3 & V2, DirectX::XMFLOAT3 & V3 )
+{
+	DirectX::XMFLOAT3 Edge1, Edge2, Edge3;
+	DirectX::XMFLOAT3 RayDirection, StartRay;
+	DirectX::XMFLOAT3 Normal;
+
+	StartRay.x = X;
+	StartRay.y = 0.0f;
+	StartRay.z = Z;
+
+	RayDirection.x = 0.0f;
+	RayDirection.y = -1.0f;
+	RayDirection.z = 0.0f;
+
+	Edge1.x = V2.x - V1.x;
+	Edge1.y = V2.y - V1.y;
+	Edge1.z = V2.z - V1.z;
+	Edge2.x = V3.x - V1.x;
+	Edge2.y = V3.y - V1.y;
+	Edge2.z = V3.z - V1.z;
+
+	Normal.x = ( Edge1.y * Edge2.z ) - ( Edge1.z * Edge2.y );
+	Normal.y = ( Edge1.z * Edge2.x ) - ( Edge1.x * Edge2.z );
+	Normal.z = ( Edge1.x * Edge2.y ) - ( Edge1.y * Edge2.x );
+	float length = sqrtf( Normal.x * Normal.x + Normal.y * Normal.y + Normal.z * Normal.z );
+	Normal.x /= length;
+	Normal.y /= length;
+	Normal.z /= length;
+
+	float D = ( -Normal.x * V1.x ) + ( -Normal.y * V1.y ) + ( -Normal.z * V1.z );
+	float denominator = ( RayDirection.x * Normal.x ) + ( RayDirection.y * Normal.y ) + ( RayDirection.z * Normal.z );
+
+	if ( fabs( denominator ) < DX::EPSILON )
+		return false;
+
+	float numerator = -1.0f * ( ( StartRay.x * Normal.x ) + ( StartRay.y * Normal.y ) + ( StartRay.z * Normal.z ) + D );
+
+	float t = numerator / denominator;
+
+	DirectX::XMFLOAT3 Q;
+	Q.x = StartRay.x + RayDirection.x * t;
+	Q.y = StartRay.y + RayDirection.y * t;
+	Q.z = StartRay.z + RayDirection.z * t;
+	
+	if ( Math::isPointInTriangle( V1, V2, V3, Q ) )
+	{
+		height = Q.y;
+		return true;
+	}
+
+
+	return false;
+}
+

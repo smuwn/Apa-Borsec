@@ -13,7 +13,6 @@
 #include <wrl.h>
 #include <comdecl.h>
 #include <comdef.h>
-#include <DirectXMath.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -31,6 +30,8 @@
 #include <sstream>
 #include <map>
 #include <unordered_map>
+
+#include "commonmath.h"
 
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dx11.lib")
@@ -64,6 +65,7 @@ MessageBoxA(NULL,"Unexpected error occured", "Error", MB_ICONERROR| MB_OK); Post
 
 namespace DX
 {
+	static constexpr const float EPSILON = 0.0001f;
 	extern Microsoft::WRL::ComPtr<ID3D11RasterizerState> NoCulling;
 	extern Microsoft::WRL::ComPtr<ID3D11RasterizerState> DefaultRS;
 	extern Microsoft::WRL::ComPtr<ID3D11RasterizerState> Wireframe;

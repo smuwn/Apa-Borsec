@@ -140,6 +140,9 @@
     <ClInclude Include="QuadTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="commonmath.h">
+      <Filter>Header Files\Helpers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="VertexShader.hlsl">

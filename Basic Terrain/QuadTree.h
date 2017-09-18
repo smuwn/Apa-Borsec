@@ -48,6 +48,7 @@ public:
 		FrustumCulling::ViewFrustum const& Frustum, int& DrawnTriangles, float CamHeight,
 		bool bWireframe = false);
 	void RenderLines( );
+	bool GetHeightAt( float X, float Z, float& height );
 private:
 	void CalculateMeshDimensions( float& CenterX, float& CenterZ, float& width );
 	int NumTrianglesInside( float CenterX, float CenterZ, float width );
@@ -59,5 +60,9 @@ private:
 	void RenderNodeLines( SNode* Node );
 	void RenderNode( SNode * Node, DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection,
 		FrustumCulling::ViewFrustum const& Frustum, int& DrawnTriangles, float CamHeight );
+
+	SNode* FindNode( SNode* Start, float X, float Z );
+	bool GetTriangleHeight( float X, float Z, float& height,
+		DirectX::XMFLOAT3& V1, DirectX::XMFLOAT3& V2, DirectX::XMFLOAT3& V3 );
 };
 
