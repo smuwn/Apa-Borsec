@@ -57,6 +57,8 @@ void QuadTree::BuildNode( SNode* Node )
 {
 	for ( int i = 0; i < 4; ++i )
 		Node->mNodes[ i ] = 0;
+	Node->mVertices = 0;
+
 
 	if ( Node->mTriangleCount == 0 )
 		return;
@@ -81,16 +83,16 @@ void QuadTree::BuildNode( SNode* Node )
 	}
 	else
 	{
-		SVertex * vertices = new SVertex[ Node->mTriangleCount * 3 ];
+		Node->mVertices = new SVertex[ mFaceCount * 3 ];
 
 		int index = 0;
 		for ( int i = 0; i < mFaceCount; ++i )
 		{
 			if ( isTriangleContained( i, Node->mCenterX, Node->mCenterZ, Node->mWidth ) )
 			{
-				vertices[ index + 0 ] = mVertices[ mIndices[ i * 3 + 0 ] ];
-				vertices[ index + 1 ] = mVertices[ mIndices[ i * 3 + 1 ] ];
-				vertices[ index + 2 ] = mVertices[ mIndices[ i * 3 + 2 ] ];
+				Node->mVertices[ index + 0 ] = mVertices[ mIndices[ i * 3 + 0 ] ];
+				Node->mVertices[ index + 1 ] = mVertices[ mIndices[ i * 3 + 1 ] ];
+				Node->mVertices[ index + 2 ] = mVertices[ mIndices[ i * 3 + 2 ] ];
 				index += 3;
 			}
 		}
@@ -98,10 +100,9 @@ void QuadTree::BuildNode( SNode* Node )
 		ShaderHelper::CreateBuffer(
 			mTerrain->mDevice, &Node->mVertexBuffer,
 			D3D11_USAGE::D3D11_USAGE_IMMUTABLE, D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER,
-			sizeof( SVertex ) * Node->mTriangleCount * 3, 0, vertices
+			sizeof( SVertex ) * Node->mTriangleCount * 3, 0, Node->mVertices
 		);
 
-		delete vertices;
 	}
 	
 }
@@ -194,6 +195,11 @@ void QuadTree::ReleaseNode( SNode* Node )
 		}
 	}
 	Node->mVertexBuffer.Reset( );
+	if ( Node->mVertices != 0 )
+	{
+		delete[ ] Node->mVertices;
+		Node->mVertices = 0;
+	}
 }
 
 void QuadTree::RenderLines( )
@@ -287,7 +293,11 @@ void QuadTree::RenderNode( SNode * Node, DirectX::FXMMATRIX& View, DirectX::FXMM
 }
 
 void QuadTree::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection,
-	FrustumCulling::ViewFrustum const& Frustum, int& DrawnTriangles, float CamHeight )
+	FrustumCulling::ViewFrustum const& Frustum, int& DrawnTriangles, float CamHeight,
+	bool bWireframe)
 {
+	if ( bWireframe )
+		mContext->RSSetState( DX::Wireframe.Get( ) );
 	RenderNode( mParentNode, View, Projection, Frustum, DrawnTriangles, CamHeight );
+	mContext->RSSetState( DX::DefaultRS.Get( ) );
 }

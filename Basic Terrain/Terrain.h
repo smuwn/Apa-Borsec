@@ -8,7 +8,7 @@ class CTerrain
 	friend class QuadTree;
 private:
 	static constexpr const float HeightFactor = 10.0f;
-	static constexpr const float TextureRepeat = 32;
+	static constexpr const float TextureRepeat = 10;
 public:
 	struct SVertex
 	{

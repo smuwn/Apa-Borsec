@@ -16,6 +16,7 @@ public:
 		float mCenterZ;
 		float mWidth;
 		int mTriangleCount;
+		SVertex * mVertices;
 		Microsoft::WRL::ComPtr<ID3D11Buffer> mVertexBuffer;
 		SNode* mNodes[ 4 ];
 	};
@@ -44,7 +45,8 @@ public:
 	~QuadTree( );
 public:
 	void Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection,
-		FrustumCulling::ViewFrustum const& Frustum, int& DrawnTriangles, float CamHeight );
+		FrustumCulling::ViewFrustum const& Frustum, int& DrawnTriangles, float CamHeight,
+		bool bWireframe = false);
 	void RenderLines( );
 private:
 	void CalculateMeshDimensions( float& CenterX, float& CenterZ, float& width );

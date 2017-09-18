@@ -273,12 +273,14 @@ void CGame::Render( )
 	FrustumCulling::ViewFrustum Frustum = FrustumCulling::ConstructFrustum( View, Projection );
 
 	//mTerrain->Render( View, Projection, bDrawWireframe );
+#if DEBUG || _DEBUG
 	mLineManager->Begin( );
 	mQuadTree->RenderLines( );
 	mLineManager->End( );
 	mLineManager->Render( View, Projection );
+#endif
 	int Drawn = 0;
-	mQuadTree->Render( View, Projection, Frustum, Drawn,CamPos.y );
+	mQuadTree->Render( View, Projection, Frustum, Drawn,CamPos.y, bDrawWireframe );
 
 	char buffer[ 500 ] = { 0 };
 	sprintf_s( buffer, "FPS: %d", mTimer.GetFPS( ) );
