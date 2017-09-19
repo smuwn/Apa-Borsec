@@ -3,7 +3,7 @@
 #include "commonincludes.h"
 #include "ShaderHelper.h"
 
-class LineShader
+class LineShader sealed
 {
 public:
 	struct SPerObject

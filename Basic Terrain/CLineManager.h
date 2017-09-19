@@ -3,7 +3,7 @@
 #include "commonincludes.h"
 #include "LineShader.h"
 
-class CLineManager
+class CLineManager sealed
 {
 	static constexpr const unsigned int MAX_LINES = 1024*1024;
 public:

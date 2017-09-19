@@ -63,6 +63,28 @@ MessageBoxA(NULL,"Unexpected error occured", "Error", MB_ICONERROR| MB_OK); Post
 }
 #endif
 
+// Forwards
+ALIGN16 class CCamera sealed;
+ALIGN16 class CGame sealed;
+ALIGN16 class CModel sealed;
+ALIGN16 class Square sealed;
+class CLineManager sealed;
+class CFont sealed;
+class CHRTimer sealed;
+class CInput sealed;
+class QuadTree sealed;
+class CTerrain sealed;
+class CText sealed;
+class CTexture;
+
+
+// Shaders
+class C2DShader sealed;
+class C3DShader sealed;
+class CDefaultShader sealed;
+class LineShader sealed;
+
+
 namespace DX
 {
 	static constexpr const float EPSILON = 0.0001f;

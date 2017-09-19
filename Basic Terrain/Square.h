@@ -5,7 +5,7 @@
 #include "Texture.h"
 
 
-ALIGN16 class Square
+ALIGN16 class Square sealed
 {
 public:
 	struct SVertex

@@ -133,6 +133,7 @@
     <ClCompile Include="DefaultShader.cpp" />
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="gameglobals.cpp" />
     <ClCompile Include="HRTimer.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="LineShader.cpp" />
@@ -157,6 +158,7 @@
     <ClInclude Include="Font.h" />
     <ClInclude Include="FrustumHelper.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="gameglobals.h" />
     <ClInclude Include="HRTimer.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="LineShader.h" />

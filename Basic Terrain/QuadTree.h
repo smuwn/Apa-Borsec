@@ -4,7 +4,7 @@
 #include "CLineManager.h"
 #include "FrustumHelper.h"
 
-class QuadTree
+class QuadTree sealed
 {
 private:
 	static constexpr const unsigned int MAX_TRIANGLES = 10000;

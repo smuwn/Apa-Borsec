@@ -3,7 +3,7 @@
 #include "commonincludes.h"
 #include "C3DShader.h"
 
-class CTerrain
+class CTerrain sealed
 {
 	friend class QuadTree;
 private:

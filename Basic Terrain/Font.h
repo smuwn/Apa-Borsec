@@ -4,7 +4,7 @@
 #include "Texture.h"
 
 
-class CFont
+class CFont sealed
 {
 public:
 	struct SVertex

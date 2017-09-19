@@ -4,7 +4,7 @@
 #include "ShaderHelper.h"
 #include "Texture.h"
 
-class C3DShader
+class C3DShader sealed
 {
 public:
 	struct SPerObject

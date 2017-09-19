@@ -4,7 +4,7 @@
 #include "ShaderHelper.h"
 #include "Texture.h"
 
-class C2DShader
+class C2DShader sealed
 {
 public:
 

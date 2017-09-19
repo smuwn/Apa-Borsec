@@ -3,7 +3,7 @@
 #include "commonincludes.h"
 #include "ShaderHelper.h"
 
-class CDefaultShader
+class CDefaultShader sealed
 {
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> mVertexShader;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> mInputLayout;

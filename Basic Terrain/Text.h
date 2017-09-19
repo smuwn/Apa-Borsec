@@ -3,7 +3,7 @@
 #include "Font.h"
 #include "C2DShader.h"
 
-class CText
+class CText sealed
 {
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mVertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mIndexBuffer;

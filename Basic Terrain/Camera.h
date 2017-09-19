@@ -5,7 +5,7 @@
 
 #define DEFINED_USE_ROTATION_ACCELERATION
 
-ALIGN16 class CCamera
+ALIGN16 class CCamera sealed
 {
 public:
 	static const DirectX::XMVECTOR Forward;
