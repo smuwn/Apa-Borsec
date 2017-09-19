@@ -206,8 +206,9 @@ void CGame::InitModels( )
 	mTerrain = std::make_shared<CTerrain>( mDevice.Get( ), mImmediateContext.Get( ), m3DShader,
 		( LPSTR ) "Data/HM.bmp", ( LPSTR ) "Data/HM.normals" );
 	mLineManager = std::make_shared<CLineManager>( mDevice.Get( ), mImmediateContext.Get( ), mLineShader);
-	mQuadTree = std::make_unique<QuadTree>( mDevice.Get( ), mImmediateContext.Get( ),
+	mQuadTree = std::make_shared<QuadTree>( mDevice.Get( ), mImmediateContext.Get( ),
 		m3DShader, mTerrain, mLineManager );
+	GameGlobals::gQuadTrees.push_back(  mQuadTree );
 	mTerrain.reset( );
 }
 

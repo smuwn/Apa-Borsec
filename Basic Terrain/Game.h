@@ -43,7 +43,7 @@ private:
 	std::shared_ptr<CTerrain> mTerrain;
 	std::shared_ptr<CLineManager> mLineManager;
 
-	std::unique_ptr<QuadTree> mQuadTree;
+	std::shared_ptr<QuadTree> mQuadTree;
 
 	std::unique_ptr<CText> mFPSText;
 	std::unique_ptr<CText> mDrawnFacesText;

@@ -4,7 +4,7 @@
 const DirectX::XMVECTOR CCamera::Forward = DirectX::XMVectorSet( 0.0f, 0.0f, 1.0f, 0.0f );
 const DirectX::XMVECTOR CCamera::Right = DirectX::XMVectorSet( 1.0f, 0.0f, 0.0f, 0.0f );
 const DirectX::XMVECTOR CCamera::Up = DirectX::XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f );
-const DirectX::XMVECTOR CCamera::DefaultPosition = DirectX::XMVectorSet( 0.0f, 0.0f, 0.0f, 1.0f );
+const DirectX::XMVECTOR CCamera::DefaultPosition = DirectX::XMVectorSet( 1.0f, 1.0f, 1.0f, 1.0f );
 const DirectX::XMMATRIX CCamera::DefaultView = DirectX::XMMatrixLookToLH( DefaultPosition, Forward, Up );
 
 
@@ -60,8 +60,34 @@ void CCamera::Frame( float frameTime )
 
 	mView = DirectX::XMMatrixLookToLH( mPosition, mDirection, mUp );
 
-	mPosition = DirectX::XMVectorAdd( mPosition, DirectX::XMVectorScale( mDirection, mForwardAcceleration ) );
+	DirectX::XMVECTOR FlattenDirection = mDirection;
+	FlattenDirection = DirectX::XMVectorSetY( FlattenDirection, 0.0f );
+	FlattenDirection = DirectX::XMVector3Normalize( FlattenDirection );
+	mPosition = DirectX::XMVectorAdd( mPosition, DirectX::XMVectorScale( FlattenDirection, mForwardAcceleration ) );
 	mPosition = DirectX::XMVectorAdd( mPosition, DirectX::XMVectorScale( mRight, mRightAcceleration ) );
+
+	float Y= DirectX::XMVectorGetY( mPosition );
+	float X = DirectX::XMVectorGetX( mPosition );
+	float Z = DirectX::XMVectorGetZ( mPosition );
+	float height;
+
+	bool bFound = false;
+	for ( auto & iter : GameGlobals::gQuadTrees )
+	{
+		if ( iter->GetHeightAt( X, Z, height ) )
+		{
+			bFound = true;
+			break;
+		}
+	}
+	if ( bFound )
+	{
+		mPosition = DirectX::XMVectorSetY( mPosition, height + CameraOffset );
+	}
+	else // Free falling
+	{
+		mPosition = DirectX::XMVectorSetY( mPosition, Y - CameraFallingSpeed * frameTime );
+	}
 
 	mForwardAcceleration *= ( 1.0f - Friction );
 	mRightAcceleration *= ( 1.0f - Friction );

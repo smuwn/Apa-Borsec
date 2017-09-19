@@ -1,8 +1,8 @@
 #pragma once
 
-#include "commonincludes.h"
+#include "QuadTree.h"
 
 namespace GameGlobals
 {
-
+	extern std::list<std::shared_ptr<QuadTree>> gQuadTrees;
 }

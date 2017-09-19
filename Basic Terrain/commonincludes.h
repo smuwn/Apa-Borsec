@@ -1,7 +1,27 @@
 #pragma once
 
-
 #define UNICODE
+
+#define ZeroMemoryAndDeclare(type, name) type name;\
+ZeroMemory(&name,sizeof(type));
+#define ZeroVariable(name) ZeroMemory(&name,sizeof(decltype(name)))
+#define ALIGN16 __declspec(align(16))
+
+
+#if _DEBUG || DEBUG
+#define CATCH catch(std::exception const& e) { \
+char buffer[500]; sprintf_s(buffer, "Error: %s\n", e.what()); \
+OutputDebugStringA(buffer); PostQuitMessage(0); }\
+catch( ... ) { \
+OutputDebugStringA( "Unexpected error occured\n" ); PostQuitMessage(0);}
+#else
+#define CATCH catch(std::exception const& e) { \
+char buffer[500]; sprintf_s(buffer, "Error: %s", e.what());\
+MessageBoxA(NULL,buffer,"Error",MB_ICONERROR| MB_OK); PostQuitMessage(0);}\
+catch (...) {\
+MessageBoxA(NULL,"Unexpected error occured", "Error", MB_ICONERROR| MB_OK); PostQuitMessage(0);\
+}
+#endif
 
 #include <windows.h>
 #include <d3d11.h>
@@ -41,48 +61,6 @@
 #pragma comment (lib, "dxgi.lib")
 #pragma comment (lib, "D3Dcompiler.lib")
 
-
-#define ZeroMemoryAndDeclare(type, name) type name;\
-ZeroMemory(&name,sizeof(type));
-#define ZeroVariable(name) ZeroMemory(&name,sizeof(decltype(name)))
-#define ALIGN16 __declspec(align(16))
-
-
-#if _DEBUG || DEBUG
-#define CATCH catch(std::exception const& e) { \
-char buffer[500]; sprintf_s(buffer, "Error: %s\n", e.what()); \
-OutputDebugStringA(buffer); PostQuitMessage(0); }\
-catch( ... ) { \
-OutputDebugStringA( "Unexpected error occured\n" ); PostQuitMessage(0);}
-#else
-#define CATCH catch(std::exception const& e) { \
-char buffer[500]; sprintf_s(buffer, "Error: %s", e.what());\
-MessageBoxA(NULL,buffer,"Error",MB_ICONERROR| MB_OK); PostQuitMessage(0);}\
-catch (...) {\
-MessageBoxA(NULL,"Unexpected error occured", "Error", MB_ICONERROR| MB_OK); PostQuitMessage(0);\
-}
-#endif
-
-// Forwards
-ALIGN16 class CCamera sealed;
-ALIGN16 class CGame sealed;
-ALIGN16 class CModel sealed;
-ALIGN16 class Square sealed;
-class CLineManager sealed;
-class CFont sealed;
-class CHRTimer sealed;
-class CInput sealed;
-class QuadTree sealed;
-class CTerrain sealed;
-class CText sealed;
-class CTexture;
-
-
-// Shaders
-class C2DShader sealed;
-class C3DShader sealed;
-class CDefaultShader sealed;
-class LineShader sealed;
 
 
 namespace DX
