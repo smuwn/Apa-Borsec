@@ -22,7 +22,8 @@ QuadTree::QuadTree( ID3D11Device * Device, ID3D11DeviceContext * Context,
 		mVertices = new SVertex[ mVertexCount ];
 		mIndices = new DWORD[ mIndexCount ];
 
-		memcpy( mVertices, &mTerrain->mVertices[ 0 ], sizeof( SVertex ) * mVertexCount );
+		//memcpy( mVertices, &mTerrain->mVertices[ 0 ], sizeof( SVertex ) * mVertexCount );
+		mTerrain->CopyVertices( mVertices );
 		memcpy( mIndices, &mTerrain->mIndices[ 0 ], sizeof( DWORD )*mIndexCount );
 
 		CalculateMeshDimensions( centerX,centerZ,width );

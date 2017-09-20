@@ -33,7 +33,6 @@ CGame::~CGame( )
 	mTriangle.reset( );
 	mFPSText.reset( );
 	mDrawnFacesText.reset( );
-	mOutsideTerrainText.reset( );
 	mTerrain.reset( );
 
 	mDevice.Reset( );
@@ -60,6 +59,10 @@ void CGame::InitWindow( bool bFullscreen )
 		mWidth = GetSystemMetrics( SM_CXSCREEN );
 		mHeight = GetSystemMetrics( SM_CYSCREEN );
 	}
+#if NO_GPU
+	mWidth = 800;
+	mHeight = 600;
+#endif
 	mhWnd = CreateWindow(
 		ENGINE_NAME, ENGINE_NAME, WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT, mWidth, mHeight,
@@ -194,7 +197,7 @@ void CGame::InitShaders( )
 	C3DShader::SLight light;
 	light.Dir = DirectX::XMFLOAT3( 1.0f, -0.4f, 0.0f );
 	light.Color = DirectX::XMFLOAT4( 1.0f, 1.0f, 1.0f, 1.0f );
-	light.Ambient = DirectX::XMFLOAT4( 0.2f, 0.2f, 0.2f, 1.0f );
+	light.Ambient = DirectX::XMFLOAT4( 0.0f, 0.0f, 0.0f, 1.0f );
 	m3DShader->SetLight( light );
 	mLineShader = std::make_shared<LineShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 }
@@ -205,11 +208,19 @@ void CGame::InitModels( )
 	mTriangle = std::make_unique<CModel>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mTerrain = std::make_shared<CTerrain>( mDevice.Get( ), mImmediateContext.Get( ), m3DShader,
 		( LPSTR ) "Data/HM.bmp", ( LPSTR ) "Data/HM.normals" );
+	mTerrain->Identity( );
+	mTerrain->Translate( 0.0f, 0.0f, 255.0f );
+	mSecondTerrain = std::make_shared<CTerrain>( mDevice.Get( ), mImmediateContext.Get( ), m3DShader,
+		( LPSTR ) "Data/HM.bmp", ( LPSTR ) "Data/HM.normals" );
 	mLineManager = std::make_shared<CLineManager>( mDevice.Get( ), mImmediateContext.Get( ), mLineShader);
 	mQuadTree = std::make_shared<QuadTree>( mDevice.Get( ), mImmediateContext.Get( ),
 		m3DShader, mTerrain, mLineManager );
-	GameGlobals::gQuadTrees.push_back(  mQuadTree );
+	mSecondQuadTree = std::make_shared<QuadTree>( mDevice.Get( ), mImmediateContext.Get( ),
+		m3DShader, mSecondTerrain, mLineManager );
+	GameGlobals::gQuadTrees.push_back( mQuadTree );
+	GameGlobals::gQuadTrees.push_back( mSecondQuadTree );
 	mTerrain.reset( );
+	mSecondTerrain.reset( );
 }
 
 void CGame::Init2D( )
@@ -222,8 +233,10 @@ void CGame::Init2D( )
 		m2DShader, mOpenSans32, mWidth, mHeight );
 	mDrawnFacesText = std::make_unique<CText>( mDevice.Get( ), mImmediateContext.Get( ),
 		m2DShader, mOpenSans32, mWidth, mHeight );
-	mOutsideTerrainText = std::make_unique<CText>( mDevice.Get( ), mImmediateContext.Get( ),
-		m2DShader, mOpenSans32, mWidth, mHeight );
+	mSquare = std::make_unique<Square>( mDevice.Get( ), mImmediateContext.Get( ),
+		m2DShader, mWidth, mHeight, 128, 128, ( LPWSTR ) L"Images/Europe.jpg" );
+	mSquare->Identity( );
+	mSquare->TranslateTo( ( float ) mWidth - 128.f, ( float ) mHeight - 128.f );
 }
 
 void CGame::Run( )
@@ -282,12 +295,19 @@ void CGame::Render( )
 	//mTerrain->Render( View, Projection, bDrawWireframe );
 #if DEBUG || _DEBUG
 	mLineManager->Begin( );
-	mQuadTree->RenderLines( );
+	for ( auto & iter : GameGlobals::gQuadTrees )
+		iter->RenderLines( );
 	mLineManager->End( );
 	mLineManager->Render( View, Projection );
 #endif
 	int Drawn = 0;
-	mQuadTree->Render( View, Projection, Frustum, Drawn,CamPos.y, bDrawWireframe );
+	for ( auto & iter : GameGlobals::gQuadTrees )
+	{
+		iter->Render( View, Projection, Frustum, Drawn, CamPos.y, bDrawWireframe );
+	}
+
+	mSquare->Render( mOrthoMatrix );
+
 
 	char buffer[ 500 ] = { 0 };
 	sprintf_s( buffer, "FPS: %d", mTimer.GetFPS( ) );
@@ -297,19 +317,6 @@ void CGame::Render( )
 	sprintf_s( buffer, "Drawn faces: %d", Drawn );
 	mDrawnFacesText->Render( mOrthoMatrix, buffer,
 		0, 33 );
-
-	if ( mQuadTree->GetHeightAt( CamPos.x, CamPos.z, Height ) )
-	{
-		sprintf_s( buffer, "Height at %.2f,%.2f is %.2f", CamPos.x, CamPos.z, Height );
-		mOutsideTerrainText->Render( mOrthoMatrix, buffer,
-			0, 66 );
-	}
-	else
-	{
-		sprintf_s( buffer, "Outside terrain" );
-		mOutsideTerrainText->Render( mOrthoMatrix, buffer,
-			0, 66, DirectX::XMFLOAT4( 1.0f, 0.0f, 0.0f, 1.0f ) );
-	}
 
 	mSwapChain->Present( 1, 0 );
 }

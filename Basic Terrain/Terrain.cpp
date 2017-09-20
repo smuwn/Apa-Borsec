@@ -12,6 +12,7 @@ CTerrain::CTerrain( ID3D11Device * Device, ID3D11DeviceContext * Context, std::s
 		InitTerrain( );
 		//InitBuffers( );
 		mTexture = std::make_shared<CTexture>( ( LPWSTR ) L"Data/Dirt01.dds", mDevice );
+		mWorld = DirectX::XMMatrixIdentity( );
 	}
 	CATCH;
 }
@@ -28,7 +29,8 @@ CTerrain::CTerrain( ID3D11Device * Device, ID3D11DeviceContext * Context, std::s
 		InitHeightmapTerrain( );
 		InitNormals( Normalmap );
 		//InitBuffers( );
-		mTexture = std::make_shared<CTexture>( ( LPWSTR ) L"Data/Dirt01.dds", mDevice );
+		mTexture = std::make_shared<CTexture>( ( LPWSTR ) L"Data/Dirt01.jpg", mDevice );
+		mWorld = DirectX::XMMatrixIdentity( );
 	}
 	CATCH;
 }
@@ -305,6 +307,22 @@ void CTerrain::InitBuffers( )
 	ShaderHelper::CreateBuffer( mDevice, mIndexBuffer.GetAddressOf( ),
 		D3D11_USAGE::D3D11_USAGE_IMMUTABLE, D3D11_BIND_FLAG::D3D11_BIND_INDEX_BUFFER,
 		sizeof( DWORD ) * mIndices.size( ), 0, &mIndices[ 0 ] );
+}
+
+void CTerrain::CopyVertices( void * To )
+{
+	DirectX::XMVECTOR Position;
+	SVertex * ToAddress = ( SVertex* ) To;
+	for ( size_t i = 0; i < mVertices.size( ); ++i )
+	{
+		SVertex Vertex = mVertices[ i ];
+		Position = DirectX::XMLoadFloat3( &Vertex.Position );
+		Position = DirectX::XMVector3TransformCoord( Position, mWorld );
+		DirectX::XMStoreFloat3( &Vertex.Position, Position );
+		ToAddress[ i ] = Vertex;
+	}
+	
+
 }
 
 void CTerrain::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection, bool bWireframe )

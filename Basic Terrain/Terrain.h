@@ -3,7 +3,7 @@
 #include "commonincludes.h"
 #include "C3DShader.h"
 
-class CTerrain sealed
+ALIGN16 class CTerrain sealed
 {
 	friend class QuadTree;
 private:
@@ -42,6 +42,8 @@ private:
 
 	std::vector<SHeightmap> mHeightmap;
 
+	DirectX::XMMATRIX mWorld;
+
 	BITMAPFILEHEADER mFileHeader;
 	BITMAPINFOHEADER mInfoHeader;
 
@@ -64,7 +66,25 @@ private:
 	void InitNormals( LPSTR Normalmap );
 	void InitTerrain( );
 	void InitBuffers( );
+private:
+	void CopyVertices( void* To );
 public:
 	void Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection, bool bWireframe = false );
+public:
+	inline void Identity( ) { mWorld = DirectX::XMMatrixIdentity( ); };
+	inline void Scale( float S ) { mWorld *= DirectX::XMMatrixScaling( S, S, S ); };
+	inline void Translate( float x, float y, float z ) { mWorld *= DirectX::XMMatrixTranslation( x, y, z ); };
+	inline void RotateX( float Theta ) { mWorld *= DirectX::XMMatrixRotationX( Theta ); };
+	inline void RotateY( float Theta ) { mWorld *= DirectX::XMMatrixRotationY( Theta ); };
+	inline void RotateZ( float Theta ) { mWorld *= DirectX::XMMatrixRotationZ( Theta ); };
+public:
+	inline void* operator new ( size_t size )
+	{
+		return _aligned_malloc( size, 16 );
+	}
+	inline void operator delete ( void* object )
+	{
+		_aligned_free( object );
+	}
 };
 

@@ -60,12 +60,15 @@ void CCamera::Frame( float frameTime )
 
 	mView = DirectX::XMMatrixLookToLH( mPosition, mDirection, mUp );
 
+#if DEBUG || _DEBUG
+	mPosition = DirectX::XMVectorAdd( mPosition, DirectX::XMVectorScale( mDirection, mForwardAcceleration ) );
+	mPosition = DirectX::XMVectorAdd( mPosition, DirectX::XMVectorScale( mRight, mRightAcceleration ) );
+#else
 	DirectX::XMVECTOR FlattenDirection = mDirection;
 	FlattenDirection = DirectX::XMVectorSetY( FlattenDirection, 0.0f );
 	FlattenDirection = DirectX::XMVector3Normalize( FlattenDirection );
 	mPosition = DirectX::XMVectorAdd( mPosition, DirectX::XMVectorScale( FlattenDirection, mForwardAcceleration ) );
 	mPosition = DirectX::XMVectorAdd( mPosition, DirectX::XMVectorScale( mRight, mRightAcceleration ) );
-
 	float Y= DirectX::XMVectorGetY( mPosition );
 	float X = DirectX::XMVectorGetX( mPosition );
 	float Z = DirectX::XMVectorGetZ( mPosition );
@@ -88,6 +91,7 @@ void CCamera::Frame( float frameTime )
 	{
 		mPosition = DirectX::XMVectorSetY( mPosition, Y - CameraFallingSpeed * frameTime );
 	}
+#endif
 
 	mForwardAcceleration *= ( 1.0f - Friction );
 	mRightAcceleration *= ( 1.0f - Friction );
