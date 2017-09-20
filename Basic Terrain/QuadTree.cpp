@@ -22,7 +22,6 @@ QuadTree::QuadTree( ID3D11Device * Device, ID3D11DeviceContext * Context,
 		mVertices = new SVertex[ mVertexCount ];
 		mIndices = new DWORD[ mIndexCount ];
 
-		//memcpy( mVertices, &mTerrain->mVertices[ 0 ], sizeof( SVertex ) * mVertexCount );
 		mTerrain->CopyVertices( mVertices );
 		memcpy( mIndices, &mTerrain->mIndices[ 0 ], sizeof( DWORD )*mIndexCount );
 
@@ -84,16 +83,20 @@ void QuadTree::BuildNode( SNode* Node )
 	}
 	else
 	{
-		Node->mVertices = new SVertex[ mFaceCount * 3 ];
+		Node->mVertices = new DirectX::XMFLOAT3[ mFaceCount * 3 ];
+		SVertex * Vertices = new SVertex[ mFaceCount * 3 ];
 
 		int index = 0;
 		for ( int i = 0; i < mFaceCount; ++i )
 		{
 			if ( isTriangleContained( i, Node->mCenterX, Node->mCenterZ, Node->mWidth ) )
 			{
-				Node->mVertices[ index + 0 ] = mVertices[ mIndices[ i * 3 + 0 ] ];
-				Node->mVertices[ index + 1 ] = mVertices[ mIndices[ i * 3 + 1 ] ];
-				Node->mVertices[ index + 2 ] = mVertices[ mIndices[ i * 3 + 2 ] ];
+				Vertices[ index + 0 ] = mVertices[ mIndices[ i * 3 + 0 ] ];
+				Vertices[ index + 1 ] = mVertices[ mIndices[ i * 3 + 1 ] ];
+				Vertices[ index + 2 ] = mVertices[ mIndices[ i * 3 + 2 ] ];
+				Node->mVertices[ index + 0 ] = mVertices[ mIndices[ i * 3 + 0 ] ].Position;
+				Node->mVertices[ index + 1 ] = mVertices[ mIndices[ i * 3 + 1 ] ].Position;
+				Node->mVertices[ index + 2 ] = mVertices[ mIndices[ i * 3 + 2 ] ].Position;
 				index += 3;
 			}
 		}
@@ -101,9 +104,9 @@ void QuadTree::BuildNode( SNode* Node )
 		ShaderHelper::CreateBuffer(
 			mTerrain->mDevice, &Node->mVertexBuffer,
 			D3D11_USAGE::D3D11_USAGE_IMMUTABLE, D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER,
-			sizeof( SVertex ) * Node->mTriangleCount * 3, 0, Node->mVertices
+			sizeof( SVertex ) * Node->mTriangleCount * 3, 0, Vertices
 		);
-
+		delete[ ] Vertices;
 	}
 	
 }
@@ -309,9 +312,9 @@ bool QuadTree::GetHeightAt( float X, float Z, float& Height )
 
 	for ( int i = 0; i < Node->mTriangleCount; ++i )
 	{
-		DirectX::XMFLOAT3 V1 = Node->mVertices[ i * 3 + 0 ].Position;
-		DirectX::XMFLOAT3 V2 = Node->mVertices[ i * 3 + 1 ].Position;
-		DirectX::XMFLOAT3 V3 = Node->mVertices[ i * 3 + 2 ].Position;
+		DirectX::XMFLOAT3 V1 = Node->mVertices[ i * 3 + 0 ];
+		DirectX::XMFLOAT3 V2 = Node->mVertices[ i * 3 + 1 ];
+		DirectX::XMFLOAT3 V3 = Node->mVertices[ i * 3 + 2 ];
 		if ( GetTriangleHeight( X, Z, Height, V1, V2, V3 ) )
 		{
 			return true;

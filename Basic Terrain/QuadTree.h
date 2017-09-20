@@ -7,7 +7,7 @@
 class QuadTree sealed
 {
 private:
-	static constexpr const unsigned int MAX_TRIANGLES = 10000;
+	static constexpr const unsigned int MAX_TRIANGLES = 50000;
 public:
 	typedef CTerrain::SVertex SVertex;
 	struct SNode
@@ -16,7 +16,7 @@ public:
 		float mCenterZ;
 		float mWidth;
 		int mTriangleCount;
-		SVertex * mVertices;
+		DirectX::XMFLOAT3 * mVertices;
 		Microsoft::WRL::ComPtr<ID3D11Buffer> mVertexBuffer;
 		SNode* mNodes[ 4 ];
 	};
