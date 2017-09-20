@@ -12,7 +12,7 @@ CTerrain::CTerrain( ID3D11Device * Device, ID3D11DeviceContext * Context, std::s
 		InitTerrain( );
 		//InitBuffers( );
 		mTexture = std::make_shared<CTexture>( ( LPWSTR ) L"Data/Dirt01.dds", mDevice );
-		mWorld = DirectX::XMMatrixIdentity( );
+		DirectX::XMStoreFloat4x4( &mWorld, DirectX::XMMatrixIdentity( ) );
 	}
 	CATCH;
 }
@@ -29,8 +29,8 @@ CTerrain::CTerrain( ID3D11Device * Device, ID3D11DeviceContext * Context, std::s
 		InitHeightmapTerrain( );
 		InitNormals( Normalmap );
 		//InitBuffers( );
-		mTexture = std::make_shared<CTexture>( ( LPWSTR ) L"Data/Dirt01.jpg", mDevice );
-		mWorld = DirectX::XMMatrixIdentity( );
+		mTexture = std::make_shared<CTexture>( ( LPWSTR ) L"Data/Dirt01.dds", mDevice );
+		DirectX::XMStoreFloat4x4( &mWorld, DirectX::XMMatrixIdentity( ) );
 	}
 	CATCH;
 }
@@ -313,11 +313,12 @@ void CTerrain::CopyVertices( void * To )
 {
 	DirectX::XMVECTOR Position;
 	SVertex * ToAddress = ( SVertex* ) To;
+	DirectX::XMMATRIX World = DirectX::XMLoadFloat4x4( &mWorld );
 	for ( size_t i = 0; i < mVertices.size( ); ++i )
 	{
 		SVertex Vertex = mVertices[ i ];
 		Position = DirectX::XMLoadFloat3( &Vertex.Position );
-		Position = DirectX::XMVector3TransformCoord( Position, mWorld );
+		Position = DirectX::XMVector3TransformCoord( Position, World );
 		DirectX::XMStoreFloat3( &Vertex.Position, Position );
 		ToAddress[ i ] = Vertex;
 	}
@@ -337,4 +338,44 @@ void CTerrain::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection,
 	mShader->Render( mIndexCount, DirectX::XMMatrixIdentity( ), View, Projection,
 		mTexture.get( ) );
 	mContext->RSSetState( DX::DefaultRS.Get( ) );
+}
+
+void CTerrain::Identity( )
+{
+	DirectX::XMStoreFloat4x4( &mWorld, DirectX::XMMatrixIdentity( ) );
+}
+
+void CTerrain::RotateX( float Theta )
+{
+	DirectX::XMMATRIX World = DirectX::XMLoadFloat4x4( &mWorld );
+	World *= DirectX::XMMatrixRotationX( Theta );
+	DirectX::XMStoreFloat4x4( &mWorld, World );
+}
+
+void CTerrain::RotateY( float Theta )
+{
+	DirectX::XMMATRIX World = DirectX::XMLoadFloat4x4( &mWorld );
+	World *= DirectX::XMMatrixRotationY( Theta );
+	DirectX::XMStoreFloat4x4( &mWorld, World );
+}
+
+void CTerrain::RotateZ( float Theta )
+{
+	DirectX::XMMATRIX World = DirectX::XMLoadFloat4x4( &mWorld );
+	World *= DirectX::XMMatrixRotationZ( Theta );
+	DirectX::XMStoreFloat4x4( &mWorld, World );
+}
+
+void CTerrain::Translate( float X, float Y, float Z )
+{
+	DirectX::XMMATRIX World = DirectX::XMLoadFloat4x4( &mWorld );
+	World *= DirectX::XMMatrixTranslation( X, Y, Z );
+	DirectX::XMStoreFloat4x4( &mWorld, World );
+}
+
+void CTerrain::Scale( float X, float Y, float Z )
+{
+	DirectX::XMMATRIX World = DirectX::XMLoadFloat4x4( &mWorld );
+	World *= DirectX::XMMatrixScaling( X, Y, Z );
+	DirectX::XMStoreFloat4x4( &mWorld, World );
 }

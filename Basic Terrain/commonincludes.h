@@ -1,7 +1,7 @@
 #pragma once
 
 #define UNICODE
-#define NO_GPU 1
+#define NO_GPU 0
 
 #define ZeroMemoryAndDeclare(type, name) type name;\
 ZeroMemory(&name,sizeof(type));

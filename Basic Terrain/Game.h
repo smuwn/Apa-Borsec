@@ -41,7 +41,6 @@ private:
 	std::unique_ptr<CCamera> mCamera;
 
 	std::shared_ptr<CTerrain> mTerrain;
-	std::shared_ptr<CTerrain> mSecondTerrain;
 	std::shared_ptr<CLineManager> mLineManager;
 
 	std::shared_ptr<QuadTree> mQuadTree;
