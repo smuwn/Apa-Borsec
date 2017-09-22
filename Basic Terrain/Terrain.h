@@ -15,6 +15,7 @@ public:
 		DirectX::XMFLOAT3 Position;
 		DirectX::XMFLOAT2 Texture;
 		DirectX::XMFLOAT3 Normal;
+		DirectX::XMFLOAT4 Color;
 		SVertex( ) :
 			Normal( 0.0f, 1.0f, 0.0f )
 		{ };
@@ -27,6 +28,9 @@ public:
 		float x;
 		float y;
 		float z;
+		float r;
+		float g;
+		float b;
 	};
 private:
 
@@ -44,9 +48,6 @@ private:
 
 	DirectX::XMFLOAT4X4 mWorld;
 
-	BITMAPFILEHEADER mFileHeader;
-	BITMAPINFOHEADER mInfoHeader;
-
 	UINT mVertexCount;
 	UINT mIndexCount;
 
@@ -56,12 +57,11 @@ private:
 	ID3D11Device * mDevice;
 	ID3D11DeviceContext * mContext;
 public:
-	CTerrain( ID3D11Device * Device, ID3D11DeviceContext * Context, std::shared_ptr< C3DShader > Shader );
 	CTerrain( ID3D11Device * Device, ID3D11DeviceContext * Context, std::shared_ptr< C3DShader > Shader, 
-		LPSTR Heightmap, LPSTR Normalmap );
+		LPSTR Heightmap, LPSTR Normalmap, LPSTR Colormap );
 	~CTerrain( );
 private:
-	void InitHeightmap( LPSTR Heightmap );
+	void InitHeightmap( LPSTR Heightmap, LPSTR Colormap );
 	void InitHeightmapTerrain( );
 	void InitNormals( LPSTR Normalmap );
 	void InitTerrain( );

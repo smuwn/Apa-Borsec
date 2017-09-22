@@ -14,15 +14,16 @@ struct PSIn
 {
     float4 PositionH : SV_POSITION;
     float4 PositionW : POSITION;
+    float4 Color : COLOR;
     float3 NormalW : NORMAL;
-    float2 Texture : TEXCOORD;
+    float2 TexCoord : TEXCOORD;
 };
 
 float4 main( PSIn input ) : SV_TARGET
 {
     input.NormalW = normalize( input.NormalW );
     //float4 Color = float4( 0.0f, 0.36f, 0.036f, 1.0f );
-    float4 Color = ObjTexture.Sample( WrapSampler, input.Texture );
+    float4 Color = ObjTexture.Sample(WrapSampler, input.TexCoord);
 
     float4 Multiplier = Ambient;
 
@@ -34,5 +35,7 @@ float4 main( PSIn input ) : SV_TARGET
         Multiplier += Diffuse * howMuchLight;
     }
 
-    return Color * Multiplier;
+    Color = Color * Multiplier;
+
+    return saturate(Color * input.Color * 2.0f);
 }
