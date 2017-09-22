@@ -106,8 +106,8 @@ void CTerrain::InitHeightmapTerrain( )
 		for (UINT j = 0; j < mColCount; ++j )
 		{
 			int index = i * mColCount + j;
-			mVertices[ index ].Position.x = ( float ) j;
-			mVertices[ index ].Position.z = ( float ) i;
+			mVertices[ index ].Position.x = mHeightmap[ index ].x;
+			mVertices[ index ].Position.z = mHeightmap[ index ].z;
 			mVertices[ index ].Position.y = mHeightmap[ index ].y;
 		}
 	mIndexCount = FaceCount * 3;
