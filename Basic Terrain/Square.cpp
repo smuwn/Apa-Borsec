@@ -21,7 +21,7 @@ Square::Square( ID3D11Device * device, ID3D11DeviceContext * context,
 		CreateBuffers( );
 		mWorld = DirectX::XMMatrixIdentity( );
 		if ( Path != L"" )
-			mFPSTexture = std::make_unique<CTexture>( Path, mDevice );
+			mTexture = std::make_unique<CTexture>( Path, mDevice );
 	}
 	CATCH;
 }
@@ -90,11 +90,20 @@ void Square::Render( DirectX::FXMMATRIX& Projection )
 	mContext->IASetVertexBuffers( 0, 1, mVertBuffer.GetAddressOf( ), &Stride, &Offset );
 	mContext->IASetIndexBuffer( mIndexBuffer.Get( ), DXGI_FORMAT::DXGI_FORMAT_R32_UINT, 0 );
 	mContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
-	mShader->Render( mIndexCount, mWorld, Projection, mFPSTexture.get( ) );
+	mShader->Render( mIndexCount, mWorld, Projection, mTexture.get( ) );
 	mContext->RSSetState( DX::DefaultRS.Get( ) );
 
 	// Old toys
 	mContext->IASetVertexBuffers( 0, 1, &oldVertexBuffer, &oldStride, &oldOffset );
 	mContext->IASetIndexBuffer( oldIndexBuffer, oldIndexFormat, oldIOffset );
 	mContext->IASetPrimitiveTopology( oldTopology );
+}
+
+void Square::SetTexture( ID3D11ShaderResourceView * SRV )
+{
+	if ( mTexture == nullptr )
+	{
+		mTexture = std::make_unique<CTexture>( );
+	}
+	mTexture->SetTexture( SRV );
 }

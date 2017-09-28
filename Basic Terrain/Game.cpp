@@ -16,7 +16,7 @@ CGame::CGame( HINSTANCE hInstance, bool bFullscreen ) :
 		InitShaders( );
 		InitModels( );
 		Init2D( );
-		mOrthoMatrix = DirectX::XMMatrixOrthographicLH( ( float ) mWidth, ( float ) mHeight, NearZ, FarZ );
+		InitTextures( );
 		mInput->addSpecialKey( DIK_B );
 	}
 	CATCH;
@@ -32,8 +32,12 @@ CGame::~CGame( )
 	m3DShader.reset( );
 	mTriangle.reset( );
 	mFPSText.reset( );
-	mDrawnFacesText.reset( );
 	mTerrain.reset( );
+#if DEBUG || _DEBUG
+	mDrawnFacesText.reset( );
+	mDebugSquare.reset( );
+	mRenderTextureDebug.reset( );
+#endif
 
 	mDevice.Reset( );
 	mImmediateContext.Reset( );
@@ -229,12 +233,27 @@ void CGame::Init2D( )
 		( LPWSTR ) L"Fonts/32OpenSans.fnt" );
 	mFPSText = std::make_unique<CText>( mDevice.Get( ), mImmediateContext.Get( ),
 		m2DShader, mOpenSans32, mWidth, mHeight );
+#if DEBUG || _DEBUG
 	mDrawnFacesText = std::make_unique<CText>( mDevice.Get( ), mImmediateContext.Get( ),
 		m2DShader, mOpenSans32, mWidth, mHeight );
-	mSquare = std::make_unique<Square>( mDevice.Get( ), mImmediateContext.Get( ),
-		m2DShader, mWidth, mHeight, 128, 128, ( LPWSTR ) L"Images/Europe.jpg" );
-	mSquare->Identity( );
-	mSquare->TranslateTo( ( float ) mWidth - 128.f, ( float ) mHeight - 128.f );
+	mDebugSquare = std::make_unique<Square>( mDevice.Get( ), mImmediateContext.Get( ), m2DShader,
+		mWidth, mHeight, 100, 100 );
+	mDebugSquare->TranslateTo( float( mWidth - mDebugSquare->GetWidth( ) ),
+		float( mHeight - mDebugSquare->GetHeight( ) ) );
+#endif
+
+	mOrthoMatrix = DirectX::XMMatrixOrthographicLH( ( float ) mWidth, ( float ) mHeight, NearZ, FarZ );
+}
+
+void CGame::InitTextures( )
+{
+#if DEBUG || _DEBUG
+	mRenderTextureDebug = std::make_unique<RenderTexture>( mDevice.Get( ), mImmediateContext.Get( ),
+		mWidth, mHeight, NearZ, FarZ );
+	mRenderTextureDebug->PrepareForRendering( );
+	mRenderTextureDebug->ClearBuffer( );
+	mDebugSquare->SetTexture( mRenderTextureDebug->GetTexture( ) );
+#endif
 }
 
 void CGame::Run( )
@@ -276,10 +295,8 @@ void CGame::Update( )
 
 void CGame::Render( )
 {
-	static FLOAT BackColor[ 4 ] = { 0,0,0,0 };
 	EnableBackbuffer( );
-	mImmediateContext->ClearRenderTargetView( mBackbuffer.Get( ), BackColor );
-	mImmediateContext->ClearDepthStencilView( mDSView.Get( ), D3D11_CLEAR_FLAG::D3D11_CLEAR_DEPTH, 1.0f, 0 );
+	ClearBackbuffer( );
 
 	DirectX::XMMATRIX View, Projection;
 	DirectX::XMFLOAT3 CamPos;
@@ -290,7 +307,6 @@ void CGame::Render( )
 	
 	FrustumCulling::ViewFrustum Frustum = FrustumCulling::ConstructFrustum( View, Projection );
 
-	//mTerrain->Render( View, Projection, bDrawWireframe );
 #if DEBUG || _DEBUG
 	mLineManager->Begin( );
 	for ( auto & iter : GameGlobals::gQuadTrees )
@@ -304,17 +320,21 @@ void CGame::Render( )
 		iter->Render( View, Projection, Frustum, Drawn, CamPos.y, bDrawWireframe );
 	}
 
-	mSquare->Render( mOrthoMatrix );
-
-
 	char buffer[ 500 ] = { 0 };
 	sprintf_s( buffer, "FPS: %d", mTimer.GetFPS( ) );
 	mFPSText->Render( mOrthoMatrix, buffer, 0, 0,
 		DirectX::XMFLOAT4( 1.0f, 1.0f, 0.0f, 1.0f ) );
 
+#if DEBUG || _DEBUG
+	mDebugSquare->Render( mOrthoMatrix );
+
 	sprintf_s( buffer, "Drawn faces: %d", Drawn );
 	mDrawnFacesText->Render( mOrthoMatrix, buffer,
 		0, 33 );
+#endif
+
+
+
 
 	mSwapChain->Present( 1, 0 );
 }
@@ -329,6 +349,13 @@ void CGame::EnableBackbuffer( )
 {
 	mImmediateContext->RSSetViewports( 1, &mFullscreenViewport );
 	mImmediateContext->OMSetRenderTargets( 1, mBackbuffer.GetAddressOf( ), mDSView.Get( ) );
+}
+
+void CGame::ClearBackbuffer( )
+{
+	static FLOAT BackColor[ 4 ] = { 0,0,0,0 };
+	mImmediateContext->ClearRenderTargetView( mBackbuffer.Get( ), BackColor );
+	mImmediateContext->ClearDepthStencilView( mDSView.Get( ), D3D11_CLEAR_FLAG::D3D11_CLEAR_DEPTH, 1.0f, 0 );
 }
 
 bool CGame::Initialize( HINSTANCE hInstance, bool bFullScreen )

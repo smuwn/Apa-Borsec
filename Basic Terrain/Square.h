@@ -24,7 +24,7 @@ private:
 
 	std::shared_ptr<C2DShader> mShader;
 
-	std::unique_ptr<CTexture> mFPSTexture;
+	std::unique_ptr<CTexture> mTexture;
 
 	UINT mWindowWidth;
 	UINT mWindowHeight;
@@ -49,6 +49,7 @@ public:
 	~Square( );
 public:
 	void Render( DirectX::FXMMATRIX& Projection );
+	void SetTexture( ID3D11ShaderResourceView* Tex );
 private:
 	void CreateBuffers( );
 public:

@@ -14,6 +14,7 @@
 #include "LineShader.h"
 #include "CLineManager.h"
 #include "QuadTree.h"
+#include "RenderTexture.h"
 
 #define GAME CGame::GetGameInstance( )
 #if defined UNICODE
@@ -25,7 +26,7 @@
 ALIGN16 class CGame sealed
 {
 	static constexpr const float NearZ = 0.1f;
-	static constexpr const float FarZ = 200.0f;
+	static constexpr const float FarZ = 500.0f;
 	static constexpr const float FOV = ( float ) D3DX_PI / 4.0f;
 private:
 	HINSTANCE mhInstance;
@@ -47,9 +48,12 @@ private:
 	std::shared_ptr<QuadTree> mSecondQuadTree;
 
 	std::unique_ptr<CText> mFPSText;
-	std::unique_ptr<CText> mDrawnFacesText;
 
-	std::unique_ptr<Square> mSquare;
+#if DEBUG || _DEBUG
+	std::unique_ptr<RenderTexture> mRenderTextureDebug;
+	std::unique_ptr<CText> mDrawnFacesText;
+	std::unique_ptr<Square> mDebugSquare;
+#endif
 
 	std::shared_ptr<CInput> mInput;
 
@@ -87,9 +91,12 @@ private:
 	void InitShaders( );
 	void InitModels( );
 	void Init2D( );
+	void InitTextures( );
+
 	void DeleteWindow( );
 
 	void EnableBackbuffer( );
+	void ClearBackbuffer( );
 
 	void Update( );
 	void Render( );
