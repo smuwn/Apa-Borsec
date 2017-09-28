@@ -2,30 +2,16 @@
 
 
 
-CTerrain::CTerrain( ID3D11Device * Device, ID3D11DeviceContext * Context, std::shared_ptr<C3DShader> Shader ) :
-	mDevice( Device ),
-	mContext( Context ),
-	mShader( Shader )
-{
-	try
-	{
-		InitTerrain( );
-		//InitBuffers( );
-		mTexture = std::make_shared<CTexture>( ( LPWSTR ) L"Data/Dirt01.dds", mDevice );
-		DirectX::XMStoreFloat4x4( &mWorld, DirectX::XMMatrixIdentity( ) );
-	}
-	CATCH;
-}
 
 CTerrain::CTerrain( ID3D11Device * Device, ID3D11DeviceContext * Context, std::shared_ptr<C3DShader> Shader, 
-	LPSTR Heightmap, LPSTR Normalmap ) :
+	LPSTR Heightmap, LPSTR Normalmap, LPSTR Colormap ) :
 	mDevice( Device ),
 	mContext( Context ),
 	mShader( Shader )
 {
 	try
 	{
-		InitHeightmap( Heightmap );
+		InitHeightmap( Heightmap, Colormap );
 		InitHeightmapTerrain( );
 		InitNormals( Normalmap );
 		//InitBuffers( );
@@ -43,14 +29,19 @@ CTerrain::~CTerrain( )
 	mIndexBuffer.Reset( );
 }
 
-void CTerrain::InitHeightmap( LPSTR Path )
+void CTerrain::InitHeightmap( LPSTR Path, LPSTR Colormap )
 {
 	FILE * HeightmapFile;
+	FILE * ColormapFile;
 	int error;
 	
 	error = fopen_s( &HeightmapFile, Path, "rb" );
 	if ( error )
 		throw std::exception( "Can't open heightmap file" );
+
+	error = fopen_s( &ColormapFile, Colormap, "rb" );
+	if ( error )
+		throw std::exception( "Can't open colormap file" );
 
 	BITMAPFILEHEADER fileHeader;
 	BITMAPINFOHEADER infoHeader;
@@ -58,20 +49,27 @@ void CTerrain::InitHeightmap( LPSTR Path )
 	fread( &fileHeader, sizeof( BITMAPFILEHEADER ), 1, HeightmapFile );
 	fread( &infoHeader, sizeof( BITMAPINFOHEADER ), 1, HeightmapFile );
 
-	mFileHeader = fileHeader;
-	mInfoHeader = infoHeader;
-
 	mRowCount = infoHeader.biHeight;
 	mColCount = infoHeader.biWidth;
 
+	fread( &fileHeader, sizeof( BITMAPFILEHEADER ), 1, ColormapFile );
+	fread( &infoHeader, sizeof( BITMAPINFOHEADER ), 1, ColormapFile );
+
+	assert( mRowCount == infoHeader.biHeight );
+	assert( mColCount == infoHeader.biWidth );
+
 	int imagesize = mRowCount * mColCount * 3;
 	unsigned char * image = new unsigned char[ imagesize ];
+	unsigned char * colors = new unsigned char[ imagesize ];
 
 	fseek( HeightmapFile, fileHeader.bfOffBits, SEEK_SET );
+	fseek( ColormapFile, fileHeader.bfOffBits, SEEK_SET );
 
 	fread( image, 1, imagesize, HeightmapFile );
+	fread( colors, 1, imagesize, ColormapFile );
 
 	fclose( HeightmapFile );
+	fclose( ColormapFile );
 
 	int k = 0; 
 	float height;
@@ -88,12 +86,16 @@ void CTerrain::InitHeightmap( LPSTR Path )
 			mHeightmap[ Index ].x = ( float ) j - mColCount / 2;
 			mHeightmap[ Index ].y = height / HeightFactor;
 			mHeightmap[ Index ].z = ( float ) i - mRowCount / 2;
+			mHeightmap[ Index ].r = colors[ k ] / 255.0f;
+			mHeightmap[ Index ].g = colors[ k + 1 ] / 255.0f;
+			mHeightmap[ Index ].b = colors[ k + 2 ] / 255.0f;
 
 			k += 3;
 		}
 	}
 
 	delete[ ] image;
+	delete[ ] colors;
 }
 
 void CTerrain::InitHeightmapTerrain( )
@@ -106,9 +108,13 @@ void CTerrain::InitHeightmapTerrain( )
 		for (UINT j = 0; j < mColCount; ++j )
 		{
 			int index = i * mColCount + j;
-			mVertices[ index ].Position.x = ( float ) j;
-			mVertices[ index ].Position.z = ( float ) i;
+			mVertices[ index ].Position.x = mHeightmap[ index ].x;
+			mVertices[ index ].Position.z = mHeightmap[ index ].z;
 			mVertices[ index ].Position.y = mHeightmap[ index ].y;
+			mVertices[ index ].Color.x = mHeightmap[ index ].r;
+			mVertices[ index ].Color.y = mHeightmap[ index ].g;
+			mVertices[ index ].Color.z = mHeightmap[ index ].b;
+			mVertices[ index ].Color.w = 1.0f;
 		}
 	mIndexCount = FaceCount * 3;
 	mIndices.resize( mIndexCount );

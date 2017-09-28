@@ -14,7 +14,7 @@ C3DShader::C3DShader( ID3D11Device * Device, ID3D11DeviceContext * Context ) :
 			mDevice, &mBlobs[ 0 ], reinterpret_cast< ID3D11DeviceChild** >( VS ) );
 		ShaderHelper::CreateShaderFromFile( L"Shaders/3DPixelShader.cso", "ps_4_0",
 			mDevice, &mBlobs[ 1 ], reinterpret_cast< ID3D11DeviceChild** >( PS ) );
-		D3D11_INPUT_ELEMENT_DESC layout[ 3 ];
+		D3D11_INPUT_ELEMENT_DESC layout[ 4 ];
 		layout[ 0 ].AlignedByteOffset = 0;
 		layout[ 0 ].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT;
 		layout[ 0 ].InputSlot = 0;
@@ -36,6 +36,13 @@ C3DShader::C3DShader( ID3D11Device * Device, ID3D11DeviceContext * Context ) :
 		layout[ 2 ].InstanceDataStepRate = 0;
 		layout[ 2 ].SemanticIndex = 0;
 		layout[ 2 ].SemanticName = "NORMAL";
+		layout[ 3 ].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+		layout[ 3 ].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
+		layout[ 3 ].InputSlot = 0;
+		layout[ 3 ].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
+		layout[ 3 ].InstanceDataStepRate = 0;
+		layout[ 3 ].SemanticIndex = 0;
+		layout[ 3 ].SemanticName = "COLOR";
 		UINT layoutCount = ARRAYSIZE( layout );
 		DX::ThrowIfFailed(
 			mDevice->CreateInputLayout( layout, layoutCount,

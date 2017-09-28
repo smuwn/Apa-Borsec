@@ -211,17 +211,12 @@ void CGame::InitModels( )
 	mCamera = std::make_unique<CCamera>( mInput, FOV, ( float ) mWidth / ( float ) mHeight, NearZ, FarZ );
 	mTriangle = std::make_unique<CModel>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mTerrain = std::make_shared<CTerrain>( mDevice.Get( ), mImmediateContext.Get( ), m3DShader,
-		( LPSTR ) "Data/HM.bmp", ( LPSTR ) "Data/HM.normals" );
+		( LPSTR ) "Data/HM.bmp", ( LPSTR ) "Data/HM.normals", (LPSTR) "Data/HMColor.bmp" );
 	mLineManager = std::make_shared<CLineManager>( mDevice.Get( ), mImmediateContext.Get( ), mLineShader);
 	mQuadTree = std::make_shared<QuadTree>( mDevice.Get( ), mImmediateContext.Get( ),
 		m3DShader, mTerrain, mLineManager );
 	mTerrain->Translate( 0.0f, 0.0f, 255.0f );
-	mSecondQuadTree = std::make_shared<QuadTree>( mDevice.Get( ), mImmediateContext.Get( ),
-		m3DShader, mTerrain, mLineManager );
 	GameGlobals::gQuadTrees.push_back( mQuadTree );
-	GameGlobals::gQuadTrees.push_back( mSecondQuadTree );
-	mQuadTree.reset( );
-	mSecondQuadTree.reset( );
 	mTerrain.reset( );
 }
 
