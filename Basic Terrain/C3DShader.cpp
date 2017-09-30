@@ -137,6 +137,7 @@ void C3DShader::RenderVertices( UINT IndexCount, DirectX::FXMMATRIX & World, Dir
 	bool bUseAlpha = false;
 	if ( texture2 != nullptr && Alpha != nullptr )
 	{
+		bUseAlpha = true;
 		ID3D11ShaderResourceView *SRV = texture2->GetTexture( );
 		mContext->PSSetShaderResources( 1, 1, &SRV );
 		SRV = Alpha->GetTexture( );
@@ -144,7 +145,7 @@ void C3DShader::RenderVertices( UINT IndexCount, DirectX::FXMMATRIX & World, Dir
 	}
 
 	mContext->Map( mTextureBuffer.Get( ), 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &MappedSubresource );
-	( ( STexture* ) MappedSubresource.pData )->HasAlpha = bUseAlpha;
+	( ( STexture* ) MappedSubresource.pData )->HasAlpha = bUseAlpha ? TRUE : FALSE;
 	mContext->Unmap( mTextureBuffer.Get( ), 0 );
 	mContext->PSSetConstantBuffers( 1, 1, mTextureBuffer.GetAddressOf( ) );
 
