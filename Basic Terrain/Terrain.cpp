@@ -4,17 +4,33 @@
 
 
 CTerrain::CTerrain( ID3D11Device * Device, ID3D11DeviceContext * Context, std::shared_ptr<C3DShader> Shader, 
-	LPSTR Heightmap, LPSTR Normalmap, LPSTR Colormap ) :
+	LPSTR Heightmap, LPSTR Normalmap, LPSTR Colormap,
+	LPSTR Materials, LPSTR Blendingmap ) :
 	mDevice( Device ),
 	mContext( Context ),
 	mShader( Shader )
 {
 	try
 	{
+		mHasBlendingmap = false;
 		InitHeightmap( Heightmap, Colormap );
-		InitHeightmapTerrain( );
-		InitNormals( Normalmap );
-		//InitBuffers( );
+		if ( Materials != "" && Blendingmap != "" )
+		{
+			mHasBlendingmap = true;
+			CalculateNormalsFromHeightmap( );
+			InitMaterials( Materials );
+			InitMaterialMap( Blendingmap );
+			InitMaterialBuffers( );
+			InitHeightmapTerrain( );
+			InitNormals( Normalmap );
+			InitBuffers( );
+		}
+		else
+		{
+			InitHeightmapTerrain( );
+			InitNormals( Normalmap );
+			InitBuffers( );
+		}
 		mTexture = std::make_shared<CTexture>( ( LPWSTR ) L"Data/Dirt01.dds", mDevice );
 		DirectX::XMStoreFloat4x4( &mWorld, DirectX::XMMatrixIdentity( ) );
 	}
@@ -315,6 +331,255 @@ void CTerrain::InitBuffers( )
 		sizeof( DWORD ) * mIndices.size( ), 0, &mIndices[ 0 ] );
 }
 
+void CTerrain::InitMaterials( LPSTR Materials )
+{
+	WCHAR Path[ MAX_PATH ];
+	size_t Length = 0;
+	mbstowcs_s( &Length, Path, Materials, MAX_PATH );
+
+	std::wifstream ifMaterials( Path );
+
+	if ( !ifMaterials.is_open( ) )
+		throw std::exception( "Couldn't open Material Info file" );
+
+	wchar_t ch = 0;
+
+	int TextureCount, MaterialCount;
+
+	while ( ch != ':' )
+	{
+		ch = ifMaterials.get( );
+	}
+
+	ifMaterials >> TextureCount;
+	mMaterialTextures.resize( TextureCount );
+	for ( int i = 0; i < TextureCount; ++i )
+	{
+		ch = ifMaterials.get( );
+		while ( ch != ':' )
+			ch = ifMaterials.get( );
+		std::wstring Path;
+		ifMaterials >> Path;
+		try
+		{
+			mMaterialTextures[ i ] = std::make_shared<CTexture>( ( LPWSTR ) Path.c_str( ), mDevice );
+		}
+		CATCH;
+	}
+
+	ch = ifMaterials.get( );
+	while ( ch != ':' )
+		ch = ifMaterials.get( );
+	ifMaterials >> MaterialCount;
+	mMaterials.resize( MaterialCount );
+	for ( int i = 0; i < MaterialCount; ++i )
+	{
+		ch = ifMaterials.get( );
+		while ( ch != ':' )
+			ch = ifMaterials.get( );
+		ifMaterials >> mMaterials[ i ].texture1 >> mMaterials[ i ].texture2
+			>> mMaterials[ i ].alphamap >> mMaterials[ i ].red
+			>> mMaterials[ i ].green >> mMaterials[ i ].blue;
+	}
+
+	ifMaterials.close( );
+}
+
+void CTerrain::InitMaterialMap( LPSTR Materialmap )
+{
+	FILE * BlendingmapFile;
+	int error;
+	error = fopen_s( &BlendingmapFile, Materialmap, "rb" );
+	if ( error )
+		throw std::exception( "Couldn't open material map" );
+
+	BITMAPFILEHEADER fileHeader;
+	BITMAPINFOHEADER infoHeader;
+
+	fread( &fileHeader, sizeof( BITMAPFILEHEADER ), 1, BlendingmapFile );
+	fread( &infoHeader, sizeof( BITMAPINFOHEADER ), 1, BlendingmapFile );
+
+	assert( mRowCount == infoHeader.biHeight );
+	assert( mColCount == infoHeader.biWidth );
+
+	int imagesize = mRowCount * mColCount * 3;
+	unsigned char * image = new unsigned char[ imagesize ];
+
+	fseek( BlendingmapFile, fileHeader.bfOffBits, SEEK_SET );
+
+	fread( image, 1, imagesize, BlendingmapFile );
+
+	fclose( BlendingmapFile );
+
+	int k = 0;
+	for ( UINT i = 0; i < mRowCount; ++i )
+	{
+		for ( UINT j = 0; j < mColCount; ++j )
+		{
+			int Index = mColCount * i + j;
+			mHeightmap[ Index ].rIndex = image[ k + 2 ];
+			mHeightmap[ Index ].gIndex = image[ k + 1 ];
+			mHeightmap[ Index ].bIndex = image[ k + 0 ];
+			k += 3;
+		}
+	}
+
+	delete[ ] image;
+}
+
+void CTerrain::InitMaterialBuffers( )
+{
+	for ( UINT i = 0; i < mRowCount - 1; ++i )
+	{
+		for ( UINT j = 0; j < mColCount - 1; ++j )
+		{
+			UINT bottomLeftIndex = ( i + 1 ) * mColCount + j;
+			UINT bottomRightIndex = ( i + 1 ) * mColCount + j + 1;
+			UINT topLeftIndex = i * mColCount + j;
+			UINT topRightIndex = i * mColCount + j + 1;
+
+			SHeightmap indexHeightmap = mHeightmap[ topLeftIndex ];
+			size_t materialIndex = 0;
+			for ( ; materialIndex < mMaterials.size( ); ++materialIndex )
+			{
+				if ( mMaterials[ materialIndex ].red == indexHeightmap.rIndex &&
+					mMaterials[ materialIndex ].green == indexHeightmap.gIndex &&
+					mMaterials[ materialIndex ].blue == indexHeightmap.bIndex )
+					break;
+			}
+			assert( materialIndex != mMaterials.size( ) );
+
+			SVertex Vertex;
+
+			// Bottom left
+			Vertex.Position = DirectX::XMFLOAT3( mHeightmap[ bottomLeftIndex ].x, mHeightmap[ bottomLeftIndex ].y, mHeightmap[ bottomLeftIndex ].z );
+			Vertex.Normal = DirectX::XMFLOAT3( mHeightmap[ bottomLeftIndex ].nx, mHeightmap[ bottomLeftIndex ].ny, mHeightmap[ bottomLeftIndex ].nz );
+			Vertex.Color = DirectX::XMFLOAT4( mHeightmap[ bottomLeftIndex ].r, mHeightmap[ bottomLeftIndex ].g, mHeightmap[ bottomLeftIndex ].b, 1.0f );
+			Vertex.Texture = DirectX::XMFLOAT2( 0.0f, 1.0f );
+			mMaterials[ materialIndex ].Vertices.push_back( Vertex );
+
+			// Bottom right
+			Vertex.Position = DirectX::XMFLOAT3( mHeightmap[ bottomRightIndex ].x, mHeightmap[ bottomRightIndex ].y, mHeightmap[ bottomRightIndex ].z );
+			Vertex.Normal = DirectX::XMFLOAT3( mHeightmap[ bottomRightIndex ].nx, mHeightmap[ bottomRightIndex ].ny, mHeightmap[ bottomRightIndex ].nz );
+			Vertex.Color = DirectX::XMFLOAT4( mHeightmap[ bottomRightIndex ].r, mHeightmap[ bottomRightIndex ].g, mHeightmap[ bottomRightIndex ].b, 1.0f );
+			Vertex.Texture = DirectX::XMFLOAT2( 1.0f, 1.0f );
+			mMaterials[ materialIndex ].Vertices.push_back( Vertex );
+
+			// Top left
+			Vertex.Position = DirectX::XMFLOAT3( mHeightmap[ topLeftIndex ].x, mHeightmap[ topLeftIndex ].y, mHeightmap[ topLeftIndex ].z );
+			Vertex.Normal = DirectX::XMFLOAT3( mHeightmap[ topLeftIndex ].nx, mHeightmap[ topLeftIndex ].ny, mHeightmap[ topLeftIndex ].nz );
+			Vertex.Color = DirectX::XMFLOAT4( mHeightmap[ topLeftIndex ].r, mHeightmap[ topLeftIndex ].g, mHeightmap[ topLeftIndex ].b, 1.0f );
+			Vertex.Texture = DirectX::XMFLOAT2( 0.0f, 0.0f );
+			mMaterials[ materialIndex ].Vertices.push_back( Vertex );
+
+			// Bottom right
+			Vertex.Position = DirectX::XMFLOAT3( mHeightmap[ bottomRightIndex ].x, mHeightmap[ bottomRightIndex ].y, mHeightmap[ bottomRightIndex ].z );
+			Vertex.Normal = DirectX::XMFLOAT3( mHeightmap[ bottomRightIndex ].nx, mHeightmap[ bottomRightIndex ].ny, mHeightmap[ bottomRightIndex ].nz );
+			Vertex.Color = DirectX::XMFLOAT4( mHeightmap[ bottomRightIndex ].r, mHeightmap[ bottomRightIndex ].g, mHeightmap[ bottomRightIndex ].b, 1.0f );
+			Vertex.Texture = DirectX::XMFLOAT2( 1.0f, 1.0f );
+			mMaterials[ materialIndex ].Vertices.push_back( Vertex );
+
+			// Top right
+			Vertex.Position = DirectX::XMFLOAT3( mHeightmap[ topRightIndex ].x, mHeightmap[ topRightIndex ].y, mHeightmap[ topRightIndex ].z );
+			Vertex.Normal = DirectX::XMFLOAT3( mHeightmap[ topRightIndex ].nx, mHeightmap[ topRightIndex ].ny, mHeightmap[ topRightIndex ].nz );
+			Vertex.Color = DirectX::XMFLOAT4( mHeightmap[ topRightIndex ].r, mHeightmap[ topRightIndex ].g, mHeightmap[ topRightIndex ].b, 1.0f );
+			Vertex.Texture = DirectX::XMFLOAT2( 1.0f, 0.0f );
+			mMaterials[ materialIndex ].Vertices.push_back( Vertex );
+
+			// Top left
+			Vertex.Position = DirectX::XMFLOAT3( mHeightmap[ topLeftIndex ].x, mHeightmap[ topLeftIndex ].y, mHeightmap[ topLeftIndex ].z );
+			Vertex.Normal = DirectX::XMFLOAT3( mHeightmap[ topLeftIndex ].nx, mHeightmap[ topLeftIndex ].ny, mHeightmap[ topLeftIndex ].nz );
+			Vertex.Color = DirectX::XMFLOAT4( mHeightmap[ topLeftIndex ].r, mHeightmap[ topLeftIndex ].g, mHeightmap[ topLeftIndex ].b, 1.0f );
+			Vertex.Texture = DirectX::XMFLOAT2( 0.0f, 0.0f );
+			mMaterials[ materialIndex ].Vertices.push_back( Vertex );
+		}
+	}
+	for ( size_t i = 0; i < mMaterials.size( ); ++i )
+	{
+		if ( mMaterials[ i ].Vertices.size( ) > 0 )
+		{
+			ShaderHelper::CreateBuffer( mDevice, &mMaterials[ i ].VertexBuffer,
+				D3D11_USAGE::D3D11_USAGE_IMMUTABLE, D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER,
+				sizeof( SVertex ) * mMaterials[ i ].Vertices.size( ), 0, &mMaterials[ i ].Vertices[ 0 ] );
+		}
+	}
+}
+
+void CTerrain::CalculateNormalsFromHeightmap( )
+{
+	using namespace DirectX;
+	int index1, index2, index3, index;
+	XMVECTOR V1, V2, V3, Edge1, Edge2, Sum;
+	//XMFLOAT3 *Normals = new XMFLOAT3[ ( mRowCount - 1 ) * ( mColCount - 1 ) ];
+	std::vector<XMFLOAT3> Normals;
+	Normals.resize( ( mRowCount - 1 ) * ( mColCount - 1 ) );
+
+	for ( size_t i = 0; i < mRowCount - 1; ++i )
+	{
+		for ( size_t j = 0; j < mColCount - 1; ++j )
+		{
+			index1 = i * mColCount + j;
+			index2 = i * mColCount + j + 1;
+			index3 = ( i + 1 ) * mColCount + j;
+		
+			XMFLOAT3 pos = XMFLOAT3( mHeightmap[ index1 ].x, mHeightmap[ index1 ].y, mHeightmap[ index1 ].z );
+			V1 = XMLoadFloat3( &pos );
+			pos = XMFLOAT3( mHeightmap[ index2 ].x, mHeightmap[ index2 ].y, mHeightmap[ index2 ].z );
+			V2 = XMLoadFloat3( &pos );
+			pos = XMFLOAT3( mHeightmap[ index3 ].x, mHeightmap[ index3 ].y, mHeightmap[ index3 ].z );
+			V3 = XMLoadFloat3( &pos );
+			
+			Edge1 = V1 - V2;
+			Edge2 = V1 - V3;
+
+			index = i * ( mRowCount - 1 ) + j;
+			XMStoreFloat3( &Normals[ index ], XMVector3Cross( Edge1, Edge2 ) );
+		}
+	}
+
+	int count;
+	for ( int i = 0; i < ( int ) mRowCount - 1; ++i )
+	{
+		for ( int j = 0; j < ( int ) mColCount - 1; ++j )
+		{
+			Sum = XMVectorSet( 0.0f, 0.0f, 0.0f, 0.0f );
+			count = 0;
+			if ( ( ( i - 1 ) >= 0 ) && ( ( j - 1 ) >= 0 ) )
+			{
+				index = ( i - 1 ) * ( mRowCount - 1 ) + j - 1;
+				Sum += XMLoadFloat3( &Normals[ index ] );
+				count++;
+			}
+			if ( j < mColCount - 1 && i - 1 >= 0)
+			{
+				index = ( ( i - 1 ) * ( mRowCount - 1 ) ) + j;
+				Sum += XMLoadFloat3( &Normals[ index ] );
+				count++;
+			}
+			if ( j - 1 >= 0 && i < mRowCount - 1 )
+			{
+				index = ( i * ( mRowCount - 1 ) ) + ( j - 1 );
+
+				Sum += XMLoadFloat3( &Normals[ index ] );
+				count++;
+			}
+			if ( j < mColCount - 1 && i < mRowCount - 1 )
+			{
+				index = ( i * ( mRowCount - 1 ) ) + j;
+
+				Sum += XMLoadFloat3( &Normals[ index ] );
+				count++;
+			}
+			Sum /= ( float ) count;
+			Sum = XMVector3Normalize( Sum );
+			index = i * mRowCount + j;
+			mHeightmap[ index ].nx = XMVectorGetX( Sum );
+			mHeightmap[ index ].ny = XMVectorGetY( Sum );
+			mHeightmap[ index ].nz = XMVectorGetZ( Sum );
+		}
+	}
+}
+
 void CTerrain::CopyVertices( void * To )
 {
 	DirectX::XMVECTOR Position;
@@ -343,6 +608,35 @@ void CTerrain::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection,
 		mContext->RSSetState( DX::Wireframe.Get( ) );
 	mShader->Render( mIndexCount, DirectX::XMMatrixIdentity( ), View, Projection,
 		mTexture.get( ) );
+	mContext->RSSetState( DX::DefaultRS.Get( ) );
+}
+
+void CTerrain::RenderMaterials( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection, bool bWireframe )
+{
+	static UINT Stride = sizeof( SVertex );
+	static UINT Offsets = 0;
+	if ( bWireframe )
+		mContext->RSSetState( DX::Wireframe.Get( ) );
+	mContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+	for ( size_t i = 0; i < mMaterials.size( ); ++i )
+	{
+		if ( mMaterials[ i ].Vertices.size( ) > 0 )
+		{
+			mContext->IASetVertexBuffers( 0, 1, mMaterials[ i ].VertexBuffer.GetAddressOf( ), &Stride, &Offsets );
+			if ( mMaterials[ i ].texture2 == -1 )
+			{
+				mShader->RenderVertices( mMaterials[ i ].Vertices.size( ), DirectX::XMMatrixIdentity( ), View, Projection,
+					mMaterialTextures[ mMaterials[ i ].texture1 ].get( ) );
+			}
+			else
+			{
+				mShader->RenderVertices( mMaterials[ i ].Vertices.size( ), DirectX::XMMatrixIdentity( ), View, Projection,
+					mMaterialTextures[ mMaterials[ i ].texture1 ].get( ), mMaterialTextures[ mMaterials[ i ].texture2 ].get( ),
+					mMaterialTextures[ mMaterials[ i ].alphamap ].get( ) );
+			}
+		}
+	}
+
 	mContext->RSSetState( DX::DefaultRS.Get( ) );
 }
 

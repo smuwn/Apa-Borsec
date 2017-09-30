@@ -2,7 +2,9 @@
 
 #include "commonincludes.h"
 #include "Input.h"
+#if !(DEBUG || _DEBUG)
 #include "GameGlobals.h"
+#endif
 
 #define DEFINED_USE_ROTATION_ACCELERATION
 

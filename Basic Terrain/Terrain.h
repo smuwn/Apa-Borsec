@@ -8,7 +8,7 @@ class CTerrain sealed
 	friend class QuadTree;
 private:
 	static constexpr const float HeightFactor = 10.0f;
-	static constexpr const float TextureRepeat = 10;
+	static constexpr const float TextureRepeat = 3;
 public:
 	struct SVertex
 	{
@@ -28,9 +28,26 @@ public:
 		float x;
 		float y;
 		float z;
+		float nx;
+		float ny;
+		float nz;
 		float r;
 		float g;
 		float b;
+		int rIndex;
+		int gIndex;
+		int bIndex;
+	};
+	struct SMaterial
+	{
+		int texture1;
+		int texture2;
+		int alphamap;
+		int red;
+		int green;
+		int blue;
+		Microsoft::WRL::ComPtr<ID3D11Buffer> VertexBuffer;
+		std::vector<SVertex> Vertices;
 	};
 private:
 
@@ -40,6 +57,8 @@ private:
 	std::shared_ptr<C3DShader> mShader;
 
 	std::shared_ptr<CTexture> mTexture;
+	std::vector<decltype( mTexture )> mMaterialTextures;
+	std::vector<SMaterial> mMaterials;
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mVertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mIndexBuffer;
@@ -47,6 +66,8 @@ private:
 	std::vector<SHeightmap> mHeightmap;
 
 	DirectX::XMFLOAT4X4 mWorld;
+
+	bool mHasBlendingmap;
 
 	UINT mVertexCount;
 	UINT mIndexCount;
@@ -57,8 +78,9 @@ private:
 	ID3D11Device * mDevice;
 	ID3D11DeviceContext * mContext;
 public:
-	CTerrain( ID3D11Device * Device, ID3D11DeviceContext * Context, std::shared_ptr< C3DShader > Shader, 
-		LPSTR Heightmap, LPSTR Normalmap, LPSTR Colormap );
+	CTerrain( ID3D11Device * Device, ID3D11DeviceContext * Context, std::shared_ptr< C3DShader > Shader,
+		LPSTR Heightmap, LPSTR Normalmap, LPSTR Colormap,
+		LPSTR Materials = "", LPSTR Blendingmap = "" );
 	~CTerrain( );
 private:
 	void InitHeightmap( LPSTR Heightmap, LPSTR Colormap );
@@ -66,10 +88,15 @@ private:
 	void InitNormals( LPSTR Normalmap );
 	void InitTerrain( );
 	void InitBuffers( );
+	void InitMaterials( LPSTR Materials );
+	void InitMaterialMap( LPSTR Materialmap );
+	void InitMaterialBuffers( );
+	void CalculateNormalsFromHeightmap( );
 private:
 	void CopyVertices( void* To );
 public:
 	void Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection, bool bWireframe = false );
+	void RenderMaterials( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection, bool bWireframe = false );
 public:
 	void Identity( );
 	void RotateX( float Theta );

@@ -1,5 +1,7 @@
 
 Texture2D ObjTexture : register( t0 );
+Texture2D ObjTexture2 : register( t1 );
+Texture2D ObjAlphamap : register( t2 );
 SamplerState WrapSampler : register( s0 );
 
 cbuffer cbLight : register( b0 )
@@ -9,6 +11,11 @@ cbuffer cbLight : register( b0 )
     float4 Diffuse;
     float4 Ambient;
 };
+
+cbuffer cbTextures : register( b1 )
+{
+    bool HasAlpha;
+}
 
 struct PSIn
 {
@@ -23,7 +30,6 @@ float4 main( PSIn input ) : SV_TARGET
 {
     input.NormalW = normalize( input.NormalW );
     //float4 Color = float4( 0.0f, 0.36f, 0.036f, 1.0f );
-    float4 Color = ObjTexture.Sample(WrapSampler, input.TexCoord);
 
     float4 Multiplier = Ambient;
 
@@ -35,7 +41,22 @@ float4 main( PSIn input ) : SV_TARGET
         Multiplier += Diffuse * howMuchLight;
     }
 
-    Color = Color * Multiplier;
+    float4 BlendColor;
+    float4 Color;
+
+    if ( HasAlpha )
+    {
+        float4 t1 = ObjTexture.Sample( WrapSampler, input.TexCoord );
+        float4 t2 = ObjTexture2.Sample( WrapSampler, input.TexCoord );
+        float4 alpha = ObjAlphamap.Sample( WrapSampler, input.TexCoord );
+        BlendColor = lerp( t1, t2, alpha );
+    }
+	else
+    {
+        BlendColor = ObjTexture.Sample( WrapSampler, input.TexCoord );
+    }
+
+    Color = BlendColor * Multiplier;
 
     return saturate(Color * input.Color * 2.0f);
 }

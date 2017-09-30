@@ -54,6 +54,9 @@ C3DShader::C3DShader( ID3D11Device * Device, ID3D11DeviceContext * Context ) :
 		ShaderHelper::CreateBuffer( mDevice, &mLightBuffer,
 			D3D11_USAGE::D3D11_USAGE_DEFAULT, D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER,
 			sizeof( SLight ), 0 );
+		ShaderHelper::CreateBuffer( mDevice, &mTextureBuffer,
+			D3D11_USAGE::D3D11_USAGE_DYNAMIC, D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER,
+			sizeof( STexture ), D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE );
 		ZeroMemoryAndDeclare( D3D11_SAMPLER_DESC, sampDesc );
 		sampDesc.AddressU =
 			sampDesc.AddressV =
@@ -80,6 +83,7 @@ C3DShader::~C3DShader( )
 	mInputLayout.Reset( );
 	mPixelShader.Reset( );
 	mPerObjectBuffer.Reset( );
+	mTextureBuffer.Reset( );
 	mWrapSampler.Reset( );
 }
 
@@ -111,7 +115,8 @@ void C3DShader::Render( UINT IndexCount, DirectX::FXMMATRIX & World, DirectX::FX
 	mContext->DrawIndexed( IndexCount, 0, 0 );
 }
 
-void C3DShader::RenderVertices( UINT IndexCount, DirectX::FXMMATRIX & World, DirectX::FXMMATRIX & View, DirectX::FXMMATRIX & Projection, CTexture * texture )
+void C3DShader::RenderVertices( UINT IndexCount, DirectX::FXMMATRIX & World, DirectX::FXMMATRIX & View, DirectX::FXMMATRIX & Projection,
+	CTexture * texture, CTexture * texture2, CTexture * Alpha )
 {
 	// Replace the old toys
 	mContext->IASetInputLayout( mInputLayout.Get( ) );
@@ -128,6 +133,20 @@ void C3DShader::RenderVertices( UINT IndexCount, DirectX::FXMMATRIX & World, Dir
 
 	mContext->Unmap( mPerObjectBuffer.Get( ), 0 );
 	mContext->VSSetConstantBuffers( 0, 1, mPerObjectBuffer.GetAddressOf( ) );
+
+	bool bUseAlpha = false;
+	if ( texture2 != nullptr && Alpha != nullptr )
+	{
+		ID3D11ShaderResourceView *SRV = texture2->GetTexture( );
+		mContext->PSSetShaderResources( 1, 1, &SRV );
+		SRV = Alpha->GetTexture( );
+		mContext->PSSetShaderResources( 2, 1, &SRV );
+	}
+
+	mContext->Map( mTextureBuffer.Get( ), 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &MappedSubresource );
+	( ( STexture* ) MappedSubresource.pData )->HasAlpha = bUseAlpha;
+	mContext->Unmap( mTextureBuffer.Get( ), 0 );
+	mContext->PSSetConstantBuffers( 1, 1, mTextureBuffer.GetAddressOf( ) );
 
 	mContext->PSSetSamplers( 0, 1, mWrapSampler.GetAddressOf( ) );
 
