@@ -529,8 +529,8 @@ void CTerrain::CalculateNormalsFromHeightmap( )
 			pos = XMFLOAT3( mHeightmap[ index3 ].x, mHeightmap[ index3 ].y, mHeightmap[ index3 ].z );
 			V3 = XMLoadFloat3( &pos );
 			
-			Edge1 = V1 - V2;
-			Edge2 = V1 - V3;
+			Edge1 = V1 - V3;
+			Edge2 = V1 - V2;
 
 			index = i * ( mRowCount - 1 ) + j;
 			XMStoreFloat3( &Normals[ index ], XMVector3Cross( Edge1, Edge2 ) );
