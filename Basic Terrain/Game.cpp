@@ -211,13 +211,12 @@ void CGame::InitModels( )
 	mCamera = std::make_unique<CCamera>( mInput, FOV, ( float ) mWidth / ( float ) mHeight, NearZ, FarZ );
 	mTriangle = std::make_unique<CModel>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mTerrain = std::make_shared<CTerrain>( mDevice.Get( ), mImmediateContext.Get( ), m3DShader,
-		( LPSTR ) "Data/Way.bmp", ( LPSTR ) "Data/Way.normals", ( LPSTR ) "Data/WayColor.bmp",
-		( LPSTR ) "Data/Materials.txt", ( LPSTR ) "Data/WayMaterialmap.bmp" );
+		( LPSTR ) "Data/HM.bmp", ( LPSTR ) "Data/HM.normals", ( LPSTR ) "Data/HMColor.bmp" );
 	mLineManager = std::make_shared<CLineManager>( mDevice.Get( ), mImmediateContext.Get( ), mLineShader);
-	//mQuadTree = std::make_shared<QuadTree>( mDevice.Get( ), mImmediateContext.Get( ),
-		//m3DShader, mTerrain, mLineManager );
-	//GameGlobals::gQuadTrees.push_back( mQuadTree );
-	//mTerrain.reset( );
+	mQuadTree = std::make_shared<QuadTree>( mDevice.Get( ), mImmediateContext.Get( ),
+		m3DShader, mTerrain, mLineManager );
+	GameGlobals::gQuadTrees.push_back( mQuadTree );
+	mTerrain.reset( );
 }
 
 void CGame::Init2D( )
@@ -304,19 +303,16 @@ void CGame::Render( )
 
 #if DEBUG || _DEBUG
 	mLineManager->Begin( );
-	//for ( auto & iter : GameGlobals::gQuadTrees )
-		//iter->RenderLines( );
+	for ( auto & iter : GameGlobals::gQuadTrees )
+		iter->RenderLines( );
 	mLineManager->End( );
 	mLineManager->Render( View, Projection );
 #endif
-	/*int Drawn = 0;
+	int Drawn = 0;
 	for ( auto & iter : GameGlobals::gQuadTrees )
 	{
 		iter->Render( View, Projection, Frustum, Drawn, CamPos.y, bDrawWireframe );
-	}*/
-
-	//mTerrain->Render( View, Projection, bDrawWireframe );
-	mTerrain->RenderMaterials( View, Projection, bDrawWireframe );
+	}
 
 	char buffer[ 500 ] = { 0 };
 	sprintf_s( buffer, "FPS: %d", mTimer.GetFPS( ) );
@@ -326,9 +322,9 @@ void CGame::Render( )
 #if DEBUG || _DEBUG
 	mDebugSquare->Render( mOrthoMatrix );
 
-	//sprintf_s( buffer, "Drawn faces: %d", Drawn );
-	//mDrawnFacesText->Render( mOrthoMatrix, buffer,
-		//0, 33 );
+	sprintf_s( buffer, "Drawn faces: %d", Drawn );
+	mDrawnFacesText->Render( mOrthoMatrix, buffer,
+		0, 33 );
 #endif
 
 

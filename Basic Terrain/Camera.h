@@ -2,9 +2,7 @@
 
 #include "commonincludes.h"
 #include "Input.h"
-#if !(DEBUG || _DEBUG)
 #include "GameGlobals.h"
-#endif
 
 #define DEFINED_USE_ROTATION_ACCELERATION
 
@@ -17,7 +15,7 @@ public:
 	static const DirectX::XMVECTOR DefaultPosition;
 	static const DirectX::XMMATRIX DefaultView;
 	static constexpr const float CameraFallingSpeed = 9.81f;
-	static constexpr const float CameraOffset = 2.0f;
+	static constexpr const float CameraOffset = 5.0f;
 	static constexpr const float Friction = 0.1f;
 	static constexpr const float CamSpeed = 0.3f;
 	static constexpr const float MaxCamSpeed = 10;

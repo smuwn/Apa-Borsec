@@ -550,20 +550,20 @@ void CTerrain::CalculateNormalsFromHeightmap( )
 				Sum += XMLoadFloat3( &Normals[ index ] );
 				count++;
 			}
-			if ( j < mColCount - 1 && i - 1 >= 0)
+			if ( j < ( int ) mColCount - 1 && i - 1 >= 0 )
 			{
 				index = ( ( i - 1 ) * ( mRowCount - 1 ) ) + j;
 				Sum += XMLoadFloat3( &Normals[ index ] );
 				count++;
 			}
-			if ( j - 1 >= 0 && i < mRowCount - 1 )
+			if ( j - 1 >= 0 && i < ( int ) mRowCount - 1 )
 			{
 				index = ( i * ( mRowCount - 1 ) ) + ( j - 1 );
 
 				Sum += XMLoadFloat3( &Normals[ index ] );
 				count++;
 			}
-			if ( j < mColCount - 1 && i < mRowCount - 1 )
+			if ( j < ( int ) mColCount - 1 && i < ( int ) mRowCount - 1 )
 			{
 				index = ( i * ( mRowCount - 1 ) ) + j;
 
