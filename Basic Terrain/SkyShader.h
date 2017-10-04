@@ -32,6 +32,7 @@ public:
 	~SkyShader( );
 public:
 	void Render( UINT IndexCount, DirectX::FXMMATRIX& World, DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection );
+	void RenderVertices( UINT VertexCount, DirectX::FXMMATRIX& World, DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection );
 	void SetColors( SPSColor const& Color );
 };
 

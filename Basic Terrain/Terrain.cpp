@@ -31,7 +31,7 @@ CTerrain::CTerrain( ID3D11Device * Device, ID3D11DeviceContext * Context, std::s
 			InitNormals( Normalmap );
 			InitBuffers( );
 		}
-		mTexture = std::make_shared<CTexture>( ( LPWSTR ) L"Data/Dirt01.dds", mDevice );
+		mTexture = std::make_shared<CTexture>( ( LPWSTR ) L"Data/Dirt01.jpg", mDevice );
 		DirectX::XMStoreFloat4x4( &mWorld, DirectX::XMMatrixIdentity( ) );
 	}
 	CATCH;

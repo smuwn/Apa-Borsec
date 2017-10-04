@@ -16,9 +16,10 @@ public:
 	};
 private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mVertexBuffer;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> mIndexBuffer;
 
 	std::shared_ptr<SkyShader> mShader;
+
+	std::vector<SVertex> mVertices;
 
 	UINT mVertexCount;
 	UINT mIndexCount;
@@ -31,6 +32,8 @@ public:
 	Skybox( ) = delete;
 	Skybox( ID3D11Device * Device, ID3D11DeviceContext * Context, std::shared_ptr<SkyShader> Shader );
 	~Skybox( );
+private:
+	void LoadModel( LPWSTR lpPath );
 public:
 	void Update( DirectX::XMFLOAT3 const& CamPos );
 	void Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection );

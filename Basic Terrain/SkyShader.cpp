@@ -71,6 +71,25 @@ void SkyShader::Render( UINT IndexCount, DirectX::FXMMATRIX& World, DirectX::FXM
 	mContext->DrawIndexed( IndexCount, 0, 0 );
 }
 
+void SkyShader::RenderVertices( UINT VertexCount, DirectX::FXMMATRIX & World, DirectX::FXMMATRIX & View, DirectX::FXMMATRIX & Projection )
+{
+	static D3D11_MAPPED_SUBRESOURCE MappedSubresource;
+	mContext->IASetInputLayout( mLayout.Get( ) );
+	mContext->VSSetShader( mVertexShader.Get( ), 0, 0 );
+	mContext->PSSetShader( mPixelShader.Get( ), 0, 0 );
+
+	mContext->PSSetConstantBuffers( 0, 1, mPSColorBuffer.GetAddressOf( ) );
+
+	mContext->Map( mVSPerObjectBuffer.Get( ), 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &MappedSubresource );
+
+	( ( SVSPerObject* ) MappedSubresource.pData )->WVP = DirectX::XMMatrixTranspose( World * View * Projection );
+
+	mContext->Unmap( mVSPerObjectBuffer.Get( ), 0 );
+	mContext->VSSetConstantBuffers( 0, 1, mVSPerObjectBuffer.GetAddressOf( ) );
+
+	mContext->Draw( VertexCount, 0 );
+}
+
 
 void SkyShader::SetColors( SkyShader::SPSColor const& Color )
 {

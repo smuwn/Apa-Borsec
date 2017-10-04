@@ -15,6 +15,12 @@ Skybox::Skybox( ID3D11Device * Device, ID3D11DeviceContext * Context, std::share
 		//						I remain
 		//					your sincere friend
 		//						Past me
+		LoadModel( L"Data/Sphere.txt" );
+		// Dear past me,
+		// The improved model for the skybox is ready
+		// I'll expect the prize
+		//						Sincere
+		//						Future me
 		SVertex vertices[ ] =
 		{
 			SVertex( -1.0f, -1.0f, -1.0f ),
@@ -26,7 +32,7 @@ Skybox::Skybox( ID3D11Device * Device, ID3D11DeviceContext * Context, std::share
 			SVertex( +1.0f, +1.0f, +1.0f ),
 			SVertex( +1.0f, -1.0f, +1.0f ),
 		};
-		mVertexCount = ARRAYSIZE( vertices );
+		//mVertexCount = ARRAYSIZE( vertices );
 
 		DWORD indices[ ] =
 		{
@@ -58,11 +64,7 @@ Skybox::Skybox( ID3D11Device * Device, ID3D11DeviceContext * Context, std::share
 
 		ShaderHelper::CreateBuffer( mDevice, &mVertexBuffer,
 			D3D11_USAGE::D3D11_USAGE_IMMUTABLE, D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER,
-			sizeof( SVertex ) * mVertexCount, 0, vertices );
-
-		ShaderHelper::CreateBuffer( mDevice, &mIndexBuffer,
-			D3D11_USAGE::D3D11_USAGE_IMMUTABLE, D3D11_BIND_FLAG::D3D11_BIND_INDEX_BUFFER,
-			sizeof( DWORD ) * mIndexCount, 0, indices );
+			sizeof( SVertex ) * mVertexCount, 0, &mVertices[0] );
 
 		SkyShader::SPSColor Color;
 		Color.CenterColor = DirectX::XMFLOAT4( 0.81f, 0.38f, 0.66f, 1.0f );
@@ -77,8 +79,42 @@ Skybox::Skybox( ID3D11Device * Device, ID3D11DeviceContext * Context, std::share
 Skybox::~Skybox( )
 {
 	mVertexBuffer.Reset( );
-	mIndexBuffer.Reset( );
 	mShader.reset( );
+}
+
+void Skybox::LoadModel( LPWSTR lpPath )
+{
+	std::wifstream ifModel( lpPath );
+
+	if ( !ifModel.is_open( ) )
+		throw std::exception( "Couldn't open model file" );
+
+	wchar_t ch = 0;
+	while ( ch != ':' )
+	{
+		ifModel.get( ch );
+	}
+	ifModel >> mVertexCount;
+
+	ifModel.get( ch );
+	while ( ch != ':' )
+	{
+		ifModel.get( ch );
+	}
+
+	for ( int i = 0; i < mVertexCount; ++i )
+	{
+		float x, y, z;
+		float u, v;
+		float nx, ny, nz;
+		ifModel >> x >> y >> z;
+		
+		ifModel >> u >> v >> nx >> ny >> nz;
+
+		mVertices.emplace_back( x, y, z );
+	}
+
+	ifModel.close( );
 }
 
 
@@ -91,13 +127,12 @@ void Skybox::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection )
 {
 	static UINT Stride = sizeof( SVertex );
 	static UINT Offsets = 0;
-	mContext->IASetIndexBuffer( mIndexBuffer.Get( ), DXGI_FORMAT::DXGI_FORMAT_R32_UINT, 0 );
 	mContext->IASetVertexBuffers( 0, 1, mVertexBuffer.GetAddressOf( ), &Stride, &Offsets );
 	mContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 
 	mContext->RSSetState( DX::NoCulling.Get( ) );
 	mContext->OMSetDepthStencilState( DX::DSLessEqual.Get( ), 0 );
-	mShader->Render( mIndexCount, mWorld, View, Projection );
+	mShader->RenderVertices( mVertexCount, mWorld, View, Projection );
 	mContext->OMSetDepthStencilState( 0, 0 );
 	mContext->RSSetState( DX::DefaultRS.Get( ) );
 }
