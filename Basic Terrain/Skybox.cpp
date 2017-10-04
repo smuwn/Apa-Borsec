@@ -1,7 +1,6 @@
 #include "Skybox.h"
 
 
-
 Skybox::Skybox( ID3D11Device * Device, ID3D11DeviceContext * Context, std::shared_ptr<SkyShader> Shader ) :
 	mDevice( Device ),
 	mContext( Context ),
@@ -9,18 +8,12 @@ Skybox::Skybox( ID3D11Device * Device, ID3D11DeviceContext * Context, std::share
 {
 	try
 	{
-		// Dear future me,
-		// Please, improve the model of the skybox
-		// I'll give you a handjob
-		//						I remain
-		//					your sincere friend
-		//						Past me
+#if !(DEBUG || _DEBUG)
 		LoadModel( L"Data/Sphere.txt" );
-		// Dear past me,
-		// The improved model for the skybox is ready
-		// I'll expect the prize
-		//						Sincere
-		//						Future me
+		ShaderHelper::CreateBuffer( mDevice, &mVertexBuffer,
+			D3D11_USAGE::D3D11_USAGE_IMMUTABLE, D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER,
+			sizeof( SVertex ) * mVertexCount, 0, &mVertices[ 0 ] );
+#else
 		SVertex vertices[ ] =
 		{
 			SVertex( -1.0f, -1.0f, -1.0f ),
@@ -32,7 +25,7 @@ Skybox::Skybox( ID3D11Device * Device, ID3D11DeviceContext * Context, std::share
 			SVertex( +1.0f, +1.0f, +1.0f ),
 			SVertex( +1.0f, -1.0f, +1.0f ),
 		};
-		//mVertexCount = ARRAYSIZE( vertices );
+		mVertexCount = ARRAYSIZE( vertices );
 
 		DWORD indices[ ] =
 		{
@@ -62,9 +55,14 @@ Skybox::Skybox( ID3D11Device * Device, ID3D11DeviceContext * Context, std::share
 		};
 		mIndexCount = ARRAYSIZE( indices );
 
+		ShaderHelper::CreateBuffer( mDevice, &mIndexBuffer,
+			D3D11_USAGE::D3D11_USAGE_IMMUTABLE, D3D11_BIND_FLAG::D3D11_BIND_INDEX_BUFFER,
+			sizeof( DWORD ) * mIndexCount, 0, &indices[ 0 ] );
+
 		ShaderHelper::CreateBuffer( mDevice, &mVertexBuffer,
 			D3D11_USAGE::D3D11_USAGE_IMMUTABLE, D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER,
-			sizeof( SVertex ) * mVertexCount, 0, &mVertices[0] );
+			sizeof( SVertex ) * mVertexCount, 0, &vertices );
+#endif
 
 		SkyShader::SPSColor Color;
 		Color.CenterColor = DirectX::XMFLOAT4( 0.81f, 0.38f, 0.66f, 1.0f );
@@ -102,7 +100,7 @@ void Skybox::LoadModel( LPWSTR lpPath )
 		ifModel.get( ch );
 	}
 
-	for ( int i = 0; i < mVertexCount; ++i )
+	for ( int i = 0; i < ( int ) mVertexCount; ++i )
 	{
 		float x, y, z;
 		float u, v;
@@ -127,12 +125,21 @@ void Skybox::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection )
 {
 	static UINT Stride = sizeof( SVertex );
 	static UINT Offsets = 0;
+#if DEBUG || _DEBUG
+	mContext->IASetIndexBuffer( mIndexBuffer.Get( ), DXGI_FORMAT::DXGI_FORMAT_R32_UINT, 0 );
+#endif
 	mContext->IASetVertexBuffers( 0, 1, mVertexBuffer.GetAddressOf( ), &Stride, &Offsets );
 	mContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 
+//#if DEBUG || _DEBUG
 	mContext->RSSetState( DX::NoCulling.Get( ) );
+//#endif
 	mContext->OMSetDepthStencilState( DX::DSLessEqual.Get( ), 0 );
+#if DEBUG || _DEBUG
+	mShader->Render( mIndexCount, mWorld, View, Projection );
+#else
 	mShader->RenderVertices( mVertexCount, mWorld, View, Projection );
+#endif
 	mContext->OMSetDepthStencilState( 0, 0 );
 	mContext->RSSetState( DX::DefaultRS.Get( ) );
 }

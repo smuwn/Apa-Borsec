@@ -63,7 +63,7 @@ void CGame::InitWindow( bool bFullscreen )
 		mWidth = GetSystemMetrics( SM_CXSCREEN );
 		mHeight = GetSystemMetrics( SM_CYSCREEN );
 	}
-#if NO_GPU
+#if defined NO_GPU
 	mWidth = 800;
 	mHeight = 600;
 #endif

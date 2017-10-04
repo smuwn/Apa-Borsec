@@ -16,6 +16,7 @@ public:
 	};
 private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mVertexBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> mIndexBuffer;
 
 	std::shared_ptr<SkyShader> mShader;
 
