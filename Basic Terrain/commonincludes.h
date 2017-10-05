@@ -66,6 +66,7 @@ MessageBoxA(NULL,"Unexpected error occured", "Error", MB_ICONERROR| MB_OK); Post
 namespace DX
 {
 	static constexpr const float EPSILON = 0.0001f;
+	extern Microsoft::WRL::ComPtr<ID3D11RasterizerState> FrontCulling;
 	extern Microsoft::WRL::ComPtr<ID3D11RasterizerState> NoCulling;
 	extern Microsoft::WRL::ComPtr<ID3D11RasterizerState> DefaultRS;
 	extern Microsoft::WRL::ComPtr<ID3D11RasterizerState> Wireframe;

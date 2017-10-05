@@ -131,9 +131,11 @@ void Skybox::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection )
 	mContext->IASetVertexBuffers( 0, 1, mVertexBuffer.GetAddressOf( ), &Stride, &Offsets );
 	mContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 
-//#if DEBUG || _DEBUG
+#if DEBUG || _DEBUG
 	mContext->RSSetState( DX::NoCulling.Get( ) );
-//#endif
+#else
+	mContext->RSSetState( DX::FrontCulling.Get( ) );
+#endif
 	mContext->OMSetDepthStencilState( DX::DSLessEqual.Get( ), 0 );
 #if DEBUG || _DEBUG
 	mShader->Render( mIndexCount, mWorld, View, Projection );
