@@ -284,11 +284,10 @@ void CGame::Update( )
 	mTimer.Frame( );
 	mInput->Frame( );
 
+	mSkybox->Update( mCamera->GetCamPos( ) );
 	mCamera->Frame( mTimer.GetFrameTime( ) );
 	if ( mInput->isSpecialKeyPressed( DIK_B ) )
 		bDrawWireframe = bDrawWireframe ? false : true;
-
-	mSkybox->Update( mCamera->GetCamPos( ) );
 }
 
 void CGame::Render( )
