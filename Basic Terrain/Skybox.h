@@ -3,27 +3,20 @@
 #include "commonincludes.h"
 #include "ShaderHelper.h"
 #include "SkyShader.h"
+#include "GeometryHelper.h"
 
 
 ALIGN16 class Skybox
 {
 public:
-	struct SVertex
-	{
-		DirectX::XMFLOAT3 Pos;
-		SVertex( float x, float y, float z ) :
-			Pos( x, y, z ) {};
-	};
+	typedef GeometryGenerator::SVertex SVertex;
 private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mVertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mIndexBuffer;
 
 	std::shared_ptr<SkyShader> mShader;
 
-	std::vector<SVertex> mVertices;
-
-	UINT mVertexCount;
-	UINT mIndexCount;
+	GeometryGenerator::MeshData mSphere;
 
 	DirectX::XMMATRIX mWorld;
 
