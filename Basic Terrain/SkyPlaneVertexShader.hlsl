@@ -13,7 +13,7 @@ struct VSOut
 VSOut main( float4 pos : POSITION, float2 tex : TEXCOORD )
 {
     VSOut output;
-    output.Position = mul( pos, WVP );
+    output.Position = mul( pos, WVP ).xyww;
     output.TexCoord = tex;
     return output;
 }

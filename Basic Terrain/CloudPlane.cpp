@@ -9,7 +9,7 @@ CloudPlane::CloudPlane( ID3D11Device * Device, ID3D11DeviceContext * Context, st
 {
 	try
 	{
-		GeometryGenerator::CreateCurbedPlane( 10, 10, 0.5f, -0.5f, 4, mPlane );
+		GeometryGenerator::CreateCurbedPlane( 10, 10, 0.5f, -1.0f, 4, mPlane );
 		
 		ShaderHelper::CreateBuffer( mDevice, &mVertexBuffer,
 			D3D11_USAGE::D3D11_USAGE_IMMUTABLE, D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER,
@@ -20,8 +20,8 @@ CloudPlane::CloudPlane( ID3D11Device * Device, ID3D11DeviceContext * Context, st
 
 		mWorld = DirectX::XMMatrixIdentity( );
 		
-		mFirstTextureSpeed = DirectX::XMFLOAT2( 0.05f, 0.02f );
-		mSecondTextureSpeed = DirectX::XMFLOAT2( 0.07f, 0.03f );
+		mFirstTextureSpeed = DirectX::XMFLOAT2( 0.02f, 0.005f );
+		mSecondTextureSpeed = DirectX::XMFLOAT2( 0.07f, 0.002f );
 
 		mFirstTextureInfo.Texture = new CTexture( L"Data/cloud001.dds", mDevice );
 		mFirstTextureInfo.Offset = DirectX::XMFLOAT2( 0.0f, 0.0f );
@@ -82,7 +82,6 @@ void CloudPlane::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projectio
 	mContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 
 	mContext->RSSetState( DX::NoCulling.Get( ) );
-	mContext->OMSetDepthStencilState( DX::DS2D.Get( ), 0 );
 	mShader->Render( mPlane.Indices.size( ), 0.85f, mWorld, View, Projection, mFirstTextureInfo, mSecondTextureInfo );
 	mContext->RSSetState( DX::DefaultRS.Get( ) );
 }
