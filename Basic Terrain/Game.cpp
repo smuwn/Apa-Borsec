@@ -205,6 +205,7 @@ void CGame::InitShaders( )
 	m3DShader->SetLight( light );
 	mLineShader = std::make_shared<LineShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mSkyShader = std::make_shared<SkyShader>( mDevice.Get( ), mImmediateContext.Get( ) );
+	mSkyPlaneShader = std::make_shared<SkyPlaneShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 }
 
 void CGame::InitModels( )
@@ -218,7 +219,8 @@ void CGame::InitModels( )
 		m3DShader, mTerrain, mLineManager );
 	GameGlobals::gQuadTrees.push_back( mQuadTree );
 	mTerrain.reset( );
-	mSkybox = std::make_unique<Skybox>( mDevice.Get( ), mImmediateContext.Get( ), mSkyShader );
+	mSkydome = std::make_unique<Skydome>( mDevice.Get( ), mImmediateContext.Get( ),
+		mSkyShader, mSkyPlaneShader );
 }
 
 void CGame::Init2D( )
@@ -284,7 +286,7 @@ void CGame::Update( )
 	mTimer.Frame( );
 	mInput->Frame( );
 
-	mSkybox->Update( mCamera->GetCamPos( ) );
+	mSkydome->Update( mCamera->GetCamPos( ), mTimer.GetFrameTime( ) );
 	mCamera->Frame( mTimer.GetFrameTime( ) );
 	if ( mInput->isSpecialKeyPressed( DIK_B ) )
 		bDrawWireframe = bDrawWireframe ? false : true;
@@ -317,7 +319,7 @@ void CGame::Render( )
 		iter->Render( View, Projection, Frustum, Drawn, CamPos.y, bDrawWireframe );
 	}
 
-	mSkybox->Render( View, Projection );
+	mSkydome->Render( View, Projection );
 
 	char buffer[ 500 ] = { 0 };
 	sprintf_s( buffer, "FPS: %d", mTimer.GetFPS( ) );

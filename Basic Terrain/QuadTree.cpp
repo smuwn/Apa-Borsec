@@ -278,7 +278,7 @@ void QuadTree::RenderNode( SNode * Node, DirectX::FXMMATRIX& View, DirectX::FXMM
 			RenderNode( Node->mNodes[ i ], View, Projection, Frustum, DrawnVertices,CamHeight );
 		}
 	}
-	if ( count > 0 )
+	if ( count > 0 || Node->mVertexBuffer.Get() == nullptr)
 		return;
 
 	static UINT Stride = sizeof( SVertex );

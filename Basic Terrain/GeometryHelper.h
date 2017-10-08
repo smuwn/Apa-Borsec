@@ -7,10 +7,10 @@ namespace GeometryGenerator
 	struct SVertex
 	{
 		DirectX::XMFLOAT3 Position;
+		DirectX::XMFLOAT2 Texture;
 		DirectX::XMFLOAT3 Normal;
 		DirectX::XMFLOAT3 Tangent;
 		DirectX::XMFLOAT3 Binormal;
-		DirectX::XMFLOAT2 Texture;
 	};
 	template <class IndexType> 
 	struct MeshDataInfo
@@ -116,6 +116,61 @@ namespace GeometryGenerator
 			Output.Indices.push_back( SouthPoleIndex );
 			Output.Indices.push_back( firstIndex + i );
 			Output.Indices.push_back( firstIndex + i + 1 );
+		}
+	}
+
+	inline void CreateCurbedPlane( float PlaneWidth, float PlaneResolution,
+		float PlaneTop, float PlaneBottom, int TextureRepeat, MeshData& Output )
+	{
+		Output.Vertices.clear( );
+		Output.Indices.clear( );
+
+		float quadSize = PlaneWidth / PlaneResolution;
+		float halfWidth = PlaneWidth / 2.0f;
+		float constant = ( PlaneTop - PlaneBottom ) / ( halfWidth * halfWidth);
+		float textureDelta = ( float ) TextureRepeat / PlaneWidth;
+		float x, y, z;
+		float u, v;
+		Output.Vertices.resize( ( UINT ) ( PlaneResolution + 1 )  * ( UINT ) ( PlaneResolution + 1 ) );
+
+		for ( int i = 0; i <= PlaneResolution; ++i )
+		{
+			z = -halfWidth + i * quadSize;
+			v = textureDelta * i;
+			for ( int j = 0; j <= PlaneResolution; ++j )
+			{
+				x = -halfWidth + j * quadSize;
+				y = PlaneTop - constant * ( ( x * x ) + ( z*z ) );
+				
+				u = textureDelta * j;
+
+				int index = i * ( int ) ( PlaneResolution + 1 ) + j;
+				Output.Vertices[ index ].Position = DirectX::XMFLOAT3( x, y, z );
+				Output.Vertices[ index ].Texture = DirectX::XMFLOAT2( u, v );
+			}
+		}
+
+		int topLeftIndex;
+		int topRightIndex;
+		int bottomLeftIndex;
+		int bottomRightIndex;
+		for ( int i = 0; i < PlaneResolution; ++i )
+		{
+			for ( int j = 0; j < PlaneResolution; ++j )
+			{
+				topLeftIndex = i * ( int ) (PlaneResolution + 1) + j;
+				topRightIndex = i * ( int ) (PlaneResolution + 1) + j + 1;
+				bottomLeftIndex = ( i + 1 ) * ( int ) (PlaneResolution + 1) + j;
+				bottomRightIndex = ( i + 1 ) * ( int ) ( PlaneResolution + 1 ) + j + 1;
+
+				Output.Indices.push_back( topLeftIndex );
+				Output.Indices.push_back( topRightIndex );
+				Output.Indices.push_back( bottomLeftIndex );
+
+				Output.Indices.push_back( bottomLeftIndex );
+				Output.Indices.push_back( topRightIndex );
+				Output.Indices.push_back( bottomRightIndex );
+			}
 		}
 	}
 }

@@ -4,9 +4,10 @@
 #include "ShaderHelper.h"
 #include "SkyShader.h"
 #include "GeometryHelper.h"
+#include "CloudPlane.h"
 
 
-ALIGN16 class Skybox
+ALIGN16 class Skydome
 {
 public:
 	typedef GeometryGenerator::SVertex SVertex;
@@ -16,6 +17,8 @@ private:
 
 	std::shared_ptr<SkyShader> mShader;
 
+	std::unique_ptr<CloudPlane> mClouds;
+
 	GeometryGenerator::MeshData mSphere;
 
 	DirectX::XMMATRIX mWorld;
@@ -23,13 +26,12 @@ private:
 	ID3D11Device * mDevice;
 	ID3D11DeviceContext * mContext;
 public:
-	Skybox( ) = delete;
-	Skybox( ID3D11Device * Device, ID3D11DeviceContext * Context, std::shared_ptr<SkyShader> Shader );
-	~Skybox( );
-private:
-	void LoadModel( LPWSTR lpPath );
+	Skydome( ) = delete;
+	Skydome( ID3D11Device * Device, ID3D11DeviceContext * Context,
+		std::shared_ptr<SkyShader> Shader, std::shared_ptr<SkyPlaneShader> CloudShader );
+	~Skydome( );
 public:
-	void Update( DirectX::XMFLOAT3 const& CamPos );
+	void Update( DirectX::XMFLOAT3 const& CamPos, float frameTime );
 	void Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection );
 public:
 	inline void* operator new( size_t size )

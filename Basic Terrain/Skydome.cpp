@@ -1,15 +1,16 @@
-#include "Skybox.h"
+#include "Skydome.h"
 
 
-Skybox::Skybox( ID3D11Device * Device, ID3D11DeviceContext * Context, std::shared_ptr<SkyShader> Shader ) :
+Skydome::Skydome( ID3D11Device * Device, ID3D11DeviceContext * Context, 
+	std::shared_ptr<SkyShader> Shader, std::shared_ptr<SkyPlaneShader> CloudsShader ) :
 	mDevice( Device ),
 	mContext( Context ),
 	mShader( Shader )
 {
 	try
-	{	
-		GeometryGenerator::MeshData Sphere;
-		GeometryGenerator::CreateSphere( 1.0f, 10, 10, mSphere );
+	{
+		mClouds = std::make_unique<CloudPlane>( mDevice, mContext, CloudsShader );
+		GeometryGenerator::CreateSphere( 1, 5, 5, mSphere );
 
 		ShaderHelper::CreateBuffer( mDevice, &mIndexBuffer,
 			D3D11_USAGE::D3D11_USAGE_IMMUTABLE, D3D11_BIND_FLAG::D3D11_BIND_INDEX_BUFFER,
@@ -29,18 +30,19 @@ Skybox::Skybox( ID3D11Device * Device, ID3D11DeviceContext * Context, std::share
 }
 
 
-Skybox::~Skybox( )
+Skydome::~Skydome( )
 {
 	mVertexBuffer.Reset( );
 	mShader.reset( );
 }
 
-void Skybox::Update( DirectX::XMFLOAT3 const& CamPos )
+void Skydome::Update( DirectX::XMFLOAT3 const& CamPos, float frameTime )
 {
 	mWorld = DirectX::XMMatrixTranslation( CamPos.x, CamPos.y, CamPos.z );
+	mClouds->Update( CamPos, frameTime );
 }
 
-void Skybox::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection )
+void Skydome::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection )
 {
 	static UINT Stride = sizeof( SVertex );
 	static UINT Offsets = 0;
@@ -53,4 +55,10 @@ void Skybox::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection )
 	mShader->Render( mSphere.Indices.size( ), mWorld, View, Projection );
 	mContext->OMSetDepthStencilState( 0, 0 );
 	mContext->RSSetState( DX::DefaultRS.Get( ) );
+
+	mContext->OMSetBlendState( DX::AdditiveBlend.Get( ), nullptr, 0xffffffff );
+	mContext->OMSetDepthStencilState( DX::DSLessEqual.Get( ), 0 );
+	mClouds->Render( View, Projection );
+	mContext->OMSetDepthStencilState( nullptr, 0 );
+	mContext->OMSetBlendState( nullptr, nullptr, 0xffffffff );
 }

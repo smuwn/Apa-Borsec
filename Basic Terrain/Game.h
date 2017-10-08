@@ -16,7 +16,8 @@
 #include "QuadTree.h"
 #include "RenderTexture.h"
 #include "SkyShader.h"
-#include "Skybox.h"
+#include "Skydome.h"
+#include "SkyPlaneShader.h"
 
 #define GAME CGame::GetGameInstance( )
 #if defined UNICODE
@@ -41,7 +42,7 @@ private:
 	D3D11_VIEWPORT mFullscreenViewport;
 	
 	std::unique_ptr<CModel> mTriangle;
-	std::unique_ptr<Skybox> mSkybox;
+	std::unique_ptr<Skydome> mSkydome;
 	std::unique_ptr<CCamera> mCamera;
 
 	std::shared_ptr<CTerrain> mTerrain;
@@ -68,6 +69,7 @@ private:
 	std::shared_ptr<C3DShader> m3DShader;
 	std::shared_ptr<LineShader> mLineShader;
 	std::shared_ptr<SkyShader> mSkyShader;
+	std::shared_ptr<SkyPlaneShader> mSkyPlaneShader;
 
 	WCHAR* mGPUDescription;
 	
