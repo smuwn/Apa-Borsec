@@ -12,17 +12,11 @@ public:
 	{
 		DirectX::XMMATRIX WVP;
 	};
-	struct SPSPerObject
-	{
-		DirectX::XMFLOAT2 FirstTextureOffset;
-		DirectX::XMFLOAT2 SecondTextureOffset;
-		float brightness;
-		DirectX::XMFLOAT3 pad;
-	};
 	struct STextureInfo
 	{
-		CTexture * Texture;
-		DirectX::XMFLOAT2 Offset;
+		DirectX::XMFLOAT2 translation;
+		float scale;
+		float brightness;
 	};
 private:
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> mVertexShader;
@@ -41,8 +35,8 @@ public:
 	SkyPlaneShader( ID3D11Device*, ID3D11DeviceContext* );
 	~SkyPlaneShader( );
 public:
-	void Render( UINT IndexCount, float brightness,
+	void Render( UINT IndexCount, STextureInfo const& TextureInfo,
 		DirectX::FXMMATRIX& World, DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection,
-		STextureInfo const& FirstTexture, STextureInfo const& SecondTexture );
+		CTexture const* CloudTexture, CTexture const* PerturbTexture );
 };
 

@@ -19,14 +19,13 @@ CloudPlane::CloudPlane( ID3D11Device * Device, ID3D11DeviceContext * Context, st
 			sizeof( DWORD ) * mPlane.Indices.size( ), 0, &mPlane.Indices[ 0 ] );
 
 		mWorld = DirectX::XMMatrixIdentity( );
-		
-		mFirstTextureSpeed = DirectX::XMFLOAT2( 0.02f, 0.005f );
-		mSecondTextureSpeed = DirectX::XMFLOAT2( 0.07f, 0.002f );
 
-		mFirstTextureInfo.Texture = new CTexture( L"Data/cloud001.dds", mDevice );
-		mFirstTextureInfo.Offset = DirectX::XMFLOAT2( 0.0f, 0.0f );
-		mSecondTextureInfo.Texture = new CTexture( L"Data/cloud002.dds", mDevice );
-		mSecondTextureInfo.Offset = DirectX::XMFLOAT2( 0.0f, 0.0f );
+		mClouds = std::make_unique<CTexture>( ( LPWSTR ) L"Data/cloud001.dds", mDevice );
+		mPerturb = std::make_unique<CTexture>( ( LPWSTR ) L"Data/perturb001.dds", mDevice );
+
+		mTextureInfo.brightness = 0.65f;
+		mTextureInfo.scale = 0.3f;
+		mTextureInfo.translation = DirectX::XMFLOAT2( 0.0f, 0.0f );
 	}
 	CATCH;
 }
@@ -34,16 +33,8 @@ CloudPlane::CloudPlane( ID3D11Device * Device, ID3D11DeviceContext * Context, st
 
 CloudPlane::~CloudPlane( )
 {
-	if ( mFirstTextureInfo.Texture )
-	{
-		delete mFirstTextureInfo.Texture;
-		mFirstTextureInfo.Texture = 0;
-	}
-	if ( mSecondTextureInfo.Texture )
-	{
-		delete mSecondTextureInfo.Texture;
-		mSecondTextureInfo.Texture = 0;
-	}
+	mClouds.reset( );
+	mPerturb.reset( );
 
 	mVertexBuffer.Reset( );
 	mIndexBuffer.Reset( );
@@ -55,22 +46,12 @@ CloudPlane::~CloudPlane( )
 void CloudPlane::Update( DirectX::XMFLOAT3 const& CamPos, float frameTime )
 {
 	mWorld = DirectX::XMMatrixTranslation( CamPos.x, CamPos.y, CamPos.z );
-	
-	mFirstTextureInfo.Offset.x += mFirstTextureSpeed.x * frameTime;
-	mFirstTextureInfo.Offset.y += mFirstTextureSpeed.y * frameTime;
+	mTextureInfo.translation.x += 0.06f * frameTime;
 
-	mSecondTextureInfo.Offset.x += mSecondTextureSpeed.x * frameTime;
-	mSecondTextureInfo.Offset.y += mSecondTextureSpeed.y * frameTime;
-
-	if ( mFirstTextureInfo.Offset.x >= 1.0f )
-		mFirstTextureInfo.Offset.x -= 1.0f;
-	if ( mFirstTextureInfo.Offset.y >= 1.0f )
-		mFirstTextureInfo.Offset.y -= 1.0f;
-
-	if ( mSecondTextureInfo.Offset.x >= 1.0f )
-		mSecondTextureInfo.Offset.x -= 1.0f;
-	if ( mSecondTextureInfo.Offset.y >= 1.0f )
-		mSecondTextureInfo.Offset.y -= 1.0f;
+	if ( mTextureInfo.translation.x > 1.0f )
+		mTextureInfo.translation.x -= 1.0f;
+	if ( mTextureInfo.translation.y > 1.0f )
+		mTextureInfo.translation.y -= 1.0f;
 }
 
 void CloudPlane::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection )
@@ -82,6 +63,6 @@ void CloudPlane::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projectio
 	mContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 
 	mContext->RSSetState( DX::NoCulling.Get( ) );
-	mShader->Render( mPlane.Indices.size( ), 0.85f, mWorld, View, Projection, mFirstTextureInfo, mSecondTextureInfo );
+	mShader->Render( mPlane.Indices.size( ), mTextureInfo, mWorld, View, Projection, mClouds.get( ), mPerturb.get( ) );
 	mContext->RSSetState( DX::DefaultRS.Get( ) );
 }

@@ -16,15 +16,13 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mIndexBuffer;
 
 	std::shared_ptr<SkyPlaneShader> mShader;
+	SkyPlaneShader::STextureInfo mTextureInfo;
 
 	GeometryGenerator::MeshData mPlane;
 	DirectX::XMMATRIX mWorld;
 
-	SkyPlaneShader::STextureInfo mFirstTextureInfo;
-	SkyPlaneShader::STextureInfo mSecondTextureInfo;
-
-	DirectX::XMFLOAT2 mFirstTextureSpeed;
-	DirectX::XMFLOAT2 mSecondTextureSpeed;
+	std::unique_ptr<CTexture> mClouds;
+	std::unique_ptr<CTexture> mPerturb;
 
 	ID3D11Device * mDevice;
 	ID3D11DeviceContext * mContext;

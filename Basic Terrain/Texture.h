@@ -12,7 +12,7 @@ public:
 	CTexture( LPWSTR lpPath, ID3D11Device * );
 	~CTexture( );
 public:
-	ID3D11ShaderResourceView* GetTexture()
+	ID3D11ShaderResourceView* GetTexture() const
 	{
 		return mTextureSRV.Get( );
 	}

@@ -39,7 +39,7 @@ SkyPlaneShader::SkyPlaneShader( ID3D11Device * Device, ID3D11DeviceContext * Con
 			sizeof( SVSPerObject ), D3D11_CPU_ACCESS_WRITE );
 		ShaderHelper::CreateBuffer( mDevice, &mPSPerObjectBuffer,
 			D3D11_USAGE::D3D11_USAGE_DYNAMIC, D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER,
-			sizeof( SPSPerObject ), D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE );
+			sizeof( STextureInfo ), D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE );
 
 		ZeroMemoryAndDeclare( D3D11_SAMPLER_DESC, sampDesc );
 		sampDesc.AddressU =
@@ -71,9 +71,9 @@ SkyPlaneShader::~SkyPlaneShader( )
 	mWrapSampler.Reset( );
 }
 
-void SkyPlaneShader::Render( UINT IndexCount, float brightness,
+void SkyPlaneShader::Render( UINT IndexCount, SkyPlaneShader::STextureInfo const& TextureInfo,
 	DirectX::FXMMATRIX & World, DirectX::FXMMATRIX & View, DirectX::FXMMATRIX & Projection,
-	STextureInfo const & FirstTexture, STextureInfo const & SecondTexture )
+	CTexture const* CloudTexture, CTexture const* PerturbTexture )
 {
 	// Replace the old toys
 	mContext->IASetInputLayout( mLayout.Get( ) );
@@ -92,23 +92,23 @@ void SkyPlaneShader::Render( UINT IndexCount, float brightness,
 	mContext->VSSetConstantBuffers( 0, 1, mVSPerObjectBuffer.GetAddressOf( ) );
 
 	mContext->PSSetSamplers( 0, 1, mWrapSampler.GetAddressOf( ) );
-
-	if ( FirstTexture.Texture /*!= nullptr*/ && SecondTexture.Texture /*!= nullptr*/ )
+	if ( CloudTexture != nullptr && PerturbTexture != nullptr )
 	{
-		ID3D11ShaderResourceView * SRV = FirstTexture.Texture->GetTexture( );
+		ID3D11ShaderResourceView * SRV = CloudTexture->GetTexture( );
 		mContext->PSSetShaderResources( 0, 1, &SRV );
-		SRV = SecondTexture.Texture->GetTexture( );
+		SRV = PerturbTexture->GetTexture( );
 		mContext->PSSetShaderResources( 1, 1, &SRV );
 
 		mContext->Map( mPSPerObjectBuffer.Get( ), 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &MappedSubresource );
-		
-		( ( SPSPerObject* ) MappedSubresource.pData )->FirstTextureOffset = FirstTexture.Offset;
-		( ( SPSPerObject* ) MappedSubresource.pData )->SecondTextureOffset = SecondTexture.Offset;
-		( ( SPSPerObject* ) MappedSubresource.pData )->brightness = brightness;
 
-		mContext->Unmap( mPSPerObjectBuffer.Get( ), 0 );
+		( ( STextureInfo* ) MappedSubresource.pData )->brightness = TextureInfo.brightness;
+		( ( STextureInfo* ) MappedSubresource.pData )->scale = TextureInfo.scale;
+		( ( STextureInfo* ) MappedSubresource.pData )->translation = TextureInfo.translation;
+
+		mContext->Unmap( mPSPerObjectBuffer.Get( ),0 );
 		mContext->PSSetConstantBuffers( 0, 1, mPSPerObjectBuffer.GetAddressOf( ) );
 
 		mContext->DrawIndexed( IndexCount, 0, 0 );
 	}
+
 }
