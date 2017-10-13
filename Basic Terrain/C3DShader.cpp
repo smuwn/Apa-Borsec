@@ -23,7 +23,7 @@ C3DShader::C3DShader( ID3D11Device * Device, ID3D11DeviceContext * Context ) :
 		layout[ 0 ].SemanticIndex = 0;
 		layout[ 0 ].SemanticName = "POSITION";
 		layout[ 1 ].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-		layout[ 1 ].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT;
+		layout[ 1 ].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
 		layout[ 1 ].InputSlot = 0;
 		layout[ 1 ].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
 		layout[ 1 ].InstanceDataStepRate = 0;

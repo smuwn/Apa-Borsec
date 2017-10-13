@@ -108,7 +108,7 @@ namespace FrustumCulling
 			XMVECTOR Plane = XMLoadFloat4( &Frustum[ i ] );
 			if ( XMVectorGetX(
 				XMPlaneDot( Plane, DirectX::XMVectorSet( Center.x, Center.y, Center.z, 1.0f ) )
-			) < -radius )
+			) <= -radius )
 				return false;
 		}
 		return true;
@@ -144,9 +144,9 @@ namespace FrustumCulling
 		float Height,
 		ViewFrustum const& Frustum )
 	{
-		if ( isSphereInFrustum( Center, width * 1.5f, Frustum ) )
+		if ( isSphereInFrustum( Center, width * 1.41f, Frustum ) )
 			return true;
-		if ( isRectangleInFrustum( Center, width, Height, width, Frustum ) )
+		if ( isRectangleInFrustum( Center, width, width, width, Frustum ) )
 			return true;
 		
 		return false;

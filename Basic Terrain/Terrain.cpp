@@ -140,33 +140,40 @@ void CTerrain::InitHeightmapTerrain( )
 	float tU = 0, tV = 0;
 	float VincrementValue = TextureRepeat / mRowCount;
 	float UincrementValue = TextureRepeat / mColCount;
+	float tDU = 0, tDV = 0;
+	float DVincrementValue = ( TextureRepeat * 2 ) / mRowCount;
+	float DUincrementValue = ( TextureRepeat * 2 ) / mColCount;
 
 	for (UINT i = 0; i < mRowCount - 1; ++i )
 	{
 		for (UINT j = 0; j < mColCount - 1; ++j )
 		{
 			mIndices[ index + 0 ] = ( i + 1 ) * mColCount + j; // Bottom left
-			mVertices[ ( i + 1 ) * mColCount + j ].Texture = DirectX::XMFLOAT2( tU,tV + VincrementValue );
+			mVertices[ ( i + 1 ) * mColCount + j ].Texture = DirectX::XMFLOAT4( tU, tV + VincrementValue, tDU, tDV + DVincrementValue );
 			
 			mIndices[ index + 1 ] = ( i + 1 ) * mColCount + j + 1; // Bottom right
-			mVertices[ ( i + 1 ) * mColCount + j + 1 ].Texture = DirectX::XMFLOAT2( tU + UincrementValue, tV + VincrementValue );
+			mVertices[ ( i + 1 ) * mColCount + j + 1 ].Texture = DirectX::XMFLOAT4( tU + UincrementValue, tV + VincrementValue, tDU + DUincrementValue, tDV + DVincrementValue);
 
 			mIndices[ index + 2 ] = i * mColCount + j; // Top left
-			mVertices[ i * mColCount + j ].Texture = DirectX::XMFLOAT2( tU, tV );
+			mVertices[ i * mColCount + j ].Texture = DirectX::XMFLOAT4( tU, tV, tDU, tDV );
 
 			mIndices[ index + 3 ] = ( i + 1 ) * mColCount + j + 1; // Bottom right
 
 			mIndices[ index + 4 ] = i * mColCount + j + 1; // Top right
-			mVertices[ i * mColCount + j + 1 ].Texture = DirectX::XMFLOAT2( tU + UincrementValue, tV );
+			mVertices[ i * mColCount + j + 1 ].Texture = DirectX::XMFLOAT4( tU + UincrementValue, tV, tDU + DUincrementValue, tDV );
 
 			mIndices[ index + 5 ] = i * mColCount + j; // Top left
 
 			tU += UincrementValue;
+			tDU += DUincrementValue;
 
 			index += 6;
 		}
 		tU = 0.0f;
 		tV += VincrementValue;
+
+		tDU = 0.0f;
+		tDV += DVincrementValue;
 	}
 }
 
@@ -455,42 +462,42 @@ void CTerrain::InitMaterialBuffers( )
 			Vertex.Position = DirectX::XMFLOAT3( mHeightmap[ bottomLeftIndex ].x, mHeightmap[ bottomLeftIndex ].y, mHeightmap[ bottomLeftIndex ].z );
 			Vertex.Normal = DirectX::XMFLOAT3( mHeightmap[ bottomLeftIndex ].nx, mHeightmap[ bottomLeftIndex ].ny, mHeightmap[ bottomLeftIndex ].nz );
 			Vertex.Color = DirectX::XMFLOAT4( mHeightmap[ bottomLeftIndex ].r, mHeightmap[ bottomLeftIndex ].g, mHeightmap[ bottomLeftIndex ].b, 1.0f );
-			Vertex.Texture = DirectX::XMFLOAT2( 0.0f, 1.0f );
+			Vertex.Texture = DirectX::XMFLOAT4( 0.0f, 1.0f, 0.0f, 1.0f );
 			mMaterials[ materialIndex ].Vertices.push_back( Vertex );
 
 			// Bottom right
 			Vertex.Position = DirectX::XMFLOAT3( mHeightmap[ bottomRightIndex ].x, mHeightmap[ bottomRightIndex ].y, mHeightmap[ bottomRightIndex ].z );
 			Vertex.Normal = DirectX::XMFLOAT3( mHeightmap[ bottomRightIndex ].nx, mHeightmap[ bottomRightIndex ].ny, mHeightmap[ bottomRightIndex ].nz );
 			Vertex.Color = DirectX::XMFLOAT4( mHeightmap[ bottomRightIndex ].r, mHeightmap[ bottomRightIndex ].g, mHeightmap[ bottomRightIndex ].b, 1.0f );
-			Vertex.Texture = DirectX::XMFLOAT2( 1.0f, 1.0f );
+			Vertex.Texture = DirectX::XMFLOAT4( 1.0f, 1.0f, 1.0f, 1.0f );
 			mMaterials[ materialIndex ].Vertices.push_back( Vertex );
 
 			// Top left
 			Vertex.Position = DirectX::XMFLOAT3( mHeightmap[ topLeftIndex ].x, mHeightmap[ topLeftIndex ].y, mHeightmap[ topLeftIndex ].z );
 			Vertex.Normal = DirectX::XMFLOAT3( mHeightmap[ topLeftIndex ].nx, mHeightmap[ topLeftIndex ].ny, mHeightmap[ topLeftIndex ].nz );
 			Vertex.Color = DirectX::XMFLOAT4( mHeightmap[ topLeftIndex ].r, mHeightmap[ topLeftIndex ].g, mHeightmap[ topLeftIndex ].b, 1.0f );
-			Vertex.Texture = DirectX::XMFLOAT2( 0.0f, 0.0f );
+			Vertex.Texture = DirectX::XMFLOAT4( 0.0f, 0.0f, 0.0f, 0.0f );
 			mMaterials[ materialIndex ].Vertices.push_back( Vertex );
 
 			// Bottom right
 			Vertex.Position = DirectX::XMFLOAT3( mHeightmap[ bottomRightIndex ].x, mHeightmap[ bottomRightIndex ].y, mHeightmap[ bottomRightIndex ].z );
 			Vertex.Normal = DirectX::XMFLOAT3( mHeightmap[ bottomRightIndex ].nx, mHeightmap[ bottomRightIndex ].ny, mHeightmap[ bottomRightIndex ].nz );
 			Vertex.Color = DirectX::XMFLOAT4( mHeightmap[ bottomRightIndex ].r, mHeightmap[ bottomRightIndex ].g, mHeightmap[ bottomRightIndex ].b, 1.0f );
-			Vertex.Texture = DirectX::XMFLOAT2( 1.0f, 1.0f );
+			Vertex.Texture = DirectX::XMFLOAT4( 1.0f, 1.0f, 1.0f, 1.0f );
 			mMaterials[ materialIndex ].Vertices.push_back( Vertex );
 
 			// Top right
 			Vertex.Position = DirectX::XMFLOAT3( mHeightmap[ topRightIndex ].x, mHeightmap[ topRightIndex ].y, mHeightmap[ topRightIndex ].z );
 			Vertex.Normal = DirectX::XMFLOAT3( mHeightmap[ topRightIndex ].nx, mHeightmap[ topRightIndex ].ny, mHeightmap[ topRightIndex ].nz );
 			Vertex.Color = DirectX::XMFLOAT4( mHeightmap[ topRightIndex ].r, mHeightmap[ topRightIndex ].g, mHeightmap[ topRightIndex ].b, 1.0f );
-			Vertex.Texture = DirectX::XMFLOAT2( 1.0f, 0.0f );
+			Vertex.Texture = DirectX::XMFLOAT4( 1.0f, 0.0f, 1.0f, 0.0f );
 			mMaterials[ materialIndex ].Vertices.push_back( Vertex );
 
 			// Top left
 			Vertex.Position = DirectX::XMFLOAT3( mHeightmap[ topLeftIndex ].x, mHeightmap[ topLeftIndex ].y, mHeightmap[ topLeftIndex ].z );
 			Vertex.Normal = DirectX::XMFLOAT3( mHeightmap[ topLeftIndex ].nx, mHeightmap[ topLeftIndex ].ny, mHeightmap[ topLeftIndex ].nz );
 			Vertex.Color = DirectX::XMFLOAT4( mHeightmap[ topLeftIndex ].r, mHeightmap[ topLeftIndex ].g, mHeightmap[ topLeftIndex ].b, 1.0f );
-			Vertex.Texture = DirectX::XMFLOAT2( 0.0f, 0.0f );
+			Vertex.Texture = DirectX::XMFLOAT4( 0.0f, 0.0f, 0.0f, 0.0f );
 			mMaterials[ materialIndex ].Vertices.push_back( Vertex );
 		}
 	}

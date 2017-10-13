@@ -21,9 +21,10 @@ struct PSIn
 {
     float4 PositionH : SV_POSITION;
     float4 PositionW : POSITION;
+    float4 PositionHC : POSITION1;
     float4 Color : COLOR;
+    float4 TexCoord : TEXCOORD;
     float3 NormalW : NORMAL;
-    float2 TexCoord : TEXCOORD;
 };
 
 float4 main( PSIn input ) : SV_TARGET
@@ -46,16 +47,23 @@ float4 main( PSIn input ) : SV_TARGET
 
     if ( HasAlpha )
     {
-        float4 t1 = ObjTexture.Sample( WrapSampler, input.TexCoord );
-        float4 t2 = ObjTexture2.Sample( WrapSampler, input.TexCoord );
-        float4 alpha = ObjAlphamap.Sample( WrapSampler, input.TexCoord );
+        float4 t1 = ObjTexture.Sample( WrapSampler, input.TexCoord.xy );
+        float4 t2 = ObjTexture2.Sample( WrapSampler, input.TexCoord.xy );
+        float4 alpha = ObjAlphamap.Sample( WrapSampler, input.TexCoord.xy );
         BlendColor = lerp( t1, t2, alpha );
     }
 	else
     {
-        BlendColor = ObjTexture.Sample( WrapSampler, input.TexCoord );
+        float depth = input.PositionHC.z / input.PositionHC.w;
+        if ( depth < 0.95f )
+        {
+            BlendColor = ObjTexture.Sample( WrapSampler, input.TexCoord.zw );
+        }
+        else
+        {
+            BlendColor = ObjTexture.Sample( WrapSampler, input.TexCoord.xy );
+        }
     }
-
     Color = BlendColor * Multiplier;
 
     return saturate(Color * input.Color * 2.0f);

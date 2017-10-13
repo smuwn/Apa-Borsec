@@ -18,6 +18,7 @@
 #include "SkyShader.h"
 #include "Skydome.h"
 #include "SkyPlaneShader.h"
+#include "DepthShader.h"
 
 #define GAME CGame::GetGameInstance( )
 #if defined UNICODE
@@ -28,7 +29,7 @@
 
 ALIGN16 class CGame sealed
 {
-	static constexpr const float NearZ = 0.1f;
+	static constexpr const float NearZ = 1.0f;
 	static constexpr const float FarZ = 500.0f;
 	static constexpr const float FOV = ( float ) D3DX_PI / 3.0f;
 private:
@@ -41,7 +42,6 @@ private:
 	CHRTimer mTimer;
 	D3D11_VIEWPORT mFullscreenViewport;
 	
-	std::unique_ptr<CModel> mTriangle;
 	std::unique_ptr<Skydome> mSkydome;
 	std::unique_ptr<CCamera> mCamera;
 
@@ -49,7 +49,6 @@ private:
 	std::shared_ptr<CLineManager> mLineManager;
 
 	std::shared_ptr<QuadTree> mQuadTree;
-	std::shared_ptr<QuadTree> mSecondQuadTree;
 
 	std::unique_ptr<CText> mFPSText;
 
@@ -70,6 +69,7 @@ private:
 	std::shared_ptr<LineShader> mLineShader;
 	std::shared_ptr<SkyShader> mSkyShader;
 	std::shared_ptr<SkyPlaneShader> mSkyPlaneShader;
+	std::shared_ptr<DepthShader> mDepthShader;
 
 	WCHAR* mGPUDescription;
 	

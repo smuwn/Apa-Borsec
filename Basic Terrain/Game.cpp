@@ -30,7 +30,7 @@ CGame::~CGame( )
 	mDefaultShader.reset( );
 	m2DShader.reset( );
 	m3DShader.reset( );
-	mTriangle.reset( );
+	mDepthShader.reset( );
 	mFPSText.reset( );
 	mTerrain.reset( );
 #if DEBUG || _DEBUG
@@ -206,12 +206,12 @@ void CGame::InitShaders( )
 	mLineShader = std::make_shared<LineShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mSkyShader = std::make_shared<SkyShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mSkyPlaneShader = std::make_shared<SkyPlaneShader>( mDevice.Get( ), mImmediateContext.Get( ) );
+	mDepthShader = std::make_shared<DepthShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 }
 
 void CGame::InitModels( )
 {
 	mCamera = std::make_unique<CCamera>( mInput, FOV, ( float ) mWidth / ( float ) mHeight, NearZ, FarZ );
-	mTriangle = std::make_unique<CModel>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mTerrain = std::make_shared<CTerrain>( mDevice.Get( ), mImmediateContext.Get( ), m3DShader,
 		( LPSTR ) "Data/HM.bmp", ( LPSTR ) "Data/HM.normals", ( LPSTR ) "Data/HMColor.bmp" );
 	mLineManager = std::make_shared<CLineManager>( mDevice.Get( ), mImmediateContext.Get( ), mLineShader);
@@ -288,8 +288,10 @@ void CGame::Update( )
 
 	mSkydome->Update( mCamera->GetCamPos( ), mTimer.GetFrameTime( ) );
 	mCamera->Frame( mTimer.GetFrameTime( ) );
+#if DEBUG || _DEBUG
 	if ( mInput->isSpecialKeyPressed( DIK_B ) )
 		bDrawWireframe = bDrawWireframe ? false : true;
+#endif
 }
 
 void CGame::Render( )

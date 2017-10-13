@@ -8,12 +8,12 @@ class CTerrain sealed
 	friend class QuadTree;
 private:
 	static constexpr const float HeightFactor = 10.0f;
-	static constexpr const float TextureRepeat = 3;
+	static constexpr const float TextureRepeat = 10;
 public:
 	struct SVertex
 	{
 		DirectX::XMFLOAT3 Position;
-		DirectX::XMFLOAT2 Texture;
+		DirectX::XMFLOAT4 Texture;
 		DirectX::XMFLOAT3 Normal;
 		DirectX::XMFLOAT4 Color;
 		SVertex( ) :

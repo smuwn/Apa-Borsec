@@ -22,7 +22,7 @@ Skydome::Skydome( ID3D11Device * Device, ID3D11DeviceContext * Context,
 
 		SkyShader::SPSColor Color;
 		Color.CenterColor = DirectX::XMFLOAT4( 0.81f, 0.38f, 0.66f, 1.0f );
-		Color.ApexColor = DirectX::XMFLOAT4( 0.0f, 0.15f, 0.66f, 1.0f );
+		Color.ApexColor = DirectX::XMFLOAT4( 0.0f, 0.25f, 0.46f, 1.0f );
 		mShader->SetColors( Color );
 
 	}
