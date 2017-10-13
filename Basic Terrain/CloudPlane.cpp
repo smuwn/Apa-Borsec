@@ -46,7 +46,7 @@ CloudPlane::~CloudPlane( )
 void CloudPlane::Update( DirectX::XMFLOAT3 const& CamPos, float frameTime )
 {
 	mWorld = DirectX::XMMatrixTranslation( CamPos.x, CamPos.y, CamPos.z );
-	mTextureInfo.translation.x += 0.06f * frameTime;
+	mTextureInfo.translation.x += 0.001f * frameTime;
 
 	if ( mTextureInfo.translation.x > 1.0f )
 		mTextureInfo.translation.x -= 1.0f;
@@ -62,7 +62,7 @@ void CloudPlane::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projectio
 	mContext->IASetVertexBuffers( 0, 1, mVertexBuffer.GetAddressOf( ), &Stride, &Offsets );
 	mContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 
-	mContext->RSSetState( DX::NoCulling.Get( ) );
+	mContext->RSSetState( DX::FrontCulling.Get( ) );
 	mShader->Render( mPlane.Indices.size( ), mTextureInfo, mWorld, View, Projection, mClouds.get( ), mPerturb.get( ) );
 	mContext->RSSetState( DX::DefaultRS.Get( ) );
 }

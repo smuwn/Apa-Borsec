@@ -40,7 +40,7 @@ namespace DX
 		ThrowIfFailed( Device->CreateDepthStencilState( &dsDesc, &DSLessEqual ) );
 		ZeroVariable( dsDesc );
 		dsDesc.DepthEnable = TRUE;
-		dsDesc.DepthFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_LESS_EQUAL;
+		dsDesc.DepthFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_GREATER;
 		dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK::D3D11_DEPTH_WRITE_MASK_ALL;
 		dsDesc.StencilEnable = FALSE;
 		ThrowIfFailed( Device->CreateDepthStencilState( &dsDesc, &DSGreater ) );

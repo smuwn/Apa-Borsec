@@ -57,7 +57,7 @@ void Skydome::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection )
 	mContext->RSSetState( DX::DefaultRS.Get( ) );
 
 	mContext->OMSetBlendState( DX::AdditiveBlend.Get( ), nullptr, 0xffffffff );
-	mContext->OMSetDepthStencilState( DX::DSGreater.Get( ), 0 );
+	mContext->OMSetDepthStencilState( DX::DSLessEqual.Get( ), 0 );
 	mClouds->Render( View, Projection );
 	mContext->OMSetDepthStencilState( nullptr, 0 );
 	mContext->OMSetBlendState( nullptr, nullptr, 0xffffffff );
