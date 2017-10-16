@@ -21,6 +21,8 @@ private:
 	GeometryGenerator::MeshData mPlane;
 	DirectX::XMMATRIX mWorld;
 
+	DirectX::XMFLOAT2 mVelocity;
+
 	std::unique_ptr<CTexture> mClouds;
 	std::unique_ptr<CTexture> mPerturb;
 

@@ -9,7 +9,7 @@ CloudPlane::CloudPlane( ID3D11Device * Device, ID3D11DeviceContext * Context, st
 {
 	try
 	{
-		GeometryGenerator::CreateCurbedPlane( 10, 10, 0.5f, -1.0f, 4, mPlane );
+		GeometryGenerator::CreateCurbedPlane( 10, 10, 0.5f, -3.0f, 4, mPlane );
 		
 		ShaderHelper::CreateBuffer( mDevice, &mVertexBuffer,
 			D3D11_USAGE::D3D11_USAGE_IMMUTABLE, D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER,
@@ -26,6 +26,9 @@ CloudPlane::CloudPlane( ID3D11Device * Device, ID3D11DeviceContext * Context, st
 		mTextureInfo.brightness = 0.65f;
 		mTextureInfo.scale = 0.3f;
 		mTextureInfo.translation = DirectX::XMFLOAT2( 0.0f, 0.0f );
+
+		mVelocity.x = 0.01f;
+		mVelocity.y = 0.005f;
 	}
 	CATCH;
 }
@@ -46,7 +49,8 @@ CloudPlane::~CloudPlane( )
 void CloudPlane::Update( DirectX::XMFLOAT3 const& CamPos, float frameTime )
 {
 	mWorld = DirectX::XMMatrixTranslation( CamPos.x, CamPos.y, CamPos.z );
-	mTextureInfo.translation.x += 0.001f * frameTime;
+	mTextureInfo.translation.x += mVelocity.x * frameTime;
+	mTextureInfo.translation.y += mVelocity.y * frameTime;
 
 	if ( mTextureInfo.translation.x > 1.0f )
 		mTextureInfo.translation.x -= 1.0f;
