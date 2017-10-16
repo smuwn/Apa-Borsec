@@ -56,8 +56,10 @@ private:
 
 	std::shared_ptr<C3DShader> mShader;
 
-	std::shared_ptr<CTexture> mTexture;
-	std::vector<decltype( mTexture )> mMaterialTextures;
+	std::shared_ptr<CTexture> mGrass;
+	std::shared_ptr<CTexture> mSlope;
+	std::shared_ptr<CTexture> mRock;
+	std::vector<decltype( mGrass )> mMaterialTextures;
 	std::vector<SMaterial> mMaterials;
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mVertexBuffer;

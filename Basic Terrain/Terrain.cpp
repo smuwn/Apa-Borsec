@@ -31,7 +31,9 @@ CTerrain::CTerrain( ID3D11Device * Device, ID3D11DeviceContext * Context, std::s
 			InitNormals( Normalmap );
 			InitBuffers( );
 		}
-		mTexture = std::make_shared<CTexture>( ( LPWSTR ) L"Data/Dirt01.dds", mDevice );
+		mGrass = std::make_shared<CTexture>( ( LPWSTR ) L"Data/Dirt01.dds", mDevice );
+		mSlope = std::make_shared<CTexture>( ( LPWSTR ) L"Data/slope.dds", mDevice );
+		mRock = std::make_shared<CTexture>( ( LPWSTR ) L"Data/rock.dds", mDevice );
 		DirectX::XMStoreFloat4x4( &mWorld, DirectX::XMMatrixIdentity( ) );
 	}
 	CATCH;
@@ -141,8 +143,8 @@ void CTerrain::InitHeightmapTerrain( )
 	float VincrementValue = TextureRepeat / mRowCount;
 	float UincrementValue = TextureRepeat / mColCount;
 	float tDU = 0, tDV = 0;
-	float DVincrementValue = ( TextureRepeat * 2 ) / mRowCount;
-	float DUincrementValue = ( TextureRepeat * 2 ) / mColCount;
+	float DVincrementValue = ( TextureRepeat * 4 ) / mRowCount;
+	float DUincrementValue = ( TextureRepeat * 4 ) / mColCount;
 
 	for (UINT i = 0; i < mRowCount - 1; ++i )
 	{
@@ -614,7 +616,7 @@ void CTerrain::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection,
 	if ( bWireframe )
 		mContext->RSSetState( DX::Wireframe.Get( ) );
 	mShader->Render( mIndexCount, DirectX::XMMatrixIdentity( ), View, Projection,
-		mTexture.get( ) );
+		mGrass.get( ) );
 	mContext->RSSetState( DX::DefaultRS.Get( ) );
 }
 

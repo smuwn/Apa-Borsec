@@ -24,7 +24,9 @@ private:
 	std::shared_ptr<CTerrain> mTerrain;
 	std::shared_ptr<CLineManager> mLines;
 	std::shared_ptr<C3DShader> mShader;
-	std::shared_ptr<CTexture> mTexture;
+	std::shared_ptr<CTexture> mGrass;
+	std::shared_ptr<CTexture> mSlope;
+	std::shared_ptr<CTexture> mRock;
 
 	SNode * mParentNode;
 

@@ -30,7 +30,7 @@
 ALIGN16 class CGame sealed
 {
 	static constexpr const float NearZ = 1.0f;
-	static constexpr const float FarZ = 500.0f;
+	static constexpr const float FarZ = 10000.0f;
 	static constexpr const float FOV = ( float ) D3DX_PI / 3.0f;
 private:
 	HINSTANCE mhInstance;

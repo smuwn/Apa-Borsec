@@ -116,7 +116,7 @@ void C3DShader::Render( UINT IndexCount, DirectX::FXMMATRIX & World, DirectX::FX
 }
 
 void C3DShader::RenderVertices( UINT IndexCount, DirectX::FXMMATRIX & World, DirectX::FXMMATRIX & View, DirectX::FXMMATRIX & Projection,
-	CTexture * texture, CTexture * texture2, CTexture * Alpha )
+	CTexture * texture, CTexture * texture2, CTexture * texture3, int startIndex )
 {
 	// Replace the old toys
 	mContext->IASetInputLayout( mInputLayout.Get( ) );
@@ -135,13 +135,15 @@ void C3DShader::RenderVertices( UINT IndexCount, DirectX::FXMMATRIX & World, Dir
 	mContext->VSSetConstantBuffers( 0, 1, mPerObjectBuffer.GetAddressOf( ) );
 
 	bool bUseAlpha = false;
-	if ( texture2 != nullptr && Alpha != nullptr )
+	if ( texture2 != nullptr && texture3 != nullptr )
 	{
 		bUseAlpha = true;
 		ID3D11ShaderResourceView *SRV = texture2->GetTexture( );
-		mContext->PSSetShaderResources( 1, 1, &SRV );
-		SRV = Alpha->GetTexture( );
-		mContext->PSSetShaderResources( 2, 1, &SRV );
+		mContext->PSSetShaderResources( startIndex + 1 - 1, 1, &SRV );
+		SRV = texture3->GetTexture( );
+		mContext->PSSetShaderResources( startIndex + 2 - 1, 1, &SRV );
+		if ( startIndex > 1 )
+			bUseAlpha = false;
 	}
 
 	mContext->Map( mTextureBuffer.Get( ), 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &MappedSubresource );

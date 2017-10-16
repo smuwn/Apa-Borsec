@@ -213,7 +213,7 @@ void CGame::InitModels( )
 {
 	mCamera = std::make_unique<CCamera>( mInput, FOV, ( float ) mWidth / ( float ) mHeight, NearZ, FarZ );
 	mTerrain = std::make_shared<CTerrain>( mDevice.Get( ), mImmediateContext.Get( ), m3DShader,
-		( LPSTR ) "Data/HM.bmp", ( LPSTR ) "Data/HM.normals", ( LPSTR ) "Data/HMColor.bmp" );
+		( LPSTR ) "Data/heightmap.bmp", ( LPSTR ) "Data/heightmap.normals", ( LPSTR ) "Data/HMColor.bmp" );
 	mLineManager = std::make_shared<CLineManager>( mDevice.Get( ), mImmediateContext.Get( ), mLineShader);
 	mQuadTree = std::make_shared<QuadTree>( mDevice.Get( ), mImmediateContext.Get( ),
 		m3DShader, mTerrain, mLineManager );

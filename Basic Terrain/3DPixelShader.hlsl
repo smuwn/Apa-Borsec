@@ -1,8 +1,13 @@
 
-Texture2D ObjTexture : register( t0 );
+Texture2D ObjGrass : register( t0 );
 Texture2D ObjTexture2 : register( t1 );
 Texture2D ObjAlphamap : register( t2 );
+Texture2D ObjSlope : register( t3 );
+Texture2D ObjRock : register( t4 );
 SamplerState WrapSampler : register( s0 );
+
+#define MIN_SLOPE 0.2f
+#define MAX_SLOPE 0.7f
 
 cbuffer cbLight : register( b0 )
 {
@@ -47,24 +52,47 @@ float4 main( PSIn input ) : SV_TARGET
 
     if ( HasAlpha )
     {
-        float4 t1 = ObjTexture.Sample( WrapSampler, input.TexCoord.xy );
+        float4 t1 = ObjGrass.Sample( WrapSampler, input.TexCoord.xy );
         float4 t2 = ObjTexture2.Sample( WrapSampler, input.TexCoord.xy );
         float4 alpha = ObjAlphamap.Sample( WrapSampler, input.TexCoord.xy );
         BlendColor = lerp( t1, t2, alpha );
     }
 	else
     {
+        float2 texCoord;
         float depth = input.PositionHC.z / input.PositionHC.w;
-        if ( depth < 0.95f )
+        if ( depth < 0.99f )
         {
-            BlendColor = ObjTexture.Sample( WrapSampler, input.TexCoord.zw );
+            texCoord = input.TexCoord.zw;
         }
         else
         {
-            BlendColor = ObjTexture.Sample( WrapSampler, input.TexCoord.xy );
+            texCoord = input.TexCoord.xy;
+        } /// Detail control
+
+        float4 GrassColor = ObjGrass.Sample( WrapSampler, texCoord );
+        float4 SlopeColor = ObjSlope.Sample( WrapSampler, texCoord );
+        float4 RockColor = ObjRock.Sample( WrapSampler, texCoord );
+
+        float InvSlope = 1.0f - input.NormalW.y;
+
+        if ( InvSlope < MIN_SLOPE )
+        {
+            float blend = InvSlope / MIN_SLOPE;
+            BlendColor = lerp( GrassColor, SlopeColor, blend );
+        }
+        else if ( InvSlope >= MIN_SLOPE && InvSlope < MAX_SLOPE )
+        {
+            float blend = ( InvSlope - MIN_SLOPE ) / ( MAX_SLOPE - MIN_SLOPE );
+            BlendColor = lerp( SlopeColor, RockColor, blend );
+        }
+		else // InvSlope >= MAX_SLOPE
+        {
+            BlendColor = RockColor;
         }
     }
     Color = BlendColor * Multiplier;
+
 
     return saturate(Color * input.Color * 2.0f);
 }
