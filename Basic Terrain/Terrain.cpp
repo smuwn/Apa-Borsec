@@ -13,7 +13,7 @@ CTerrain::CTerrain( ID3D11Device * Device, ID3D11DeviceContext * Context, std::s
 	try
 	{
 		mHasBlendingmap = false;
-		InitHeightmap( Heightmap, Colormap );
+		InitHeightmap( Heightmap, Colormap, true );
 		if ( Materials != "" && Blendingmap != "" )
 		{
 			mHasBlendingmap = true;
@@ -47,7 +47,7 @@ CTerrain::~CTerrain( )
 	mIndexBuffer.Reset( );
 }
 
-void CTerrain::InitHeightmap( LPSTR Path, LPSTR Colormap )
+void CTerrain::InitHeightmap( LPSTR Path, LPSTR Colormap, bool Smooth )
 {
 	FILE * HeightmapFile;
 	FILE * ColormapFile;
@@ -112,8 +112,46 @@ void CTerrain::InitHeightmap( LPSTR Path, LPSTR Colormap )
 		}
 	}
 
+	if ( Smooth )
+	{
+		for ( int i = 0; i < mRowCount; ++i )
+		{
+			for ( int j = 0; j < mColCount; ++j )
+			{
+				Average( i, j );
+			}
+		}
+	}
+
 	delete[ ] image;
 	delete[ ] colors;
+}
+
+void CTerrain::Average( int row, int col )
+{
+	float avg = 0.0f;
+	int num = 0;
+	for ( int i = row - 3; i <= row + 3; ++i )
+	{
+		for ( int j = col - 3; j <= col + 3; ++j )
+		{
+			if ( isInBounds( i, j ) )
+			{
+				avg += mHeightmap[ i * mColCount + j ].y;
+				num++;
+			}
+		}
+	}
+	mHeightmap[ row * mColCount + col ].y = avg / num;
+}
+
+bool CTerrain::isInBounds( int row, int col )
+{
+	if ( row < 0 || row >= ( int )mRowCount )
+		return false;
+	if ( col < 0 || col >= ( int )mColCount )
+		return false;
+	return true;
 }
 
 void CTerrain::InitHeightmapTerrain( )

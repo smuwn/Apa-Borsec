@@ -85,7 +85,7 @@ public:
 		LPSTR Materials = "", LPSTR Blendingmap = "" );
 	~CTerrain( );
 private:
-	void InitHeightmap( LPSTR Heightmap, LPSTR Colormap );
+	void InitHeightmap( LPSTR Heightmap, LPSTR Colormap, bool bSmooth = true );
 	void InitHeightmapTerrain( );
 	void InitNormals( LPSTR Normalmap );
 	void InitTerrain( );
@@ -93,7 +93,10 @@ private:
 	void InitMaterials( LPSTR Materials );
 	void InitMaterialMap( LPSTR Materialmap );
 	void InitMaterialBuffers( );
+private:
 	void CalculateNormalsFromHeightmap( );
+	void Average( int row, int col );
+	bool isInBounds( int row, int col );
 private:
 	void CopyVertices( void* To );
 public:
