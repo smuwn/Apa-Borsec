@@ -14,7 +14,7 @@ C3DShader::C3DShader( ID3D11Device * Device, ID3D11DeviceContext * Context ) :
 			mDevice, &mBlobs[ 0 ], reinterpret_cast< ID3D11DeviceChild** >( VS ) );
 		ShaderHelper::CreateShaderFromFile( L"Shaders/3DPixelShader.cso", "ps_4_0",
 			mDevice, &mBlobs[ 1 ], reinterpret_cast< ID3D11DeviceChild** >( PS ) );
-		D3D11_INPUT_ELEMENT_DESC layout[ 4 ];
+		D3D11_INPUT_ELEMENT_DESC layout[ 6 ];
 		layout[ 0 ].AlignedByteOffset = 0;
 		layout[ 0 ].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT;
 		layout[ 0 ].InputSlot = 0;
@@ -37,12 +37,26 @@ C3DShader::C3DShader( ID3D11Device * Device, ID3D11DeviceContext * Context ) :
 		layout[ 2 ].SemanticIndex = 0;
 		layout[ 2 ].SemanticName = "NORMAL";
 		layout[ 3 ].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-		layout[ 3 ].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
+		layout[ 3 ].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT;
 		layout[ 3 ].InputSlot = 0;
 		layout[ 3 ].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
 		layout[ 3 ].InstanceDataStepRate = 0;
 		layout[ 3 ].SemanticIndex = 0;
-		layout[ 3 ].SemanticName = "COLOR";
+		layout[ 3 ].SemanticName = "TANGENT";
+		layout[ 4 ].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+		layout[ 4 ].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT;
+		layout[ 4 ].InputSlot = 0;
+		layout[ 4 ].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
+		layout[ 4 ].InstanceDataStepRate = 0;
+		layout[ 4 ].SemanticIndex = 0;
+		layout[ 4 ].SemanticName = "BINORMAL";
+		layout[ 5 ].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+		layout[ 5 ].Format = DXGI_FORMAT::DXGI_FORMAT_R32G32B32A32_FLOAT;
+		layout[ 5 ].InputSlot = 0;
+		layout[ 5 ].InputSlotClass = D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA;
+		layout[ 5 ].InstanceDataStepRate = 0;
+		layout[ 5 ].SemanticIndex = 0;
+		layout[ 5 ].SemanticName = "COLOR";
 		UINT layoutCount = ARRAYSIZE( layout );
 		DX::ThrowIfFailed(
 			mDevice->CreateInputLayout( layout, layoutCount,
@@ -88,7 +102,7 @@ C3DShader::~C3DShader( )
 }
 
 void C3DShader::Render( UINT IndexCount, DirectX::FXMMATRIX & World, DirectX::FXMMATRIX & View, DirectX::FXMMATRIX & Projection,
-	CTexture * texture )
+	CTexture * texture, CTexture * bumpmap )
 {
 	// Replace the old toys
 	mContext->IASetInputLayout( mInputLayout.Get( ) );
@@ -111,12 +125,14 @@ void C3DShader::Render( UINT IndexCount, DirectX::FXMMATRIX & World, DirectX::FX
 	mContext->PSSetConstantBuffers( 0, 1, mLightBuffer.GetAddressOf( ) );
 	ID3D11ShaderResourceView * SRV = texture->GetTexture( );
 	mContext->PSSetShaderResources( 0, 1, &SRV );
+	SRV = bumpmap->GetTexture( );
+	mContext->PSSetShaderResources( 5, 1, &SRV );
 
 	mContext->DrawIndexed( IndexCount, 0, 0 );
 }
 
 void C3DShader::RenderVertices( UINT IndexCount, DirectX::FXMMATRIX & World, DirectX::FXMMATRIX & View, DirectX::FXMMATRIX & Projection,
-	CTexture * texture, CTexture * texture2, CTexture * texture3, int startIndex )
+	CTexture * texture, CTexture * bumpmap, CTexture * texture2, CTexture * texture3, int startIndex )
 {
 	// Replace the old toys
 	mContext->IASetInputLayout( mInputLayout.Get( ) );
@@ -156,6 +172,8 @@ void C3DShader::RenderVertices( UINT IndexCount, DirectX::FXMMATRIX & World, Dir
 	mContext->PSSetConstantBuffers( 0, 1, mLightBuffer.GetAddressOf( ) );
 	ID3D11ShaderResourceView * SRV = texture->GetTexture( );
 	mContext->PSSetShaderResources( 0, 1, &SRV );
+	SRV = bumpmap->GetTexture( );
+	mContext->PSSetShaderResources( 5, 1, &SRV );
 
 	mContext->Draw( IndexCount, 0 );
 }

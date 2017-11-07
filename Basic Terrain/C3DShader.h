@@ -43,10 +43,10 @@ public:
 public:
 	void Render( UINT IndexCount, DirectX::FXMMATRIX& World,
 		DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection,
-		CTexture * texture );
+		CTexture * texture, CTexture * bumpmap );
 	void RenderVertices( UINT vertexCount, DirectX::FXMMATRIX& World,
 		DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection,
-		CTexture * texture, CTexture * = nullptr, CTexture * = nullptr,
+		CTexture * texture, CTexture * bumpmap, CTexture * = nullptr, CTexture * = nullptr,
 		int = 1 );
 	void SetLight( SLight const& Light );
 };

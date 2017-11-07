@@ -15,6 +15,8 @@ public:
 		DirectX::XMFLOAT3 Position;
 		DirectX::XMFLOAT4 Texture;
 		DirectX::XMFLOAT3 Normal;
+		DirectX::XMFLOAT3 Tangent;
+		DirectX::XMFLOAT3 Binormal;
 		DirectX::XMFLOAT4 Color;
 		SVertex( ) :
 			Normal( 0.0f, 1.0f, 0.0f )
@@ -59,6 +61,7 @@ private:
 	std::shared_ptr<CTexture> mGrass;
 	std::shared_ptr<CTexture> mSlope;
 	std::shared_ptr<CTexture> mRock;
+	std::shared_ptr<CTexture> mBumpmap;
 	std::vector<decltype( mGrass )> mMaterialTextures;
 	std::vector<SMaterial> mMaterials;
 

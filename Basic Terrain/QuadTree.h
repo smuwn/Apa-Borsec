@@ -27,6 +27,7 @@ private:
 	std::shared_ptr<CTexture> mGrass;
 	std::shared_ptr<CTexture> mSlope;
 	std::shared_ptr<CTexture> mRock;
+	std::shared_ptr<CTexture> mBumpmap;
 
 	SNode * mParentNode;
 

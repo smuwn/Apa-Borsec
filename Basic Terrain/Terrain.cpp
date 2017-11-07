@@ -34,6 +34,7 @@ CTerrain::CTerrain( ID3D11Device * Device, ID3D11DeviceContext * Context, std::s
 		mGrass = std::make_shared<CTexture>( ( LPWSTR ) L"Data/Dirt01.dds", mDevice );
 		mSlope = std::make_shared<CTexture>( ( LPWSTR ) L"Data/slope.dds", mDevice );
 		mRock = std::make_shared<CTexture>( ( LPWSTR ) L"Data/rock.dds", mDevice );
+		mBumpmap = std::make_shared<CTexture>( ( LPWSTR ) L"Data/nmap.dds", mDevice );
 		DirectX::XMStoreFloat4x4( &mWorld, DirectX::XMMatrixIdentity( ) );
 	}
 	CATCH;
@@ -114,9 +115,9 @@ void CTerrain::InitHeightmap( LPSTR Path, LPSTR Colormap, bool Smooth )
 
 	if ( Smooth )
 	{
-		for ( int i = 0; i < mRowCount; ++i )
+		for ( unsigned int i = 0; i < mRowCount; ++i )
 		{
-			for ( int j = 0; j < mColCount; ++j )
+			for ( unsigned int j = 0; j < mColCount; ++j )
 			{
 				Average( i, j );
 			}
@@ -283,6 +284,7 @@ void CTerrain::InitNormals( LPSTR Normalmap )
 	if ( error )
 	{ // Couldn't open file
 		std::vector<DirectX::XMFLOAT3> unnormalized;
+		std::vector<DirectX::XMFLOAT3> tangent;
 		for ( size_t i = 0; i < mIndices.size( ) / 3; ++i )
 		{
 			float vecX, vecY, vecZ;
@@ -300,9 +302,30 @@ void CTerrain::InitNormals( LPSTR Normalmap )
 			DirectX::XMFLOAT3 Normal;
 			DirectX::XMStoreFloat3( &Normal, DirectX::XMVector3Cross( edge1, edge2 ) );
 			unnormalized.push_back( Normal );
+
+			DirectX::XMFLOAT2 tC1, tC2;
+			tC1.x = mVertices[ mIndices[ ( i * 3 ) + 1 ] ].Texture.x - mVertices[ mIndices[ ( i * 3 ) + 0 ] ].Texture.x;
+			tC1.y = mVertices[ mIndices[ ( i * 3 ) + 1 ] ].Texture.y - mVertices[ mIndices[ ( i * 3 ) + 0 ] ].Texture.y;
+
+			tC2.x = mVertices[ mIndices[ ( i * 3 ) + 2 ] ].Texture.x - mVertices[ mIndices[ ( i * 3 ) + 0 ] ].Texture.x;
+			tC2.y = mVertices[ mIndices[ ( i * 3 ) + 2 ] ].Texture.y - mVertices[ mIndices[ ( i * 3 ) + 0 ] ].Texture.y;
+
+			float denom = 1.0f / ( tC1.x * tC2.y - tC2.x * tC1.y );
+
+			DirectX::XMFLOAT3 Tangent;
+			DirectX::XMFLOAT3 e1, e2;
+			DirectX::XMStoreFloat3( &e1, edge1 );
+			DirectX::XMStoreFloat3( &e2, edge2 );
+
+			Tangent.x = ( tC1.y * e1.x - tC2.y * e2.x )  * denom;
+			Tangent.y = ( tC1.y * e1.x - tC2.y * e2.x )  * denom;
+			Tangent.z = ( tC1.y * e1.x - tC2.y * e2.x )  * denom;
+
+			tangent.push_back( Tangent );
 		}
 
 		DirectX::XMVECTOR sumNormal;
+		DirectX::XMVECTOR sumTangent;
 		int facesUsing;
 		float tX = 0, tY = 0, tZ = 0;
 		for ( size_t i = 0; i < mVertices.size( ); ++i )
@@ -321,15 +344,28 @@ void CTerrain::InitNormals( LPSTR Normalmap )
 
 					sumNormal = DirectX::XMVectorSet( tX, tY, tZ, 0.0f );
 					facesUsing++;
+
+					tX = DirectX::XMVectorGetX( sumTangent ) + tangent[ j ].x;
+					tY = DirectX::XMVectorGetY( sumTangent ) + tangent[ j ].y;
+					tZ = DirectX::XMVectorGetZ( sumTangent ) + tangent[ j ].z;
+					sumTangent = DirectX::XMVectorSet( tX, tY, tZ, 0.0f );
 				}
 			}
-			sumNormal = DirectX::XMVector3Normalize( sumNormal );
 			sumNormal = DirectX::XMVectorDivide( sumNormal,
 				DirectX::XMVectorSet(
 					( float ) facesUsing, ( float ) facesUsing, ( float ) facesUsing, ( float ) facesUsing
 					) );
+			sumNormal = DirectX::XMVector3Normalize( sumNormal );
+			sumTangent = DirectX::XMVectorDivide( sumTangent,
+				DirectX::XMVectorSet(
+					( float ) facesUsing, ( float ) facesUsing, ( float ) facesUsing, ( float ) facesUsing
+					) );
+			sumTangent = DirectX::XMVector3Normalize( sumNormal );
+			
 
 			DirectX::XMStoreFloat3( &mVertices[ i ].Normal, sumNormal );
+			DirectX::XMStoreFloat3( &mVertices[ i ].Tangent, sumTangent );
+			DirectX::XMStoreFloat3( &mVertices[ i ].Binormal, DirectX::XMVector3Cross( sumNormal, sumTangent ) );
 		}
 		FILE * NormalmapFile;
 		fopen_s( &NormalmapFile, Normalmap, "wb" );
@@ -346,7 +382,22 @@ void CTerrain::InitNormals( LPSTR Normalmap )
 			fwrite( &red, sizeof( decltype(red) ), 1, NormalmapFile );
 			fwrite( &green, sizeof( decltype( green ) ), 1, NormalmapFile );
 			fwrite( &blue, sizeof( decltype( blue ) ), 1, NormalmapFile );
+
+			red = mVertices[ i ].Tangent.x * 255;
+			green = mVertices[ i ].Tangent.y * 255;
+			blue = mVertices[ i ].Tangent.z * 255;
+
+			fwrite( &red, sizeof( decltype( red ) ), 1, NormalmapFile );
+			fwrite( &green, sizeof( decltype( green ) ), 1, NormalmapFile );
+			fwrite( &blue, sizeof( decltype( blue ) ), 1, NormalmapFile );
+
+			red = mVertices[ i ].Binormal.x * 255;
+			green = mVertices[ i ].Binormal.y * 255;
+			blue = mVertices[ i ].Binormal.z * 255;
 			
+			fwrite( &red, sizeof( decltype( red ) ), 1, NormalmapFile );
+			fwrite( &green, sizeof( decltype( green ) ), 1, NormalmapFile );
+			fwrite( &blue, sizeof( decltype( blue ) ), 1, NormalmapFile );
 		}
 
 		fclose( NormalmapFile );
@@ -362,6 +413,18 @@ void CTerrain::InitNormals( LPSTR Normalmap )
 			mVertices[ i ].Normal.x = red / 255.f;
 			mVertices[ i ].Normal.y = green / 255.f;
 			mVertices[ i ].Normal.z = blue / 255.f;
+			fread( &red, sizeof( decltype( red ) ), 1, Heightmap );
+			fread( &green, sizeof( decltype( green ) ), 1, Heightmap );
+			fread( &blue, sizeof( decltype( blue ) ), 1, Heightmap );
+			mVertices[ i ].Tangent.x = red / 255.f;
+			mVertices[ i ].Tangent.y = green / 255.f;
+			mVertices[ i ].Tangent.z = blue / 255.f;
+			fread( &red, sizeof( decltype( red ) ), 1, Heightmap );
+			fread( &green, sizeof( decltype( green ) ), 1, Heightmap );
+			fread( &blue, sizeof( decltype( blue ) ), 1, Heightmap );
+			mVertices[ i ].Binormal.x = red / 255.f;
+			mVertices[ i ].Binormal.y = green / 255.f;
+			mVertices[ i ].Binormal.z = blue / 255.f;
 		}
 		
 		fclose( Heightmap );
@@ -654,7 +717,7 @@ void CTerrain::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection,
 	if ( bWireframe )
 		mContext->RSSetState( DX::Wireframe.Get( ) );
 	mShader->Render( mIndexCount, DirectX::XMMatrixIdentity( ), View, Projection,
-		mGrass.get( ) );
+		mGrass.get( ), mBumpmap.get( ) );
 	mContext->RSSetState( DX::DefaultRS.Get( ) );
 }
 
@@ -673,13 +736,13 @@ void CTerrain::RenderMaterials( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Pr
 			if ( mMaterials[ i ].texture2 == -1 )
 			{
 				mShader->RenderVertices( mMaterials[ i ].Vertices.size( ), DirectX::XMMatrixIdentity( ), View, Projection,
-					mMaterialTextures[ mMaterials[ i ].texture1 ].get( ) );
+					mMaterialTextures[ mMaterials[ i ].texture1 ].get( ), mBumpmap.get( ) );
 			}
 			else
 			{
 				mShader->RenderVertices( mMaterials[ i ].Vertices.size( ), DirectX::XMMatrixIdentity( ), View, Projection,
 					mMaterialTextures[ mMaterials[ i ].texture1 ].get( ), mMaterialTextures[ mMaterials[ i ].texture2 ].get( ),
-					mMaterialTextures[ mMaterials[ i ].alphamap ].get( ) );
+					mMaterialTextures[ mMaterials[ i ].alphamap ].get( ), mBumpmap.get( ) );
 			}
 		}
 	}
