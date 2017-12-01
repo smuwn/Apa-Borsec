@@ -39,7 +39,6 @@ QuadTree::QuadTree( ID3D11Device * Device, ID3D11DeviceContext * Context,
 		mGrass = std::shared_ptr<CTexture>( mTerrain->mGrass );
 		mSlope = std::shared_ptr<CTexture>( mTerrain->mSlope );
 		mRock = std::shared_ptr<CTexture>( mTerrain->mRock );
-		mBumpmap = std::shared_ptr<CTexture>( mTerrain->mBumpmap );
 		mTerrain.reset( );
 	}
 	CATCH;
@@ -292,8 +291,7 @@ void QuadTree::RenderNode( SNode * Node, DirectX::FXMMATRIX& View, DirectX::FXMM
 	mContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 	
 	mShader->RenderVertices( Node->mTriangleCount * 3,
-		DirectX::XMMatrixIdentity( ), View, Projection,
-		mGrass.get( ), mBumpmap.get( ),
+		DirectX::XMMatrixIdentity( ), View, Projection, mGrass.get( ),
 		mSlope.get( ), mRock.get( ), 3 );
 	DrawnVertices += Node->mTriangleCount;
 
