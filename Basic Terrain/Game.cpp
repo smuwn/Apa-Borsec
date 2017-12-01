@@ -207,6 +207,7 @@ void CGame::InitShaders( )
 	mSkyShader = std::make_shared<SkyShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mSkyPlaneShader = std::make_shared<SkyPlaneShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mDepthShader = std::make_shared<DepthShader>( mDevice.Get( ), mImmediateContext.Get( ) );
+	mWaterShader = std::make_shared<CWaterShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 }
 
 void CGame::InitModels( )
@@ -221,6 +222,8 @@ void CGame::InitModels( )
 	mTerrain.reset( );
 	mSkydome = std::make_unique<Skydome>( mDevice.Get( ), mImmediateContext.Get( ),
 		mSkyShader, mSkyPlaneShader );
+	mWater = std::make_unique<CWater>( mDevice.Get( ), mImmediateContext.Get( ),
+		mWaterShader, WaterRadius, WaterQuads, WaterTextureRepeat );
 }
 
 void CGame::Init2D( )
@@ -287,6 +290,7 @@ void CGame::Update( )
 	mInput->Frame( );
 
 	mSkydome->Update( mCamera->GetCamPos( ), mTimer.GetFrameTime( ) );
+	mWater->Update( mTimer.GetFrameTime( ), mCamera.get( ) );
 	mCamera->Frame( mTimer.GetFrameTime( ) );
 #if DEBUG || _DEBUG
 	if ( mInput->isSpecialKeyPressed( DIK_B ) )
@@ -304,7 +308,8 @@ void CGame::Render( )
 	View = mCamera->GetView( );
 	Projection = mCamera->GetProjection( );
 	CamPos = mCamera->GetCamPos( );
-	float Height = 69;
+
+	mWater->Render( View, Projection );
 	
 	FrustumCulling::ViewFrustum Frustum = FrustumCulling::ConstructFrustum( View, Projection );
 

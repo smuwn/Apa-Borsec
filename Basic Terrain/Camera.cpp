@@ -58,7 +58,10 @@ void CCamera::Frame( float frameTime )
 	mRight = DirectX::XMVector3TransformCoord( Right, Rotation );
 	mUp = DirectX::XMVector3Cross( mDirection, mRight );
 
+	mReflectedPosition = DirectX::XMVector3Reflect( mPosition, Up );
+	mReflectedDirection = DirectX::XMVector3Reflect( mDirection, Up );
 	mView = DirectX::XMMatrixLookToLH( mPosition, mDirection, mUp );
+	mReflectView = DirectX::XMMatrixLookToLH( mPosition, mReflectedDirection, Up );
 
 #if DEBUG || _DEBUG
 	mPosition = DirectX::XMVectorAdd( mPosition, DirectX::XMVectorScale( mDirection, mForwardAcceleration ) );

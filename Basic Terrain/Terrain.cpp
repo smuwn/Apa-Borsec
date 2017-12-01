@@ -102,7 +102,7 @@ void CTerrain::InitHeightmap( LPSTR Path, LPSTR Colormap, bool Smooth )
 			int Index = mColCount * i + j;
 
 			mHeightmap[ Index ].x = ( float ) j - mColCount / 2;
-			mHeightmap[ Index ].y = height / HeightFactor;
+			mHeightmap[ Index ].y = height / HeightFactor - SubtractFromHeight;
 			mHeightmap[ Index ].z = ( float ) i - mRowCount / 2;
 			mHeightmap[ Index ].r = colors[ k ] / 255.0f;
 			mHeightmap[ Index ].g = colors[ k + 1 ] / 255.0f;
@@ -114,9 +114,9 @@ void CTerrain::InitHeightmap( LPSTR Path, LPSTR Colormap, bool Smooth )
 
 	if ( Smooth )
 	{
-		for ( int i = 0; i < mRowCount; ++i )
+		for ( size_t i = 0; i < mRowCount; ++i )
 		{
-			for ( int j = 0; j < mColCount; ++j )
+			for ( size_t j = 0; j < mColCount; ++j )
 			{
 				Average( i, j );
 			}

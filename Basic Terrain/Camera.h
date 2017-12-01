@@ -25,12 +25,15 @@ public:
 private:
 	std::shared_ptr<CInput> mInput;
 
+	DirectX::XMVECTOR mReflectedDirection = Forward;
 	DirectX::XMVECTOR mDirection = Forward;
 	DirectX::XMVECTOR mRight = Right;
 	DirectX::XMVECTOR mUp = Up;
 	DirectX::XMVECTOR mPosition = DefaultPosition;
+	DirectX::XMVECTOR mReflectedPosition = DefaultPosition;
 
 	DirectX::XMMATRIX mView;
+	DirectX::XMMATRIX mReflectView;
 	DirectX::XMMATRIX mProjection;
 
 	float mForwardAcceleration = 0.0f;
@@ -52,9 +55,12 @@ public:
 	void Frame( float frametime );
 public:
 	inline DirectX::XMMATRIX& GetView( ) { return mView; };
+	inline DirectX::XMMATRIX& GetReflectView( ) { return mReflectView; };
 	inline DirectX::XMMATRIX& GetProjection( ) { return mProjection; };
 	inline DirectX::XMFLOAT3 GetCamPos( )
 	{ DirectX::XMFLOAT3 Pos; DirectX::XMStoreFloat3( &Pos, mPosition ); return Pos; };
+	inline DirectX::XMFLOAT3 GetCamRotation( )
+	{ return DirectX::XMFLOAT3( mPitch, mYaw, mRoll ); };
 public:
 	inline void* operator new ( size_t size )
 	{

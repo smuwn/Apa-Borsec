@@ -19,6 +19,8 @@
 #include "Skydome.h"
 #include "SkyPlaneShader.h"
 #include "DepthShader.h"
+#include "WaterShader.h"
+#include "Water.h"
 
 #define GAME CGame::GetGameInstance( )
 #if defined UNICODE
@@ -30,8 +32,11 @@
 ALIGN16 class CGame sealed
 {
 	static constexpr const float NearZ = 1.0f;
-	static constexpr const float FarZ = 10000.0f;
+	static constexpr const float FarZ = 100.0f;
 	static constexpr const float FOV = ( float ) D3DX_PI / 3.0f;
+	static constexpr const float WaterRadius = 100.0f;
+	static constexpr const unsigned int WaterQuads = 10;
+	static constexpr const unsigned int WaterTextureRepeat = 40;
 private:
 	HINSTANCE mhInstance;
 	HWND mhWnd;
@@ -43,6 +48,7 @@ private:
 	D3D11_VIEWPORT mFullscreenViewport;
 	
 	std::unique_ptr<Skydome> mSkydome;
+	std::unique_ptr<CWater> mWater;
 	std::unique_ptr<CCamera> mCamera;
 
 	std::shared_ptr<CTerrain> mTerrain;
@@ -70,6 +76,7 @@ private:
 	std::shared_ptr<SkyShader> mSkyShader;
 	std::shared_ptr<SkyPlaneShader> mSkyPlaneShader;
 	std::shared_ptr<DepthShader> mDepthShader;
+	std::shared_ptr<CWaterShader> mWaterShader;
 
 	WCHAR* mGPUDescription;
 	

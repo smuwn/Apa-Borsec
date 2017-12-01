@@ -9,6 +9,7 @@ class CTerrain sealed
 private:
 	static constexpr const float HeightFactor = 10.0f;
 	static constexpr const float TextureRepeat = 10;
+	static constexpr const float SubtractFromHeight = 5.0f;
 public:
 	struct SVertex
 	{
