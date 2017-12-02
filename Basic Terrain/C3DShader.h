@@ -12,6 +12,10 @@ public:
 		DirectX::XMMATRIX WVP;
 		DirectX::XMMATRIX World;
 	};
+	struct SClippingPlane
+	{
+		DirectX::XMFLOAT4 Plane;
+	};
 	struct SLight
 	{
 		DirectX::XMFLOAT3 Dir;
@@ -31,6 +35,7 @@ private:
 	std::array < Microsoft::WRL::ComPtr<ID3DBlob>, 2> mBlobs;
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mPerObjectBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> mClippingPlaneBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mLightBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mTextureBuffer;
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> mWrapSampler;
@@ -49,5 +54,6 @@ public:
 		CTexture * texture, CTexture * = nullptr, CTexture * = nullptr,
 		int = 1 );
 	void SetLight( SLight const& Light );
+	void SetClippingPlane( SClippingPlane const& ClippingPlane );
 };
 

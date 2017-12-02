@@ -199,10 +199,13 @@ void CGame::InitShaders( )
 	m2DShader = std::make_shared<C2DShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	m3DShader = std::make_shared<C3DShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	C3DShader::SLight light;
-	light.Dir = DirectX::XMFLOAT3( 0.0f, -1.0f, 0.0f );
+	light.Dir = DirectX::XMFLOAT3( 0.5f, -1.0f, 0.0f );
 	light.Color = DirectX::XMFLOAT4( 1.0f, 1.0f, 1.0f, 1.0f );
 	light.Ambient = DirectX::XMFLOAT4( 0.4f, 0.4f, 0.4f, 1.0f );
 	m3DShader->SetLight( light );
+	C3DShader::SClippingPlane plane;
+	plane.Plane = DirectX::XMFLOAT4( 0.0f, 0.0f, 0.0f, 1.0f ); // Disabled
+	m3DShader->SetClippingPlane( plane );
 	mLineShader = std::make_shared<LineShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mSkyShader = std::make_shared<SkyShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mSkyPlaneShader = std::make_shared<SkyPlaneShader>( mDevice.Get( ), mImmediateContext.Get( ) );
@@ -255,6 +258,13 @@ void CGame::InitTextures( )
 	mRenderTextureDebug->ClearBuffer( );
 	mDebugSquare->SetTexture( mRenderTextureDebug->GetTexture( ) );
 #endif
+	mReflectionTexture = std::make_unique<RenderTexture>( mDevice.Get( ), mImmediateContext.Get( ),
+		ReflectionTextureSize, ReflectionTextureSize, NearZ, FarZ );
+	mReflectionTexture->PrepareForRendering( );
+	mReflectionTexture->ClearBuffer( );
+	mRefractionTexture = std::make_unique<RenderTexture>( mDevice.Get( ), mImmediateContext.Get( ),
+		RefractionTextureSize, RefractionTextureSize, NearZ, FarZ );
+	mWater->SetTextures( mReflectionTexture->GetTexture( ), mRefractionTexture->GetTexture( ) );
 }
 
 void CGame::Run( )
@@ -289,7 +299,7 @@ void CGame::Update( )
 	mTimer.Frame( );
 	mInput->Frame( );
 
-	mSkydome->Update( mCamera->GetCamPos( ), mTimer.GetFrameTime( ) );
+	mSkydome->Update( mTimer.GetFrameTime( ) );
 	mWater->Update( mTimer.GetFrameTime( ), mCamera.get( ) );
 	mCamera->Frame( mTimer.GetFrameTime( ) );
 #if DEBUG || _DEBUG
@@ -302,14 +312,18 @@ void CGame::Render( )
 {
 	EnableBackbuffer( );
 	ClearBackbuffer( );
+	C3DShader::SClippingPlane plane;
+	plane.Plane = DirectX::XMFLOAT4( 0.0f, 0.0f, 0.0f, 1.0f );
+	m3DShader->SetClippingPlane( plane );
 
-	DirectX::XMMATRIX View, Projection;
-	DirectX::XMFLOAT3 CamPos;
+
+	DirectX::XMMATRIX View, ReflectView, Projection;
+	DirectX::XMFLOAT3 CamPos, ReflectedCamPos;
 	View = mCamera->GetView( );
+	ReflectView = mCamera->GetReflectView( );
 	Projection = mCamera->GetProjection( );
 	CamPos = mCamera->GetCamPos( );
-
-	mWater->Render( View, Projection );
+	ReflectedCamPos = mCamera->GetReflectedCamPos( );
 	
 	FrustumCulling::ViewFrustum Frustum = FrustumCulling::ConstructFrustum( View, Projection );
 
@@ -320,13 +334,43 @@ void CGame::Render( )
 	mLineManager->End( );
 	mLineManager->Render( View, Projection );
 #endif
+	// Render Scene
 	int Drawn = 0;
 	for ( auto & iter : GameGlobals::gQuadTrees )
 	{
 		iter->Render( View, Projection, Frustum, Drawn, CamPos.y, bDrawWireframe );
 	}
 
-	mSkydome->Render( View, Projection );
+	mSkydome->Render( View, Projection, CamPos );
+
+	// Render Reflection
+	mReflectionTexture->PrepareForRendering( );
+	mReflectionTexture->ClearBuffer( );
+	C3DShader::SClippingPlane waterPlane;
+	waterPlane.Plane = DirectX::XMFLOAT4( 0.0f, 1.0f, 0.0f, 0.0f );
+	m3DShader->SetClippingPlane( waterPlane );
+	for ( auto & iter : GameGlobals::gQuadTrees )
+	{
+		iter->Render( ReflectView, Projection, Frustum, Drawn, CamPos.y, bDrawWireframe );
+	}
+
+	//mSkydome->Render( ReflectView, Projection, ReflectedCamPos );
+
+	// Render refraction
+	mRefractionTexture->PrepareForRendering( );
+	mRefractionTexture->ClearBuffer( );
+	waterPlane.Plane = DirectX::XMFLOAT4( 0.0f, -1.0f, 0.0f, 0.0f );
+	m3DShader->SetClippingPlane( waterPlane );
+	for ( auto & iter : GameGlobals::gQuadTrees )
+	{
+		iter->Render( View, Projection, Frustum, Drawn, CamPos.y, bDrawWireframe );
+	}
+	
+	//mSkydome->Render( View, Projection, CamPos );
+
+	EnableBackbuffer( );
+
+	mWater->Render( View, Projection, ReflectView );
 
 	char buffer[ 500 ] = { 0 };
 	sprintf_s( buffer, "FPS: %d", mTimer.GetFPS( ) );

@@ -85,16 +85,23 @@ void RenderTexture::InitViews( )
 		) );
 
 	DepthBuffer->Release( );
+
+	mViewport.TopLeftX = 0;
+	mViewport.TopLeftY = 0;
+	mViewport.Width = mWidth;
+	mViewport.Height = mHeight;
+	mViewport.MinDepth = 0.0f;
+	mViewport.MaxDepth = 1.0f;
 }
 
 void RenderTexture::PrepareForRendering( )
 {
 	mContext->OMSetRenderTargets( 1, mTextureRTV.GetAddressOf( ), mDSView.Get( ) );
+	mContext->RSSetViewports( 1, &mViewport );
 }
 
 void RenderTexture::ClearBuffer( )
 {
 	mContext->ClearRenderTargetView( mTextureRTV.Get( ), mClearColor );
-	mContext->ClearDepthStencilView( mDSView.Get( ), D3D11_CLEAR_FLAG::D3D11_CLEAR_DEPTH |
-		D3D11_CLEAR_FLAG::D3D11_CLEAR_STENCIL, 1.0f, 0 );
+	mContext->ClearDepthStencilView( mDSView.Get( ), D3D11_CLEAR_FLAG::D3D11_CLEAR_DEPTH, 1.0f, 0 );
 }

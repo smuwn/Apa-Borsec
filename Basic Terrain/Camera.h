@@ -59,6 +59,8 @@ public:
 	inline DirectX::XMMATRIX& GetProjection( ) { return mProjection; };
 	inline DirectX::XMFLOAT3 GetCamPos( )
 	{ DirectX::XMFLOAT3 Pos; DirectX::XMStoreFloat3( &Pos, mPosition ); return Pos; };
+	inline DirectX::XMFLOAT3 GetReflectedCamPos( )
+	{ DirectX::XMFLOAT3 Pos; DirectX::XMStoreFloat3( &Pos, mReflectedPosition ); return Pos; };
 	inline DirectX::XMFLOAT3 GetCamRotation( )
 	{ return DirectX::XMFLOAT3( mPitch, mYaw, mRoll ); };
 public:

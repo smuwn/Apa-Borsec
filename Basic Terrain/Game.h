@@ -32,11 +32,13 @@
 ALIGN16 class CGame sealed
 {
 	static constexpr const float NearZ = 1.0f;
-	static constexpr const float FarZ = 100.0f;
+	static constexpr const float FarZ = 1000.0f;
 	static constexpr const float FOV = ( float ) D3DX_PI / 3.0f;
 	static constexpr const float WaterRadius = 100.0f;
 	static constexpr const unsigned int WaterQuads = 10;
 	static constexpr const unsigned int WaterTextureRepeat = 40;
+	static constexpr const unsigned int ReflectionTextureSize = 256;
+	static constexpr const unsigned int RefractionTextureSize = 256;
 private:
 	HINSTANCE mhInstance;
 	HWND mhWnd;
@@ -77,6 +79,9 @@ private:
 	std::shared_ptr<SkyPlaneShader> mSkyPlaneShader;
 	std::shared_ptr<DepthShader> mDepthShader;
 	std::shared_ptr<CWaterShader> mWaterShader;
+
+	std::unique_ptr<RenderTexture> mReflectionTexture;
+	std::unique_ptr<RenderTexture> mRefractionTexture;
 
 	WCHAR* mGPUDescription;
 	

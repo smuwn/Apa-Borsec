@@ -30,6 +30,7 @@ struct PSIn
     float4 Color : COLOR;
     float4 TexCoord : TEXCOORD;
     float3 NormalW : NORMAL;
+    float Clip : SV_CLIPDISTANCE0;
 };
 
 float4 main( PSIn input ) : SV_TARGET

@@ -12,6 +12,8 @@ ALIGN16 class RenderTexture
 
 	DirectX::XMMATRIX mOrthoMatrix;
 
+	D3D11_VIEWPORT mViewport;
+
 	float mWidth;
 	float mHeight;
 	float mCamNear;

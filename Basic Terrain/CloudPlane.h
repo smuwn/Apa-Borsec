@@ -32,8 +32,8 @@ public:
 	CloudPlane( ID3D11Device * Device, ID3D11DeviceContext * Context, std::shared_ptr<SkyPlaneShader> Shader );
 	~CloudPlane( );
 public:
-	void Update( DirectX::XMFLOAT3 const& CamPos, float frameTime );
-	void Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection );
+	void Update( float frameTime );
+	void Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection, DirectX::XMFLOAT3 const& CamPos );
 public:
 	inline void* operator new ( size_t size )
 	{

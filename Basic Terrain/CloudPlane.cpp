@@ -46,9 +46,8 @@ CloudPlane::~CloudPlane( )
 }
 
 
-void CloudPlane::Update( DirectX::XMFLOAT3 const& CamPos, float frameTime )
+void CloudPlane::Update( float frameTime )
 {
-	mWorld = DirectX::XMMatrixTranslation( CamPos.x, CamPos.y, CamPos.z );
 	mTextureInfo.translation.x += mVelocity.x * frameTime;
 	mTextureInfo.translation.y += mVelocity.y * frameTime;
 
@@ -58,10 +57,11 @@ void CloudPlane::Update( DirectX::XMFLOAT3 const& CamPos, float frameTime )
 		mTextureInfo.translation.y -= 1.0f;
 }
 
-void CloudPlane::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection )
+void CloudPlane::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection, DirectX::XMFLOAT3 const& CamPos )
 {
 	static UINT Stride = sizeof( SVertex );
 	static UINT Offsets = 0;
+	mWorld = DirectX::XMMatrixTranslation( CamPos.x, CamPos.y, CamPos.z );
 	mContext->IASetIndexBuffer( mIndexBuffer.Get( ), DXGI_FORMAT::DXGI_FORMAT_R32_UINT, 0 );
 	mContext->IASetVertexBuffers( 0, 1, mVertexBuffer.GetAddressOf( ), &Stride, &Offsets );
 	mContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );

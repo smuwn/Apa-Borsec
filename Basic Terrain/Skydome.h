@@ -31,8 +31,8 @@ public:
 		std::shared_ptr<SkyShader> Shader, std::shared_ptr<SkyPlaneShader> CloudShader );
 	~Skydome( );
 public:
-	void Update( DirectX::XMFLOAT3 const& CamPos, float frameTime );
-	void Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection );
+	void Update( float frameTime );
+	void Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection, DirectX::XMFLOAT3 const& CamPos );
 public:
 	inline void* operator new( size_t size )
 	{

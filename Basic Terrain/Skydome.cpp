@@ -36,16 +36,16 @@ Skydome::~Skydome( )
 	mShader.reset( );
 }
 
-void Skydome::Update( DirectX::XMFLOAT3 const& CamPos, float frameTime )
+void Skydome::Update( float frameTime )
 {
-	mWorld = DirectX::XMMatrixTranslation( CamPos.x, CamPos.y, CamPos.z );
-	mClouds->Update( CamPos, frameTime );
+	mClouds->Update( frameTime );
 }
 
-void Skydome::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection )
+void Skydome::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection, DirectX::XMFLOAT3 const& CamPos )
 {
 	static UINT Stride = sizeof( SVertex );
 	static UINT Offsets = 0;
+	mWorld = DirectX::XMMatrixTranslation( CamPos.x, CamPos.y, CamPos.z );
 	mContext->IASetIndexBuffer( mIndexBuffer.Get( ), DXGI_FORMAT::DXGI_FORMAT_R32_UINT, 0 );
 	mContext->IASetVertexBuffers( 0, 1, mVertexBuffer.GetAddressOf( ), &Stride, &Offsets );
 	mContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
@@ -58,7 +58,7 @@ void Skydome::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection )
 
 	mContext->OMSetBlendState( DX::AdditiveBlend.Get( ), nullptr, 0xffffffff );
 	mContext->OMSetDepthStencilState( DX::DSLessEqual.Get( ), 0 );
-	mClouds->Render( View, Projection );
+	mClouds->Render( View, Projection, CamPos );
 	mContext->OMSetDepthStencilState( nullptr, 0 );
 	mContext->OMSetBlendState( nullptr, nullptr, 0xffffffff );
 }

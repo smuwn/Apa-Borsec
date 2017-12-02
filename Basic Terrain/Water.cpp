@@ -25,6 +25,16 @@ CWater::~CWater( )
 	mIndexBuffer.Reset( );
 }
 
+void CWater::SetTextures( ID3D11ShaderResourceView * Reflection, ID3D11ShaderResourceView * Refraction )
+{
+	mReflection.reset( );
+	mReflection = std::make_unique<CTexture>( );
+	mReflection->SetTexture( Reflection );
+	mRefraction.reset( );
+	mRefraction = std::make_unique<CTexture>( );
+	mRefraction->SetTexture( Refraction );
+}
+
 void CWater::Update( float frameTime, CCamera * camera )
 {
 	auto CamPos = camera->GetCamPos( );
@@ -33,7 +43,7 @@ void CWater::Update( float frameTime, CCamera * camera )
 		DirectX::XMMatrixTranslation( CamPos.x, 0.0f, CamPos.z );
 }
 
-void CWater::Render( DirectX::FXMMATRIX & view, DirectX::FXMMATRIX & projection )
+void CWater::Render( DirectX::FXMMATRIX & view, DirectX::FXMMATRIX & projection, DirectX::FXMMATRIX & reflectView )
 {
 	static const UINT Stride = sizeof( SVertex );
 	static const UINT Offset = 0;
@@ -44,7 +54,7 @@ void CWater::Render( DirectX::FXMMATRIX & view, DirectX::FXMMATRIX & projection 
 	mContext->IASetVertexBuffers( 0, 1, mVertexBuffer.GetAddressOf( ), &Stride, &Offset );
 
 	mContext->RSSetState( DX::NoCulling.Get( ) );
-	mShader->Render( mIndexCount, mWorld, view, projection );
+	mShader->Render( mIndexCount, mWorld, view, projection, reflectView, mReflection.get( ), mRefraction.get( ) );
 	mContext->RSSetState( DX::DefaultRS.Get( ) );
 }
 
@@ -55,6 +65,9 @@ void CWater::InitializeBuffers( float radius, UINT numQuads, UINT repeatTexture 
 
 	float du = ( float ) repeatTexture / ( float ) numQuads;
 	float dv = ( float ) repeatTexture / ( float ) numQuads;
+
+	float dtu = 1.0f / ( float ) numQuads;
+	float dtv = 1.0f / ( float ) numQuads;
 
 	mVertices.resize( ( numQuads ) * ( numQuads ) );
 	mVertexCount = mVertices.size( );
@@ -72,6 +85,8 @@ void CWater::InitializeBuffers( float radius, UINT numQuads, UINT repeatTexture 
 	mIndices.resize( ( numQuads - 1 ) * ( numQuads - 1 ) * 6 );
 	mIndexCount = mIndices.size( );
 	int index = 0;
+	float u = 0.0f;
+	float v = 0.0f;
 	float tu = 0.0f;
 	float tv = 0.0f;
 	for ( size_t i = 0; i < numQuads - 1; ++i )
@@ -80,7 +95,7 @@ void CWater::InitializeBuffers( float radius, UINT numQuads, UINT repeatTexture 
 		{
 			// Bottom left
 			mIndices[ index + 0 ] = ( i + 1 ) * numQuads + j;
-			mVertices[ ( i + 1 ) * numQuads + j ].Texture = DirectX::XMFLOAT2( tu, tv + dv );
+			mVertices[ ( i + 1 ) * numQuads + j ].Texture = DirectX::XMFLOAT2(  tu, tv + dv );
 
 			// Bottom right
 			mIndices[ index + 1 ] = ( i + 1 ) * numQuads + j + 1;
@@ -94,7 +109,7 @@ void CWater::InitializeBuffers( float radius, UINT numQuads, UINT repeatTexture 
 
 			// Top right
 			mIndices[ index + 4 ] = i * numQuads + j + 1;
-			mVertices[ i * numQuads + j + 1 ].Texture = DirectX::XMFLOAT2( tu + du, tv );
+			mVertices[ i * numQuads + j + 1 ].Texture = DirectX::XMFLOAT2(  tu + du, tv );
 
 			mIndices[ index + 5 ] = i * numQuads + j; // Top left
 
