@@ -305,6 +305,7 @@ void CGame::Update( )
 	if ( mInput->isSpecialKeyPressed( DIK_B ) )
 		bDrawWireframe = bDrawWireframe ? false : true;
 #endif
+	mLastReflectRefractDraw -= mTimer.GetFrameTime( );
 }
 
 void CGame::Render( )
@@ -342,30 +343,34 @@ void CGame::Render( )
 
 	mSkydome->Render( View, Projection, CamPos );
 
-	// Render Reflection
-	mReflectionTexture->PrepareForRendering( );
-	mReflectionTexture->ClearBuffer( );
-	C3DShader::SClippingPlane waterPlane;
-	waterPlane.Plane = DirectX::XMFLOAT4( 0.0f, 1.0f, 0.0f, 0.0f );
-	m3DShader->SetClippingPlane( waterPlane );
-	for ( auto & iter : GameGlobals::gQuadTrees )
+	if ( mLastReflectRefractDraw <= 0 )
 	{
-		iter->Render( ReflectView, Projection, Frustum, Drawn, CamPos.y, bDrawWireframe );
-	}
+		// Render Reflection
+		mReflectionTexture->PrepareForRendering( );
+		mReflectionTexture->ClearBuffer( );
+		C3DShader::SClippingPlane waterPlane;
+		waterPlane.Plane = DirectX::XMFLOAT4( 0.0f, 1.0f, 0.0f, 0.0f );
+		m3DShader->SetClippingPlane( waterPlane );
+		for ( auto & iter : GameGlobals::gQuadTrees )
+		{
+			iter->Render( ReflectView, Projection, Frustum, Drawn, CamPos.y, bDrawWireframe );
+		}
 
-	mSkydome->Render( ReflectView, Projection, ReflectedCamPos );
+		mSkydome->Render( ReflectView, Projection, ReflectedCamPos );
 
-	// Render refraction
-	mRefractionTexture->PrepareForRendering( );
-	mRefractionTexture->ClearBuffer( );
-	waterPlane.Plane = DirectX::XMFLOAT4( 0.0f, -1.0f, 0.0f, 0.0f );
-	m3DShader->SetClippingPlane( waterPlane );
-	for ( auto & iter : GameGlobals::gQuadTrees )
-	{
-		iter->Render( View, Projection, Frustum, Drawn, CamPos.y, bDrawWireframe );
+		// Render refraction
+		mRefractionTexture->PrepareForRendering( );
+		mRefractionTexture->ClearBuffer( );
+		waterPlane.Plane = DirectX::XMFLOAT4( 0.0f, -1.0f, 0.0f, 0.0f );
+		m3DShader->SetClippingPlane( waterPlane );
+		for ( auto & iter : GameGlobals::gQuadTrees )
+		{
+			iter->Render( View, Projection, Frustum, Drawn, CamPos.y, bDrawWireframe );
+		}
+
+		mSkydome->Render( View, Projection, CamPos, false );
+		mLastReflectRefractDraw = TimeToRedrawReflectionRefraction;
 	}
-	
-	mSkydome->Render( View, Projection, CamPos, false );
 
 	EnableBackbuffer( );
 

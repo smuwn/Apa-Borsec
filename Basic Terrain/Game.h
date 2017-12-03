@@ -34,6 +34,7 @@ ALIGN16 class CGame sealed
 	static constexpr const float NearZ = 1.0f;
 	static constexpr const float FarZ = 1000.0f;
 	static constexpr const float FOV = ( float ) D3DX_PI / 3.0f;
+	static constexpr const float TimeToRedrawReflectionRefraction = 1.f / 60.f;
 	static constexpr const float WaterRadius = 500.0f;
 	static constexpr const unsigned int WaterQuads = 5;
 	static constexpr const unsigned int ReflectionTextureSize = 512;
@@ -85,6 +86,7 @@ private:
 	WCHAR* mGPUDescription;
 
 	C3DShader::SLight mLight;
+	float mLastReflectRefractDraw = 0.0f;
 	
 	DirectX::XMMATRIX mOrthoMatrix;
 
