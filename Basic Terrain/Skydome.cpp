@@ -41,7 +41,8 @@ void Skydome::Update( float frameTime )
 	mClouds->Update( frameTime );
 }
 
-void Skydome::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection, DirectX::XMFLOAT3 const& CamPos )
+void Skydome::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection, DirectX::XMFLOAT3 const& CamPos,
+	bool bDrawClouds )
 {
 	static UINT Stride = sizeof( SVertex );
 	static UINT Offsets = 0;
@@ -58,7 +59,8 @@ void Skydome::Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection, 
 
 	mContext->OMSetBlendState( DX::AdditiveBlend.Get( ), nullptr, 0xffffffff );
 	mContext->OMSetDepthStencilState( DX::DSLessEqual.Get( ), 0 );
-	mClouds->Render( View, Projection, CamPos );
+	if ( bDrawClouds )
+		mClouds->Render( View, Projection, CamPos );
 	mContext->OMSetDepthStencilState( nullptr, 0 );
 	mContext->OMSetBlendState( nullptr, nullptr, 0xffffffff );
 }

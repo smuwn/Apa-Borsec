@@ -9,7 +9,7 @@ CloudPlane::CloudPlane( ID3D11Device * Device, ID3D11DeviceContext * Context, st
 {
 	try
 	{
-		GeometryGenerator::CreateCurbedPlane( 10, 10, 0.5f, -3.0f, 4, mPlane );
+		GeometryGenerator::CreateCurbedPlane( 10, 6, 0.5f, -3.0f, 4, mPlane );
 		
 		ShaderHelper::CreateBuffer( mDevice, &mVertexBuffer,
 			D3D11_USAGE::D3D11_USAGE_IMMUTABLE, D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER,

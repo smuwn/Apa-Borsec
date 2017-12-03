@@ -34,11 +34,10 @@ ALIGN16 class CGame sealed
 	static constexpr const float NearZ = 1.0f;
 	static constexpr const float FarZ = 1000.0f;
 	static constexpr const float FOV = ( float ) D3DX_PI / 3.0f;
-	static constexpr const float WaterRadius = 100.0f;
-	static constexpr const unsigned int WaterQuads = 10;
-	static constexpr const unsigned int WaterTextureRepeat = 40;
-	static constexpr const unsigned int ReflectionTextureSize = 256;
-	static constexpr const unsigned int RefractionTextureSize = 256;
+	static constexpr const float WaterRadius = 500.0f;
+	static constexpr const unsigned int WaterQuads = 5;
+	static constexpr const unsigned int ReflectionTextureSize = 512;
+	static constexpr const unsigned int RefractionTextureSize = 512;
 private:
 	HINSTANCE mhInstance;
 	HWND mhWnd;
@@ -84,6 +83,8 @@ private:
 	std::unique_ptr<RenderTexture> mRefractionTexture;
 
 	WCHAR* mGPUDescription;
+
+	C3DShader::SLight mLight;
 	
 	DirectX::XMMATRIX mOrthoMatrix;
 

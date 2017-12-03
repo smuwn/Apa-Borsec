@@ -198,11 +198,10 @@ void CGame::InitShaders( )
 	mDefaultShader = std::make_shared<CDefaultShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	m2DShader = std::make_shared<C2DShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	m3DShader = std::make_shared<C3DShader>( mDevice.Get( ), mImmediateContext.Get( ) );
-	C3DShader::SLight light;
-	light.Dir = DirectX::XMFLOAT3( 0.5f, -1.0f, 0.0f );
-	light.Color = DirectX::XMFLOAT4( 1.0f, 1.0f, 1.0f, 1.0f );
-	light.Ambient = DirectX::XMFLOAT4( 0.4f, 0.4f, 0.4f, 1.0f );
-	m3DShader->SetLight( light );
+	mLight.Dir = DirectX::XMFLOAT3( 0.0f, -1.0f, 0.0f );
+	mLight.Color = DirectX::XMFLOAT4( 1.0f, 1.0f, 1.0f, 1.0f );
+	mLight.Ambient = DirectX::XMFLOAT4( 0.4f, 0.4f, 0.4f, 1.0f );
+	m3DShader->SetLight( mLight );
 	C3DShader::SClippingPlane plane;
 	plane.Plane = DirectX::XMFLOAT4( 0.0f, 0.0f, 0.0f, 1.0f ); // Disabled
 	m3DShader->SetClippingPlane( plane );
@@ -226,7 +225,7 @@ void CGame::InitModels( )
 	mSkydome = std::make_unique<Skydome>( mDevice.Get( ), mImmediateContext.Get( ),
 		mSkyShader, mSkyPlaneShader );
 	mWater = std::make_unique<CWater>( mDevice.Get( ), mImmediateContext.Get( ),
-		mWaterShader, WaterRadius, WaterQuads, WaterTextureRepeat );
+		mWaterShader, WaterRadius, WaterQuads );
 }
 
 void CGame::Init2D( )
@@ -354,7 +353,7 @@ void CGame::Render( )
 		iter->Render( ReflectView, Projection, Frustum, Drawn, CamPos.y, bDrawWireframe );
 	}
 
-	//mSkydome->Render( ReflectView, Projection, ReflectedCamPos );
+	mSkydome->Render( ReflectView, Projection, ReflectedCamPos );
 
 	// Render refraction
 	mRefractionTexture->PrepareForRendering( );
@@ -366,11 +365,11 @@ void CGame::Render( )
 		iter->Render( View, Projection, Frustum, Drawn, CamPos.y, bDrawWireframe );
 	}
 	
-	//mSkydome->Render( View, Projection, CamPos );
+	mSkydome->Render( View, Projection, CamPos, false );
 
 	EnableBackbuffer( );
 
-	mWater->Render( View, Projection, ReflectView );
+	mWater->Render( View, Projection, ReflectView, CamPos, mLight.Dir );
 
 	char buffer[ 500 ] = { 0 };
 	sprintf_s( buffer, "FPS: %d", mTimer.GetFPS( ) );

@@ -26,6 +26,10 @@ private:
 
 	std::unique_ptr<CTexture> mReflection;
 	std::unique_ptr<CTexture> mRefraction;
+	std::unique_ptr<CTexture> mNormals;
+
+	DirectX::XMFLOAT2 mTextureRepeat;
+	float mWaterTranslation;
 
 	UINT mIndexCount;
 	UINT mVertexCount;
@@ -37,15 +41,15 @@ private:
 public:
 	CWater( ) = default;
 	CWater( ID3D11Device * Device, ID3D11DeviceContext * Context,
-		std::shared_ptr<CWaterShader> Shader, float radius, UINT numQuads,
-		UINT repeatTexture );
+		std::shared_ptr<CWaterShader> Shader, float radius, UINT numQuads );
 	~CWater( );
 public:
 	void SetTextures( ID3D11ShaderResourceView * Reflection, ID3D11ShaderResourceView * Refraction );
 	void Update( float frameTime, CCamera * camera );
-	void Render( DirectX::FXMMATRIX& view, DirectX::FXMMATRIX& projection, DirectX::FXMMATRIX& reflectView );
+	void Render( DirectX::FXMMATRIX& view, DirectX::FXMMATRIX& projection, DirectX::FXMMATRIX& reflectView,
+		DirectX::XMFLOAT3 const& CamPos, DirectX::XMFLOAT3 const& LightDir );
 private:
-	void InitializeBuffers( float radius, UINT numQuads, UINT repeatTexture );
+	void InitializeBuffers( float radius, UINT numQuads );
 public:
 	inline void * operator new( size_t size )
 	{

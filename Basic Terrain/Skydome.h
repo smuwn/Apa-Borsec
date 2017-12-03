@@ -32,7 +32,8 @@ public:
 	~Skydome( );
 public:
 	void Update( float frameTime );
-	void Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection, DirectX::XMFLOAT3 const& CamPos );
+	void Render( DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection, DirectX::XMFLOAT3 const& CamPos,
+		bool bDrawClouds = true );
 public:
 	inline void* operator new( size_t size )
 	{

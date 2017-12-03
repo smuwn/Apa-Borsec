@@ -3,15 +3,21 @@
 
 
 CWater::CWater( ID3D11Device * Device, ID3D11DeviceContext * Context,
-	std::shared_ptr<CWaterShader> Shader, float radius, UINT numQuads,
-	UINT repeatTexture ) :
+	std::shared_ptr<CWaterShader> Shader, float radius, UINT numQuads ) :
 	mDevice( Device ),
 	mContext( Context ),
 	mShader( Shader )
 {
 	try
 	{
-		InitializeBuffers( radius, numQuads, repeatTexture );
+		InitializeBuffers( radius, numQuads );
+		mNormals = std::make_unique<CTexture>( ( LPWSTR ) L"Data/waterNormals.dds", mDevice );
+		CWaterShader::SPSWater waterInfo;
+		waterInfo.reflectRefractScale = 0.2f;
+		waterInfo.WaterColor = DirectX::XMFLOAT4( 0.0f, 0.3f, 0.6f, 1.0f );
+		waterInfo.WaterShininess = 256.f;
+		mShader->SetWaterInfo( waterInfo );
+		mTextureRepeat = DirectX::XMFLOAT2( 0.01f, 0.02f );
 	}
 	CATCH;
 }
@@ -39,11 +45,16 @@ void CWater::Update( float frameTime, CCamera * camera )
 {
 	auto CamPos = camera->GetCamPos( );
 	auto CamRot = camera->GetCamRotation( );
-	mWorld = DirectX::XMMatrixRotationY( CamRot.y ) *
-		DirectX::XMMatrixTranslation( CamPos.x, 0.0f, CamPos.z );
+	//mWorld = DirectX::XMMatrixRotationY( CamRot.y ) *
+		//DirectX::XMMatrixTranslation( CamPos.x, 0.0f, CamPos.z );
+	mWorld = DirectX::XMMatrixIdentity( );
+	mWaterTranslation += 0.1f * frameTime;
+	if ( mWaterTranslation >= 1.0f )
+		mWaterTranslation -= 1.0f;
 }
 
-void CWater::Render( DirectX::FXMMATRIX & view, DirectX::FXMMATRIX & projection, DirectX::FXMMATRIX & reflectView )
+void CWater::Render( DirectX::FXMMATRIX & view, DirectX::FXMMATRIX & projection, DirectX::FXMMATRIX & reflectView,
+	DirectX::XMFLOAT3 const& camPos, DirectX::XMFLOAT3 const& lightDir )
 {
 	static const UINT Stride = sizeof( SVertex );
 	static const UINT Offset = 0;
@@ -54,17 +65,19 @@ void CWater::Render( DirectX::FXMMATRIX & view, DirectX::FXMMATRIX & projection,
 	mContext->IASetVertexBuffers( 0, 1, mVertexBuffer.GetAddressOf( ), &Stride, &Offset );
 
 	mContext->RSSetState( DX::NoCulling.Get( ) );
-	mShader->Render( mIndexCount, mWorld, view, projection, reflectView, mReflection.get( ), mRefraction.get( ) );
+	mShader->Render( mIndexCount, mWorld, view, projection, reflectView,
+		mReflection.get( ), mRefraction.get( ), mNormals.get( ),
+		camPos, mTextureRepeat, lightDir, mWaterTranslation );
 	mContext->RSSetState( DX::DefaultRS.Get( ) );
 }
 
-void CWater::InitializeBuffers( float radius, UINT numQuads, UINT repeatTexture )
+void CWater::InitializeBuffers( float radius, UINT numQuads )
 {
 	float dx = ( 2 * radius ) / ( float ) numQuads;
 	float dz = ( 2 * radius ) / ( float ) numQuads;
 
-	float du = ( float ) repeatTexture / ( float ) numQuads;
-	float dv = ( float ) repeatTexture / ( float ) numQuads;
+	float du = 1.0f / ( float ) numQuads;
+	float dv = 1.0f / ( float ) numQuads;
 
 	float dtu = 1.0f / ( float ) numQuads;
 	float dtv = 1.0f / ( float ) numQuads;
@@ -78,7 +91,7 @@ void CWater::InitializeBuffers( float radius, UINT numQuads, UINT repeatTexture 
 			int index = i * numQuads + j;
 			mVertices[ index ].Position.x = -radius + ( float ) j * dx;
 			mVertices[ index ].Position.y = 0.0f;
-			mVertices[ index ].Position.z = -10.0f + ( float ) i * dz;
+			mVertices[ index ].Position.z = -radius + ( float ) i * dz;
 		}
 	}
 

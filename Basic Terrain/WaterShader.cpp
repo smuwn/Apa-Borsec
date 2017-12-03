@@ -42,6 +42,15 @@ CWaterShader::CWaterShader( ID3D11Device * Device, ID3D11DeviceContext * Context
 		ShaderHelper::CreateBuffer( mDevice, &mVSPerObjectBuffer,
 			D3D11_USAGE::D3D11_USAGE_DYNAMIC, D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER,
 			sizeof( SVSPerObject ), D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE );
+		ShaderHelper::CreateBuffer( mDevice, &mVSCameraBuffer,
+			D3D11_USAGE::D3D11_USAGE_DYNAMIC, D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER,
+			sizeof( SVSCamera ), D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE );
+		ShaderHelper::CreateBuffer( mDevice, &mPSWaterBuffer,
+			D3D11_USAGE::D3D11_USAGE_DEFAULT, D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER,
+			sizeof( SPSWater ), 0 );
+		ShaderHelper::CreateBuffer( mDevice, &mPSPerObjectBuffer,
+			D3D11_USAGE::D3D11_USAGE_DYNAMIC, D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER,
+			sizeof( SPSPerObject ), D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE );
 
 		ZeroMemoryAndDeclare( D3D11_SAMPLER_DESC, sampDesc );
 		sampDesc.AddressU =
@@ -77,7 +86,9 @@ CWaterShader::~CWaterShader( )
 void CWaterShader::Render( UINT indexCount,
 	DirectX::FXMMATRIX & World, DirectX::FXMMATRIX & View,
 	DirectX::FXMMATRIX & Projection, DirectX::FXMMATRIX & ReflectView,
-	CTexture * Reflection, CTexture * Refraction )
+	CTexture * Reflection, CTexture * Refraction, CTexture * Normals,
+	DirectX::XMFLOAT3 const& CamPos, DirectX::XMFLOAT2 const& TextureTiling,
+	DirectX::XMFLOAT3 const& LightDir, float waterTranslation )
 {
 	static D3D11_MAPPED_SUBRESOURCE MappedSubresource;
 
@@ -86,8 +97,8 @@ void CWaterShader::Render( UINT indexCount,
 	mContext->IASetInputLayout( mLayout.Get( ) );
 
 	mContext->PSSetSamplers( 0, 1, mWrapSampler.GetAddressOf( ) );
-	ID3D11ShaderResourceView * SRV[ 2 ] = { Reflection->GetTexture( ),Refraction->GetTexture( ) };
-	mContext->PSSetShaderResources( 0, 2, SRV );
+	ID3D11ShaderResourceView * SRV[ 3 ] = { Reflection->GetTexture( ),Refraction->GetTexture( ), Normals->GetTexture( ) };
+	mContext->PSSetShaderResources( 0, 3, SRV );
 	
 	mContext->Map( mVSPerObjectBuffer.Get( ), 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &MappedSubresource );
 
@@ -98,8 +109,28 @@ void CWaterShader::Render( UINT indexCount,
 
 	mContext->Unmap( mVSPerObjectBuffer.Get( ), 0 );
 	mContext->VSSetConstantBuffers( 0, 1, mVSPerObjectBuffer.GetAddressOf( ) );
+	
+	mContext->Map( mVSCameraBuffer.Get( ), 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &MappedSubresource );
 
+	( ( SVSCamera* ) MappedSubresource.pData )->CamPos = CamPos;
+	( ( SVSCamera* ) MappedSubresource.pData )->NormalMapTiling = TextureTiling;
+
+	mContext->Unmap( mVSCameraBuffer.Get( ), 0 );
+	mContext->VSSetConstantBuffers( 1, 1, mVSCameraBuffer.GetAddressOf( ) );
+
+	mContext->PSSetConstantBuffers( 0, 1, mPSWaterBuffer.GetAddressOf( ) );
+
+	mContext->Map( mPSPerObjectBuffer.Get( ), 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &MappedSubresource );
+	( ( SPSPerObject* ) MappedSubresource.pData )->lightDirection = LightDir;
+	( ( SPSPerObject* ) MappedSubresource.pData )->waterTranslation = waterTranslation;
+	mContext->Unmap( mPSPerObjectBuffer.Get( ), 0 );
+	mContext->PSSetConstantBuffers( 1, 1, mPSPerObjectBuffer.GetAddressOf( ) );
+	
 	mContext->DrawIndexed( indexCount, 0, 0 );
 }
 
+void CWaterShader::SetWaterInfo( SPSWater const & Water )
+{
+	mContext->UpdateSubresource( mPSWaterBuffer.Get( ), 0, nullptr, &Water, 0, 0 );
+}
 

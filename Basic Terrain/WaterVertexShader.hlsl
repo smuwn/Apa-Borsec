@@ -7,14 +7,24 @@ cbuffer cbPerObject : register( b0 )
     float4x4 gReflectView;
 };
 
+cbuffer cbCamera : register( b1 )
+{
+    float3 CamPos;
+    float pad;
+    float2 NormalMapTiling;
+    float2 Pad;
+};
+
 struct VSOut
 {
     float4 PositionH : SV_POSITION;
     float4 PositionW : POSITION0;
     float4 ReflectionPosition : POSITION1;
     float4 RefractionPosition : POSITION2;
+    float3 EyeDirection : POSITION3;
     float2 Texture : TEXCOORD;
-
+    float2 Texture1 : TEXCOORD1;
+    float2 Texture2 : TEXCOORD2;
 };
 
 VSOut main( float4 pos : POSITION, float2 tex : TEXCOORD )
@@ -36,7 +46,13 @@ VSOut main( float4 pos : POSITION, float2 tex : TEXCOORD )
     refractViewProjectionWorld = mul( gWorld, refractViewProjectionWorld );
     output.RefractionPosition = mul( pos, refractViewProjectionWorld );
 
+    output.EyeDirection = CamPos - output.PositionW.xyz;
+    output.EyeDirection = normalize( output.EyeDirection );
+
     output.Texture = tex;
+
+    output.Texture1 = tex / NormalMapTiling.x;
+    output.Texture2 = tex / NormalMapTiling.y;
 
     return output;
 }
