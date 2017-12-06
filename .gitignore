@@ -240,5 +240,4 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
-/Basic Terrain/Data
 /Basic Terrain/Shaders

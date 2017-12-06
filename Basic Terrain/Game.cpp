@@ -198,7 +198,7 @@ void CGame::InitShaders( )
 	mDefaultShader = std::make_shared<CDefaultShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	m2DShader = std::make_shared<C2DShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	m3DShader = std::make_shared<C3DShader>( mDevice.Get( ), mImmediateContext.Get( ) );
-	mLight.Dir = DirectX::XMFLOAT3( 0.0f, -1.0f, 0.0f );
+	mLight.Dir = DirectX::XMFLOAT3( 1.0f, 0.0f, 0.0f );
 	mLight.Color = DirectX::XMFLOAT4( 1.0f, 1.0f, 1.0f, 1.0f );
 	mLight.Ambient = DirectX::XMFLOAT4( 0.4f, 0.4f, 0.4f, 1.0f );
 	m3DShader->SetLight( mLight );
