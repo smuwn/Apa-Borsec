@@ -1,5 +1,7 @@
 #include "Game.h"
 
+//#define NO_GPU
+
 CGame* CGame::m_GameInstance = nullptr;
 
 
@@ -146,16 +148,26 @@ void CGame::InitD3D( bool bFullscreen )
 #endif
 	
 	D3D_DRIVER_TYPE driver =
-#if NO_GPU
+#if defined NO_GPU
 		D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_WARP
 #else
 		D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_HARDWARE
 #endif
 		;
 
+	D3D_FEATURE_LEVEL featureLevels[ ] =
+	{
+		D3D_FEATURE_LEVEL_11_1,
+		D3D_FEATURE_LEVEL_11_0,
+		D3D_FEATURE_LEVEL_10_1,
+		D3D_FEATURE_LEVEL_10_0,
+	};
+	UINT numFeatureLevels = ARRAYSIZE( featureLevels );
+	D3D_FEATURE_LEVEL featureLevel;
+
 	DX::ThrowIfFailed(
 		D3D11CreateDeviceAndSwapChain( NULL, driver, NULL, flags,
-			NULL, NULL, D3D11_SDK_VERSION, &swapDesc, &mSwapChain, &mDevice, NULL, &mImmediateContext )
+			featureLevels, numFeatureLevels, D3D11_SDK_VERSION, &swapDesc, &mSwapChain, &mDevice, &featureLevel, &mImmediateContext )
 	);
 
 	ID3D11Texture2D * backBufferResource;
@@ -185,6 +197,7 @@ void CGame::InitD3D( bool bFullscreen )
 	DSViewResource->Release( );
 
 	DX::InitStates( mDevice.Get( ) );
+	Utilities::Create( mDevice.Get( ) );
 	backBufferResource->Release( );
 	Factory->Release( );
 	Adapter->Release( );
@@ -198,7 +211,7 @@ void CGame::InitShaders( )
 	mDefaultShader = std::make_shared<CDefaultShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	m2DShader = std::make_shared<C2DShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	m3DShader = std::make_shared<C3DShader>( mDevice.Get( ), mImmediateContext.Get( ) );
-	mLight.Dir = DirectX::XMFLOAT3( 1.0f, 0.0f, 0.0f );
+	mLight.Dir = DirectX::XMFLOAT3( 0.0f, -1.0f, 0.0f );
 	mLight.Color = DirectX::XMFLOAT4( 1.0f, 1.0f, 1.0f, 1.0f );
 	mLight.Ambient = DirectX::XMFLOAT4( 0.4f, 0.4f, 0.4f, 1.0f );
 	m3DShader->SetLight( mLight );
@@ -209,7 +222,14 @@ void CGame::InitShaders( )
 	mSkyShader = std::make_shared<SkyShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mSkyPlaneShader = std::make_shared<SkyPlaneShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mDepthShader = std::make_shared<DepthShader>( mDevice.Get( ), mImmediateContext.Get( ) );
-	mWaterShader = std::make_shared<CWaterShader>( mDevice.Get( ), mImmediateContext.Get( ) );
+	mFireShaders = std::make_shared<CParticleShader>( mDevice.Get( ), mImmediateContext.Get( ) );
+	try
+	{
+		mFireShaders->CreateStreamOutShaders( L"Shaders/FireSOVertexShader.cso", L"Shaders/FireSOGeometryShader.cso" );
+		mFireShaders->CreateRenderShaders( L"Shaders/FireRVertexShader.cso", L"Shaders/FireRGeometryShader.cso",
+			L"Shaders/FireRPixelShader.cso" );
+	}
+	CATCH;
 }
 
 void CGame::InitModels( )
@@ -224,8 +244,9 @@ void CGame::InitModels( )
 	mTerrain.reset( );
 	mSkydome = std::make_unique<Skydome>( mDevice.Get( ), mImmediateContext.Get( ),
 		mSkyShader, mSkyPlaneShader );
-	mWater = std::make_unique<CWater>( mDevice.Get( ), mImmediateContext.Get( ),
-		mWaterShader, WaterRadius, WaterQuads );
+	mFire = std::make_unique<ParticleSystem>( mDevice.Get( ), mImmediateContext.Get( ),
+		mFireShaders );
+	mFire->SetEmitPos( DirectX::XMFLOAT3( -7.f, 1.f, -45.f ) );
 }
 
 void CGame::Init2D( )
@@ -250,20 +271,20 @@ void CGame::Init2D( )
 
 void CGame::InitTextures( )
 {
+	try
+	{
+		mFireTexture = std::make_shared<CTexture>( ( LPWSTR ) L"Data/FireFlare.dds", mDevice.Get( ) );
+		mFire->SetTexture( mFireTexture->GetTexture( ) );
+	}
+	CATCH;
 #if DEBUG || _DEBUG
 	mRenderTextureDebug = std::make_unique<RenderTexture>( mDevice.Get( ), mImmediateContext.Get( ),
 		mWidth, mHeight, NearZ, FarZ );
 	mRenderTextureDebug->PrepareForRendering( );
 	mRenderTextureDebug->ClearBuffer( );
 	mDebugSquare->SetTexture( mRenderTextureDebug->GetTexture( ) );
+	mDebugSquare->SetTexture( mFireTexture->GetTexture( ) );
 #endif
-	mReflectionTexture = std::make_unique<RenderTexture>( mDevice.Get( ), mImmediateContext.Get( ),
-		ReflectionTextureSize, ReflectionTextureSize, NearZ, FarZ );
-	mReflectionTexture->PrepareForRendering( );
-	mReflectionTexture->ClearBuffer( );
-	mRefractionTexture = std::make_unique<RenderTexture>( mDevice.Get( ), mImmediateContext.Get( ),
-		RefractionTextureSize, RefractionTextureSize, NearZ, FarZ );
-	mWater->SetTextures( mReflectionTexture->GetTexture( ), mRefractionTexture->GetTexture( ) );
 }
 
 void CGame::Run( )
@@ -298,14 +319,13 @@ void CGame::Update( )
 	mTimer.Frame( );
 	mInput->Frame( );
 
-	mSkydome->Update( mTimer.GetFrameTime( ) );
-	mWater->Update( mTimer.GetFrameTime( ), mCamera.get( ) );
 	mCamera->Frame( mTimer.GetFrameTime( ) );
+	mSkydome->Update( mTimer.GetFrameTime( ) );
+	mFire->Update( mTimer.GetFrameTime( ) );
 #if DEBUG || _DEBUG
 	if ( mInput->isSpecialKeyPressed( DIK_B ) )
 		bDrawWireframe = bDrawWireframe ? false : true;
 #endif
-	mLastReflectRefractDraw -= mTimer.GetFrameTime( );
 }
 
 void CGame::Render( )
@@ -343,38 +363,12 @@ void CGame::Render( )
 
 	mSkydome->Render( View, Projection, CamPos );
 
-	if ( mLastReflectRefractDraw <= 0 )
-	{
-		// Render Reflection
-		mReflectionTexture->PrepareForRendering( );
-		mReflectionTexture->ClearBuffer( );
-		C3DShader::SClippingPlane waterPlane;
-		waterPlane.Plane = DirectX::XMFLOAT4( 0.0f, 1.0f, 0.0f, 0.0f );
-		m3DShader->SetClippingPlane( waterPlane );
-		for ( auto & iter : GameGlobals::gQuadTrees )
-		{
-			iter->Render( ReflectView, Projection, Frustum, Drawn, CamPos.y, bDrawWireframe );
-		}
-
-		mSkydome->Render( ReflectView, Projection, ReflectedCamPos );
-
-		// Render refraction
-		mRefractionTexture->PrepareForRendering( );
-		mRefractionTexture->ClearBuffer( );
-		waterPlane.Plane = DirectX::XMFLOAT4( 0.0f, -1.0f, 0.0f, 0.0f );
-		m3DShader->SetClippingPlane( waterPlane );
-		for ( auto & iter : GameGlobals::gQuadTrees )
-		{
-			iter->Render( View, Projection, Frustum, Drawn, CamPos.y, bDrawWireframe );
-		}
-
-		mSkydome->Render( View, Projection, CamPos, false );
-		mLastReflectRefractDraw = TimeToRedrawReflectionRefraction;
-	}
-
 	EnableBackbuffer( );
 
-	mWater->Render( View, Projection, ReflectView, CamPos, mLight.Dir );
+	mImmediateContext->OMSetBlendState( DX::TransparencyBlend.Get( ), nullptr, 0xffffffff );
+	mFire->Render( mCamera.get( ) );
+	mImmediateContext->OMSetBlendState( nullptr, nullptr, 0xffffffff );
+
 
 	char buffer[ 500 ] = { 0 };
 	sprintf_s( buffer, "FPS: %d", mTimer.GetFPS( ) );

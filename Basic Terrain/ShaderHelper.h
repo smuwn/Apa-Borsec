@@ -48,6 +48,54 @@ namespace ShaderHelper
 
 	}
 
+	inline void CreateStreamOutputEntries( D3D11_INPUT_ELEMENT_DESC * layout, unsigned int numLayout,
+		D3D11_SO_DECLARATION_ENTRY *& soe )
+	{
+		soe = new D3D11_SO_DECLARATION_ENTRY[ numLayout ];
+		for ( size_t i = 0; i < numLayout; ++i )
+		{
+			soe[ i ].ComponentCount = DX::GetComponentCountFromFormat( layout[ i ].Format );
+			soe[ i ].OutputSlot = 0;
+			soe[ i ].SemanticIndex = layout[ i ].SemanticIndex;
+			soe[ i ].SemanticName = layout[ i ].SemanticName;
+			soe[ i ].StartComponent = 0;
+			soe[ i ].Stream = 0;
+		}
+	}
+
+	inline void CreateGeometryShaderWithStreamOutput( LPWSTR filePath, LPSTR profile,
+		ID3D11Device * device, ID3DBlob ** ShaderBlob, ID3D11DeviceChild ** Shader,
+		D3D11_SO_DECLARATION_ENTRY *& soe, unsigned int numLayout )
+	{
+		DX::ThrowIfFailed( D3DReadFileToBlob( filePath, ShaderBlob ) );
+
+		D3D_FEATURE_LEVEL featureLevel = device->GetFeatureLevel( );
+		if ( featureLevel >= D3D_FEATURE_LEVEL_11_0 )
+		{
+			DX::ThrowIfFailed( device->CreateGeometryShaderWithStreamOutput( ( *ShaderBlob )->GetBufferPointer( ), ( *ShaderBlob )->GetBufferSize( ),
+				soe, numLayout, nullptr, 0, D3D11_SO_NO_RASTERIZED_STREAM,
+				nullptr, reinterpret_cast< ID3D11GeometryShader** >( Shader )
+				) );
+		}
+		else
+		{
+			DX::ThrowIfFailed( device->CreateGeometryShaderWithStreamOutput( ( *ShaderBlob )->GetBufferPointer( ), ( *ShaderBlob )->GetBufferSize( ),
+				soe, numLayout, nullptr, 0, 0,
+				nullptr, reinterpret_cast< ID3D11GeometryShader** >( Shader )
+				) );
+		}
+	}
+
+	inline void CreateGeometryShaderWithStreamOutput( LPWSTR filePath, LPSTR profile,
+		ID3D11Device * device, ID3DBlob ** ShaderBlob, ID3D11DeviceChild ** Shader,
+		D3D11_INPUT_ELEMENT_DESC *layout, unsigned int numLayout, D3D11_SO_DECLARATION_ENTRY *& soe )
+	{
+		CreateStreamOutputEntries( layout, numLayout, soe );
+
+		CreateGeometryShaderWithStreamOutput( filePath, profile,
+			device, ShaderBlob, Shader, soe, numLayout );
+	}
+
 	inline void CreateBuffer( ID3D11Device * device, ID3D11Buffer ** FinalBuffer,
 		D3D11_USAGE Usage, D3D11_BIND_FLAG flag, size_t DataSize, int CPUAccessFlag,
 		void* data = nullptr, UINT MiscFlag = 0, UINT StructureByteStride = 0 )

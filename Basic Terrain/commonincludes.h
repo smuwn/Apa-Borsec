@@ -11,15 +11,15 @@ ZeroMemory(&name,sizeof(type));
 #if _DEBUG || DEBUG
 #define CATCH catch(std::exception const& e) { \
 char buffer[500]; sprintf_s(buffer, "Error: %s\n", e.what()); \
-OutputDebugStringA(buffer); PostQuitMessage(0); }\
+OutputDebugStringA(buffer); exit(1); }\
 catch( ... ) { \
-OutputDebugStringA( "Unexpected error occured\n" ); PostQuitMessage(0);}
+OutputDebugStringA( "Unexpected error occured\n" ); exit(1);}
 #else
 #define CATCH catch(std::exception const& e) { \
 char buffer[500]; sprintf_s(buffer, "Error: %s", e.what());\
-MessageBoxA(NULL,buffer,"Error",MB_ICONERROR| MB_OK); PostQuitMessage(0);}\
+MessageBoxA(NULL,buffer,"Error",MB_ICONERROR| MB_OK); exit(1);}\
 catch (...) {\
-MessageBoxA(NULL,"Unexpected error occured", "Error", MB_ICONERROR| MB_OK); PostQuitMessage(0);\
+MessageBoxA(NULL,"Unexpected error occured", "Error", MB_ICONERROR| MB_OK); exit(1);\
 }
 #endif
 
@@ -73,7 +73,9 @@ namespace DX
 	extern Microsoft::WRL::ComPtr<ID3D11DepthStencilState> DS2D;
 	extern Microsoft::WRL::ComPtr<ID3D11DepthStencilState> DSLessEqual;
 	extern Microsoft::WRL::ComPtr<ID3D11DepthStencilState> DSGreater;
+	extern Microsoft::WRL::ComPtr<ID3D11DepthStencilState> DSDisabled;
 	extern Microsoft::WRL::ComPtr<ID3D11BlendState> AdditiveBlend;
+	extern Microsoft::WRL::ComPtr<ID3D11BlendState> TransparencyBlend;
 	inline void ThrowIfFailed( HRESULT hr )
 	{
 		if ( FAILED( hr ) )
@@ -95,13 +97,16 @@ namespace DX
 	};
 	inline void OutputVDebugString( const wchar_t * format, ... )
 	{
+#if DEBUG || _DEBUG
 		static wchar_t Sequence[ 1024 ];
 		va_list args;
 		va_start( args, format );
 		_vsnwprintf_s( Sequence, sizeof( Sequence ), format, args );
 		va_end( args );
 		OutputDebugStringW( Sequence );
+#endif
 	}
+	/// <summary>Chechks if the objects exits before releasing it</summary>
 	inline void SafeRelease( IUnknown *& object )
 	{
 		OutputVDebugString( L"Please don't use SafeRelease(); Use smart pointers instead" );
@@ -111,10 +116,19 @@ namespace DX
 			object = nullptr;
 		}
 	}
+	/// <summary>Clamps a value between lower and upper</summary>
 	template <class type> 
-	type clamp( type& x, type lower, type upper )
+	inline type clamp( type& x, type lower, type upper )
 	{
 		return max( lower, min( x, upper ) );
 	}
+	/// <summary>Returns a random number between a and b</summary>
+	inline float randomNumber( float a, float b )
+	{
+		return a + ( float( rand( ) ) / RAND_MAX ) * ( b - a );
+	}
+	/// <summary>Gets the component count from known simple formats (RGBA,BGRA...); -1 if it's an invalid format</summary>
+	int GetComponentCountFromFormat( DXGI_FORMAT format );
+	/// <summary>Initializes Direct3D states</summary>
 	void InitStates( ID3D11Device* );
 }

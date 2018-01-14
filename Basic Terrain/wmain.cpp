@@ -6,6 +6,7 @@ int WINAPI wWinMain(
 	LPWSTR lpCmdLine, int iShow
 )
 {
+	srand( ( unsigned int ) time( NULL ) );
 	if ( !GAME->Initialize( hInstance, 
 #if DEBUG || _DEBUG
 		false 

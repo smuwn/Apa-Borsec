@@ -21,6 +21,9 @@
 #include "DepthShader.h"
 #include "WaterShader.h"
 #include "Water.h"
+#include "Utilities.h"
+#include "ParticleShader.h"
+#include "ParticleSystem.h"
 
 #define GAME CGame::GetGameInstance( )
 #if defined UNICODE
@@ -50,7 +53,6 @@ private:
 	D3D11_VIEWPORT mFullscreenViewport;
 	
 	std::unique_ptr<Skydome> mSkydome;
-	std::unique_ptr<CWater> mWater;
 	std::unique_ptr<CCamera> mCamera;
 
 	std::shared_ptr<CTerrain> mTerrain;
@@ -66,6 +68,9 @@ private:
 	std::unique_ptr<Square> mDebugSquare;
 #endif
 
+	std::unique_ptr<ParticleSystem> mFire;
+	std::shared_ptr<CTexture> mFireTexture;
+
 	std::shared_ptr<CInput> mInput;
 
 	std::shared_ptr<CFont> mArial73;
@@ -78,15 +83,11 @@ private:
 	std::shared_ptr<SkyShader> mSkyShader;
 	std::shared_ptr<SkyPlaneShader> mSkyPlaneShader;
 	std::shared_ptr<DepthShader> mDepthShader;
-	std::shared_ptr<CWaterShader> mWaterShader;
-
-	std::unique_ptr<RenderTexture> mReflectionTexture;
-	std::unique_ptr<RenderTexture> mRefractionTexture;
+	std::shared_ptr<CParticleShader> mFireShaders;
 
 	WCHAR* mGPUDescription;
 
 	C3DShader::SLight mLight;
-	float mLastReflectRefractDraw = 0.0f;
 	
 	DirectX::XMMATRIX mOrthoMatrix;
 
