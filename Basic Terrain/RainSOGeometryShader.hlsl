@@ -1,4 +1,4 @@
-#include "Fire.hlsli"
+#include "Rain.hlsli"
 
 Texture1D ObjRandomTexture : register( t0 );
 SamplerState ObjWrapSampler : register( s0 );
@@ -38,33 +38,33 @@ float3 GetRandomDirection( float offset )
 }
 
 
-[maxvertexcount(2)]
+[maxvertexcount( 6 )]
 void main(
-	point GSIn input[1] : SV_POSITION,
+	point GSIn input[ 1 ] : SV_POSITION,
 	inout PointStream< GSOut > output
-)
+	)
 {
 	input[ 0 ].Age += gDeltaTime;
 	if ( input[ 0 ].Type == EMITTER )
 	{
-		if ( input[ 0 ].Age > 0.05f )
+		if ( input[ 0 ].Age > 0.002f )
 		{
+			[unroll( 5 )]
+			for ( int i = 0; i < 5; ++i )
+			{
+				GSOut newElem;
+				newElem.ParticlePos = gEmitPosW + 35.0f * GetRandomDirection( 0 );
+				newElem.ParticlePos.y = gEmitPosW.y + 20.0f;
+				newElem.ParticleDir = float3( 0.0f, 0.0f, 0.0f );
 
-			GSOut newElem;
-			newElem.ParticlePos = gEmitPosW;
-			newElem.ParticleDir = GetRandomDirection( 0 );
-			newElem.ParticleDir.x *= 0.5f;
-			newElem.ParticleDir.z *= 0.5f;
-			newElem.ParticleDir *= 4;
+				newElem.Size = float2( 1.0f, 1.0f );
 
-			newElem.Size = float2( 1.0f, 1.0f );
+				newElem.Age = 0.0f;
+				newElem.Type = RAINDROP;
 
-			newElem.Age = 0.0f;
-			newElem.Type = FLARE;
-			
+				output.Append( newElem );
+			}
 			input[ 0 ].Age = 0.0f;
-
-			output.Append( newElem );
 		}
 
 		GSOut elem;
@@ -80,7 +80,7 @@ void main(
 	}
 	else
 	{
-		if ( input[ 0 ].Age <= 1.0f )
+		if ( input[ 0 ].Age <= 3.0f )
 		{
 			GSOut elem;
 			elem.ParticlePos = input[ 0 ].ParticlePos.xyz;

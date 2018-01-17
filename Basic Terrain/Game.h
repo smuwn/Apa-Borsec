@@ -71,6 +71,8 @@ private:
 	std::unique_ptr<ParticleSystem> mFire;
 	std::shared_ptr<CTexture> mFireTexture;
 
+	std::unique_ptr<ParticleSystem> mRain;
+
 	std::shared_ptr<CInput> mInput;
 
 	std::shared_ptr<CFont> mArial73;
@@ -84,6 +86,7 @@ private:
 	std::shared_ptr<SkyPlaneShader> mSkyPlaneShader;
 	std::shared_ptr<DepthShader> mDepthShader;
 	std::shared_ptr<CParticleShader> mFireShaders;
+	std::shared_ptr<CParticleShader> mRainShaders;
 
 	WCHAR* mGPUDescription;
 

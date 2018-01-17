@@ -284,12 +284,30 @@
     <FxCompile Include="FireRPixelShader.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
+    <FxCompile Include="RainSOVertexShader.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="RainSOGeometryShader.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="RainRVertexShader.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="RainRGeometryShader.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="RainRPixelShader.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="commonincludes.h">
       <Filter>Header Files\Helpers</Filter>
     </None>
     <None Include="Fire.hlsli">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Rain.hlsli">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>

@@ -1,7 +1,5 @@
 #include "Game.h"
 
-//#define NO_GPU
-
 CGame* CGame::m_GameInstance = nullptr;
 
 
@@ -222,12 +220,16 @@ void CGame::InitShaders( )
 	mSkyShader = std::make_shared<SkyShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mSkyPlaneShader = std::make_shared<SkyPlaneShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mDepthShader = std::make_shared<DepthShader>( mDevice.Get( ), mImmediateContext.Get( ) );
-	mFireShaders = std::make_shared<CParticleShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	try
 	{
+		mFireShaders = std::make_shared<CParticleShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 		mFireShaders->CreateStreamOutShaders( L"Shaders/FireSOVertexShader.cso", L"Shaders/FireSOGeometryShader.cso" );
 		mFireShaders->CreateRenderShaders( L"Shaders/FireRVertexShader.cso", L"Shaders/FireRGeometryShader.cso",
 			L"Shaders/FireRPixelShader.cso" );
+		mRainShaders = std::make_shared<CParticleShader>( mDevice.Get( ), mImmediateContext.Get( ) );
+		mRainShaders->CreateStreamOutShaders( L"Shaders/RainSOVertexShader.cso", L"Shaders/RainSOGeometryShader.cso" );
+		mRainShaders->CreateRenderShaders( L"Shaders/RainRVertexShader.cso", L"Shaders/RainRGeometryShader.cso",
+			L"Shaders/RainRPixelShader.cso" );
 	}
 	CATCH;
 }
@@ -247,6 +249,8 @@ void CGame::InitModels( )
 	mFire = std::make_unique<ParticleSystem>( mDevice.Get( ), mImmediateContext.Get( ),
 		mFireShaders );
 	mFire->SetEmitPos( DirectX::XMFLOAT3( -7.f, 1.f, -45.f ) );
+	mRain = std::make_unique<ParticleSystem>( mDevice.Get( ), mImmediateContext.Get( ),
+		mRainShaders );
 }
 
 void CGame::Init2D( )
@@ -322,6 +326,8 @@ void CGame::Update( )
 	mCamera->Frame( mTimer.GetFrameTime( ) );
 	mSkydome->Update( mTimer.GetFrameTime( ) );
 	mFire->Update( mTimer.GetFrameTime( ) );
+	mRain->Update( mTimer.GetFrameTime( ) );
+	mRain->SetEmitPos( mCamera->GetCamPos( ) );
 #if DEBUG || _DEBUG
 	if ( mInput->isSpecialKeyPressed( DIK_B ) )
 		bDrawWireframe = bDrawWireframe ? false : true;
@@ -365,9 +371,12 @@ void CGame::Render( )
 
 	EnableBackbuffer( );
 
-	mImmediateContext->OMSetBlendState( DX::TransparencyBlend.Get( ), nullptr, 0xffffffff );
-	mFire->Render( mCamera.get( ) );
-	mImmediateContext->OMSetBlendState( nullptr, nullptr, 0xffffffff );
+	// DO NOT USE THIS
+	//mImmediateContext->OMSetBlendState( DX::TransparencyBlend.Get( ), nullptr, 0xffffffff );
+	//mFire->Render( mCamera.get( ) );
+	//mImmediateContext->OMSetBlendState( nullptr, nullptr, 0xffffffff );
+
+	mRain->Render( mCamera.get( ) );
 
 
 	char buffer[ 500 ] = { 0 };

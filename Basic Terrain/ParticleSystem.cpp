@@ -106,8 +106,9 @@ void ParticleSystem::CreateBuffers( )
 		D3D11_BIND_FLAG( D3D11_BIND_FLAG::D3D11_BIND_VERTEX_BUFFER | D3D11_BIND_FLAG::D3D11_BIND_STREAM_OUTPUT ),
 		sizeof( SVertex ) * mMaxParticles, 0 );
 	
+#if DEBUG || _DEBUG
 	ShaderHelper::CreateBuffer( mDevice, &mDebugBuffer,
 		D3D11_USAGE::D3D11_USAGE_STAGING,
 		D3D11_BIND_FLAG( 0 ), sizeof( SVertex ) * mMaxParticles, D3D11_CPU_ACCESS_READ );
-	
+#endif
 }
