@@ -371,10 +371,9 @@ void CGame::Render( )
 
 	EnableBackbuffer( );
 
-	// DO NOT USE THIS
-	//mImmediateContext->OMSetBlendState( DX::TransparencyBlend.Get( ), nullptr, 0xffffffff );
-	//mFire->Render( mCamera.get( ) );
-	//mImmediateContext->OMSetBlendState( nullptr, nullptr, 0xffffffff );
+	mImmediateContext->OMSetBlendState( DX::TransparencyBlend.Get( ), nullptr, 0xffffffff );
+	mFire->Render( mCamera.get( ) );
+	mImmediateContext->OMSetBlendState( nullptr, nullptr, 0xffffffff );
 
 	mRain->Render( mCamera.get( ) );
 

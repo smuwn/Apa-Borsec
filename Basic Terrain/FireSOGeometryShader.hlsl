@@ -47,7 +47,7 @@ void main(
 	input[ 0 ].Age += gDeltaTime;
 	if ( input[ 0 ].Type == EMITTER )
 	{
-		if ( input[ 0 ].Age > 0.05f )
+		if ( input[ 0 ].Age > 0.01f )
 		{
 
 			GSOut newElem;

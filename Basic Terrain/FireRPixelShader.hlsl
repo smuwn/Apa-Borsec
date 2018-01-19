@@ -14,5 +14,7 @@ struct PSIn
 
 float4 main(PSIn input) : SV_TARGET
 {
-	return ( ObjTexture.Sample( ObjWrapSampler,input.texcoord ) * input.color);
+	float4 Color = ( ObjTexture.Sample( ObjWrapSampler,input.texcoord ) * input.color );
+	clip( Color.a - 0.25f );
+	return Color;
 }
