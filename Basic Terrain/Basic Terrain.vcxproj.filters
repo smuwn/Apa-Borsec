@@ -29,6 +29,18 @@
     <Filter Include="Source Files\Helpers">
       <UniqueIdentifier>{4ec5ab40-b95d-4899-964f-73841be7898e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader Files\Particle Shaders">
+      <UniqueIdentifier>{9808cdbb-4a53-47be-b083-52da729de6d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader Files\Particle Shaders\Fire">
+      <UniqueIdentifier>{5becc0c6-9b69-4bdf-aa89-22ad10a63346}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader Files\Particle Shaders\Rain">
+      <UniqueIdentifier>{6d30ac6e-e1ea-4725-8795-4d1373cd6384}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader Files\Particle Shaders\Fireworks">
+      <UniqueIdentifier>{4fe926c1-e1a3-421f-9486-5728a0fc6f68}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="wmain.cpp">
@@ -269,35 +281,50 @@
     <FxCompile Include="WaterPixelShader.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
-    <FxCompile Include="FireSOVertexShader.hlsl">
-      <Filter>Shader Files</Filter>
-    </FxCompile>
-    <FxCompile Include="FireSOGeometryShader.hlsl">
-      <Filter>Shader Files</Filter>
-    </FxCompile>
-    <FxCompile Include="FireRVertexShader.hlsl">
-      <Filter>Shader Files</Filter>
-    </FxCompile>
     <FxCompile Include="FireRGeometryShader.hlsl">
-      <Filter>Shader Files</Filter>
+      <Filter>Shader Files\Particle Shaders\Fire</Filter>
     </FxCompile>
     <FxCompile Include="FireRPixelShader.hlsl">
-      <Filter>Shader Files</Filter>
+      <Filter>Shader Files\Particle Shaders\Fire</Filter>
     </FxCompile>
-    <FxCompile Include="RainSOVertexShader.hlsl">
-      <Filter>Shader Files</Filter>
+    <FxCompile Include="FireRVertexShader.hlsl">
+      <Filter>Shader Files\Particle Shaders\Fire</Filter>
     </FxCompile>
-    <FxCompile Include="RainSOGeometryShader.hlsl">
-      <Filter>Shader Files</Filter>
+    <FxCompile Include="FireSOGeometryShader.hlsl">
+      <Filter>Shader Files\Particle Shaders\Fire</Filter>
     </FxCompile>
-    <FxCompile Include="RainRVertexShader.hlsl">
-      <Filter>Shader Files</Filter>
+    <FxCompile Include="FireSOVertexShader.hlsl">
+      <Filter>Shader Files\Particle Shaders\Fire</Filter>
     </FxCompile>
     <FxCompile Include="RainRGeometryShader.hlsl">
-      <Filter>Shader Files</Filter>
+      <Filter>Shader Files\Particle Shaders\Rain</Filter>
     </FxCompile>
     <FxCompile Include="RainRPixelShader.hlsl">
-      <Filter>Shader Files</Filter>
+      <Filter>Shader Files\Particle Shaders\Rain</Filter>
+    </FxCompile>
+    <FxCompile Include="RainRVertexShader.hlsl">
+      <Filter>Shader Files\Particle Shaders\Rain</Filter>
+    </FxCompile>
+    <FxCompile Include="RainSOGeometryShader.hlsl">
+      <Filter>Shader Files\Particle Shaders\Rain</Filter>
+    </FxCompile>
+    <FxCompile Include="RainSOVertexShader.hlsl">
+      <Filter>Shader Files\Particle Shaders\Rain</Filter>
+    </FxCompile>
+    <FxCompile Include="FireworksSOVertexShader.hlsl">
+      <Filter>Shader Files\Particle Shaders\Fireworks</Filter>
+    </FxCompile>
+    <FxCompile Include="FireworksSOGeometryShader.hlsl">
+      <Filter>Shader Files\Particle Shaders\Fireworks</Filter>
+    </FxCompile>
+    <FxCompile Include="FireworksRGeometryShader.hlsl">
+      <Filter>Shader Files\Particle Shaders\Fireworks</Filter>
+    </FxCompile>
+    <FxCompile Include="FireworksRVertexShader.hlsl">
+      <Filter>Shader Files\Particle Shaders\Fireworks</Filter>
+    </FxCompile>
+    <FxCompile Include="FireworksRPixelShader.hlsl">
+      <Filter>Shader Files\Particle Shaders\Fireworks</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
@@ -305,10 +332,13 @@
       <Filter>Header Files\Helpers</Filter>
     </None>
     <None Include="Fire.hlsli">
-      <Filter>Shader Files</Filter>
+      <Filter>Shader Files\Particle Shaders\Fire</Filter>
     </None>
     <None Include="Rain.hlsli">
-      <Filter>Shader Files</Filter>
+      <Filter>Shader Files\Particle Shaders\Rain</Filter>
+    </None>
+    <None Include="Fireworks.hlsli">
+      <Filter>Shader Files\Particle Shaders\Fireworks</Filter>
     </None>
   </ItemGroup>
 </Project>

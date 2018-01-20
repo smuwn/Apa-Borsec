@@ -57,7 +57,7 @@ void main(
 			newElem.ParticleDir.z *= 0.5f;
 			newElem.ParticleDir *= 4;
 
-			newElem.Size = float2( 1.0f, 1.0f );
+			newElem.Size = float2( 2.0f, 2.0f );
 
 			newElem.Age = 0.0f;
 			newElem.Type = FLARE;

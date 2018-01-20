@@ -1,5 +1,6 @@
 #include "Game.h"
 
+
 CGame* CGame::m_GameInstance = nullptr;
 
 
@@ -230,6 +231,10 @@ void CGame::InitShaders( )
 		mRainShaders->CreateStreamOutShaders( L"Shaders/RainSOVertexShader.cso", L"Shaders/RainSOGeometryShader.cso" );
 		mRainShaders->CreateRenderShaders( L"Shaders/RainRVertexShader.cso", L"Shaders/RainRGeometryShader.cso",
 			L"Shaders/RainRPixelShader.cso" );
+		mFireworksShaders = std::make_shared<CParticleShader>( mDevice.Get( ), mImmediateContext.Get( ) );
+		mFireworksShaders->CreateStreamOutShaders( L"Shaders/FireworksSOVertexShader.cso", L"Shaders/FireworksSOGeometryShader.cso" );
+		mFireworksShaders->CreateRenderShaders( L"Shaders/FireworksRVertexShader.cso", L"Shaders/FireworksRGeometryShader.cso",
+			L"Shaders/FireworksRPixelShader.cso" );
 	}
 	CATCH;
 }
@@ -251,6 +256,9 @@ void CGame::InitModels( )
 	mFire->SetEmitPos( DirectX::XMFLOAT3( -7.f, 1.f, -45.f ) );
 	mRain = std::make_unique<ParticleSystem>( mDevice.Get( ), mImmediateContext.Get( ),
 		mRainShaders );
+	mFireworks = std::make_unique<ParticleSystem>( mDevice.Get( ), mImmediateContext.Get( ),
+		mFireworksShaders );
+	mFireworks->SetEmitPos( DirectX::XMFLOAT3( -8.f, 1.0f, -44.f ) );
 }
 
 void CGame::Init2D( )
@@ -279,6 +287,8 @@ void CGame::InitTextures( )
 	{
 		mFireTexture = std::make_shared<CTexture>( ( LPWSTR ) L"Data/FireFlare.dds", mDevice.Get( ) );
 		mFire->SetTexture( mFireTexture->GetTexture( ) );
+		mFireworksTexture = std::make_shared<CTexture>( ( LPWSTR ) L"Data/Firework.jpg", mDevice.Get( ) );
+		mFireworks->SetTexture( mFireworksTexture->GetTexture( ) );
 	}
 	CATCH;
 #if DEBUG || _DEBUG
@@ -287,7 +297,6 @@ void CGame::InitTextures( )
 	mRenderTextureDebug->PrepareForRendering( );
 	mRenderTextureDebug->ClearBuffer( );
 	mDebugSquare->SetTexture( mRenderTextureDebug->GetTexture( ) );
-	mDebugSquare->SetTexture( mFireTexture->GetTexture( ) );
 #endif
 }
 
@@ -328,6 +337,7 @@ void CGame::Update( )
 	mFire->Update( mTimer.GetFrameTime( ) );
 	mRain->Update( mTimer.GetFrameTime( ) );
 	mRain->SetEmitPos( mCamera->GetCamPos( ) );
+	mFireworks->Update( mTimer.GetFrameTime( ) );
 #if DEBUG || _DEBUG
 	if ( mInput->isSpecialKeyPressed( DIK_B ) )
 		bDrawWireframe = bDrawWireframe ? false : true;
@@ -371,8 +381,10 @@ void CGame::Render( )
 
 	EnableBackbuffer( );
 
+	// Render Particles
 	mImmediateContext->OMSetBlendState( DX::TransparencyBlend.Get( ), nullptr, 0xffffffff );
 	mFire->Render( mCamera.get( ) );
+	mFireworks->Render( mCamera.get( ) );
 	mImmediateContext->OMSetBlendState( nullptr, nullptr, 0xffffffff );
 
 	mRain->Render( mCamera.get( ) );

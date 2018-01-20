@@ -68,7 +68,10 @@ void ParticleSystem::Render( CCamera * camera )
 	//SVertex * vertices = ( SVertex* ) mappedSubresource.pData;
 	//for ( int i = 0; i < 10; ++i )
 	//{
-	//	DX::OutputVDebugString( L"Particle %d: Age: %.2f, Type: %d\n", i, vertices[ i ].Age, vertices[ i ].Type );
+	//	DX::OutputVDebugString( L"Particle %d: Type: %d Initpos: (%.2f, %.2f, %.2f), Direction: (%.2f,%.2f,%.2f)\n",
+	//		i, vertices[ i ].Type,
+	//		vertices[ i ].ParticlePos.x, vertices[ i ].ParticlePos.y, vertices[ i ].ParticlePos.z,
+	//		vertices[ i ].ParticleDir.x, vertices[ i ].ParticleDir.y, vertices[ i ].ParticleDir.z );
 	//}
 
 	//mContext->Unmap( mDebugBuffer.Get( ), 0 );
