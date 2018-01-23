@@ -38,7 +38,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mClippingPlaneBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mLightBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mTextureBuffer;
-	Microsoft::WRL::ComPtr<ID3D11SamplerState> mWrapSampler;
 
 	ID3D11Device * mDevice;
 	ID3D11DeviceContext * mContext;

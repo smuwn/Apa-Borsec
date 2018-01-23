@@ -24,9 +24,12 @@ void CModel::CreateTriangle( )
 {
 	SVertex vertices[ ] =
 	{
-		SVertex( DirectX::XMFLOAT3( 0.0f, 0.5f, 0.5f ) ),
-		SVertex( DirectX::XMFLOAT3( 0.5f,-0.5f, 0.5f ) ),
-		SVertex( DirectX::XMFLOAT3( -0.5f,-0.5f, 0.5f ) ),
+		SVertex( DirectX::XMFLOAT3( 0.0f, 1.0f, 0.0f ),
+			DirectX::XMFLOAT3(0.0f,0.0f,-1.0f), DirectX::XMFLOAT2(0.5f, 0.0f) ),
+		SVertex( DirectX::XMFLOAT3( 1.0f,-1.0f, 0.0f ),
+			DirectX::XMFLOAT3( 0.0f,0.0f,-1.0f ), DirectX::XMFLOAT2( 1.0f, 1.0f ) ),
+		SVertex( DirectX::XMFLOAT3( -1.0f,-1.0f, 0.0f ),
+			DirectX::XMFLOAT3( 0.0f,0.0f,-1.0f ), DirectX::XMFLOAT2( 0.0f, 1.0f ) ),
 	};
 	mNumVertices = ARRAYSIZE( vertices );
 	ZeroMemoryAndDeclare( D3D11_BUFFER_DESC, vertBuffDesc );
@@ -35,7 +38,7 @@ void CModel::CreateTriangle( )
 	vertBuffDesc.ByteWidth = sizeof( SVertex ) * mNumVertices;
 	vertBuffDesc.Usage = D3D11_USAGE::D3D11_USAGE_DEFAULT;
 	vertBuffData.pSysMem = vertices;
-	DX::ThrowIfFailed(
+	ThrowIfFailed(
 		mDevice->CreateBuffer( &vertBuffDesc, &vertBuffData, &mVertexBuffer )
 		);
 	DWORD Indices[ ] =
@@ -49,7 +52,7 @@ void CModel::CreateTriangle( )
 	indexBuffDesc.ByteWidth = sizeof( DWORD ) * mNumIndices;
 	indexBuffDesc.Usage = D3D11_USAGE::D3D11_USAGE_DEFAULT;
 	indexBuffData.pSysMem = Indices;
-	DX::ThrowIfFailed(
+	ThrowIfFailed(
 		mDevice->CreateBuffer( &indexBuffDesc, &indexBuffData, &mIndexBuffer )
 		);
 }

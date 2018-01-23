@@ -28,7 +28,6 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mPerObjectBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mColorBuffer;
-	Microsoft::WRL::ComPtr<ID3D11SamplerState> mSampler;
 
 	ID3D11Device * mDevice;
 	ID3D11DeviceContext * mContext;

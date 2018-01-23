@@ -51,7 +51,7 @@ void Square::CreateBuffers( )
 	buffDesc.Usage = D3D11_USAGE::D3D11_USAGE_DEFAULT;
 	buffDesc.ByteWidth = sizeof( SVertex ) * mVertexCount;
 	buffData.pSysMem = Vertices;
-	DX::ThrowIfFailed( mDevice->CreateBuffer( &buffDesc, &buffData, &mVertBuffer ) );
+	ThrowIfFailed( mDevice->CreateBuffer( &buffDesc, &buffData, &mVertBuffer ) );
 
 	DWORD Indices[ ] =
 	{
@@ -65,7 +65,7 @@ void Square::CreateBuffers( )
 	buffDesc.ByteWidth = sizeof( DWORD ) * mIndexCount;
 	buffDesc.Usage = D3D11_USAGE::D3D11_USAGE_IMMUTABLE;
 	buffData.pSysMem = Indices;
-	DX::ThrowIfFailed( mDevice->CreateBuffer( &buffDesc, &buffData, &mIndexBuffer ) );
+	ThrowIfFailed( mDevice->CreateBuffer( &buffDesc, &buffData, &mIndexBuffer ) );
 }
 
 void Square::Render( DirectX::FXMMATRIX& Projection )

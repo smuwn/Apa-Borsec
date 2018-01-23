@@ -42,7 +42,7 @@ void RenderTexture::InitViews( )
 	texDesc.SampleDesc.Quality = 0;
 	texDesc.Usage = D3D11_USAGE::D3D11_USAGE_DEFAULT;
 
-	DX::ThrowIfFailed( mDevice->CreateTexture2D(
+	ThrowIfFailed( mDevice->CreateTexture2D(
 		&texDesc, nullptr, &mTexture
 		) );
 
@@ -53,7 +53,7 @@ void RenderTexture::InitViews( )
 	srvDesc.Texture2D.MipLevels = 1;
 	srvDesc.Texture2D.MostDetailedMip = 0;
 
-	DX::ThrowIfFailed( mDevice->CreateShaderResourceView(
+	ThrowIfFailed( mDevice->CreateShaderResourceView(
 		mTexture.Get( ), &srvDesc, &mTextureSRV
 		) );
 
@@ -63,7 +63,7 @@ void RenderTexture::InitViews( )
 	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION::D3D11_RTV_DIMENSION_TEXTURE2D;
 	rtvDesc.Texture2D.MipSlice = 0;
 
-	DX::ThrowIfFailed( mDevice->CreateRenderTargetView(
+	ThrowIfFailed( mDevice->CreateRenderTargetView(
 		mTexture.Get( ), &rtvDesc, &mTextureRTV
 		) );
 
@@ -79,8 +79,8 @@ void RenderTexture::InitViews( )
 	texDesc.SampleDesc.Quality = 0;
 	
 	ID3D11Texture2D * DepthBuffer = nullptr;
-	DX::ThrowIfFailed( mDevice->CreateTexture2D( &texDesc, nullptr, &DepthBuffer ) );
-	DX::ThrowIfFailed( mDevice->CreateDepthStencilView(
+	ThrowIfFailed( mDevice->CreateTexture2D( &texDesc, nullptr, &DepthBuffer ) );
+	ThrowIfFailed( mDevice->CreateDepthStencilView(
 		DepthBuffer, nullptr, &mDSView
 		) );
 

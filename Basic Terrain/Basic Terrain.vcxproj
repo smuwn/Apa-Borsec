@@ -142,6 +142,7 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="ParticleShader.cpp" />
     <ClCompile Include="ParticleSystem.cpp" />
+    <ClCompile Include="ProjectiveTexturingShader.cpp" />
     <ClCompile Include="QuadTree.cpp" />
     <ClCompile Include="RenderTexture.cpp" />
     <ClCompile Include="Skydome.cpp" />
@@ -182,6 +183,8 @@
     <ClInclude Include="Model.h" />
     <ClInclude Include="ParticleShader.h" />
     <ClInclude Include="ParticleSystem.h" />
+    <ClInclude Include="ProjectiveTexturingShader.h" />
+    <ClInclude Include="Projector.h" />
     <ClInclude Include="QuadTree.h" />
     <ClInclude Include="RenderTexture.h" />
     <ClInclude Include="ShaderHelper.h" />
@@ -367,6 +370,22 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(LocalDebuggerWorkingDirectory)Shaders\%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)Shaders\%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="ProjectiveTexturingPixelShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)Shaders\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(LocalDebuggerWorkingDirectory)Shaders\%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="ProjectiveTexturingVertexShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)Shaders\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(LocalDebuggerWorkingDirectory)Shaders\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="RainRGeometryShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Geometry</ShaderType>

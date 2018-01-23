@@ -4,7 +4,7 @@
 
 CTexture::CTexture( LPWSTR lpPath, ID3D11Device* device )
 {
-	DX::ThrowIfFailed(
+	ThrowIfFailed(
 		D3DX11CreateShaderResourceViewFromFile( device, lpPath, nullptr, nullptr, &mTextureSRV, nullptr )
 		);
 }

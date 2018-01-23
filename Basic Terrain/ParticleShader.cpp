@@ -13,18 +13,6 @@ CParticleShader::CParticleShader( ID3D11Device * device, ID3D11DeviceContext * c
 			D3D11_USAGE::D3D11_USAGE_DYNAMIC, D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER,
 			sizeof( SPerFrame ), D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE );
 
-		ZeroMemoryAndDeclare( D3D11_SAMPLER_DESC, sampDesc );
-		sampDesc.AddressU =
-			sampDesc.AddressV =
-			sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_MODE::D3D11_TEXTURE_ADDRESS_WRAP;
-		sampDesc.Filter = D3D11_FILTER::D3D11_FILTER_MIN_MAG_MIP_POINT;
-		sampDesc.MaxLOD = FLT_MAX;
-		sampDesc.MinLOD = 0;
-		sampDesc.MipLODBias = 0;
-		DX::ThrowIfFailed(
-			mDevice->CreateSamplerState( &sampDesc, &mWrapSampler )
-			);
-
 
 	}
 	CATCH;
@@ -80,7 +68,7 @@ void CParticleShader::CreateStreamOutShaders( LPWSTR lpVertexShader, LPWSTR lpGe
 	layout[ 4 ].SemanticIndex = 0;
 	layout[ 4 ].SemanticName = "TYPE";
 	UINT layoutSize = ARRAYSIZE( layout );
-	DX::ThrowIfFailed(
+	ThrowIfFailed(
 		mDevice->CreateInputLayout( layout, layoutSize, mStreamOut.mBlobs[ 0 ]->GetBufferPointer( ),
 			mStreamOut.mBlobs[ 0 ]->GetBufferSize( ), &mLayout )
 		);
@@ -113,7 +101,7 @@ void CParticleShader::RenderStreamOut( SPerFrame & info, UINT vertexCount )
 	memcpy_s( MappedSubresource.pData, sizeof( SPerFrame ), ( void* ) &info, sizeof( SPerFrame ) );
 	mContext->Unmap( mEmitterInfoBuffer.Get( ), 0 );
 	mContext->GSSetConstantBuffers( 0, 1, mEmitterInfoBuffer.GetAddressOf( ) );
-	mContext->GSSetSamplers( 0, 1, mWrapSampler.GetAddressOf( ) );
+	mContext->GSSetSamplers( 0, 1, DX::PointWrapSampler.GetAddressOf( ) );
 
 	ID3D11ShaderResourceView * SRVs[ ] = { Utilities::GetRandomTextureSRV( ) };
 	mContext->GSSetShaderResources( 0, 1, SRVs );
@@ -158,7 +146,7 @@ void CParticleShader::Render( ID3D11ShaderResourceView * texture )
 	mContext->GSSetConstantBuffers( 0, 1, mEmitterInfoBuffer.GetAddressOf( ) );
 	
 	mContext->PSSetShaderResources( 0, 1, &texture );
-	mContext->PSSetSamplers( 0, 1, mWrapSampler.GetAddressOf( ) );
+	mContext->PSSetSamplers( 0, 1, DX::PointWrapSampler.GetAddressOf( ) );
 
 	mContext->RSSetState( DX::NoCulling.Get( ) );
 

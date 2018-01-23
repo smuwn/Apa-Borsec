@@ -26,7 +26,6 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mVSPerObjectBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mPSPerObjectBuffer;
-	Microsoft::WRL::ComPtr<ID3D11SamplerState> mWrapSampler;
 
 
 	ID3D11Device* mDevice;

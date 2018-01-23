@@ -23,6 +23,30 @@ MessageBoxA(NULL,"Unexpected error occured", "Error", MB_ICONERROR| MB_OK); exit
 }
 #endif
 
+#if DEBUG || _DEBUG
+#define ThrowIfFailed(hr) if ( FAILED( hr) )\
+{\
+	_com_error err( hr );\
+	const wchar_t* errorMessage = err.ErrorMessage( );\
+	wchar_t buffer[ 500 ];\
+	int line = __LINE__;\
+	const char* file = __FILE__;\
+	swprintf_s( buffer, L"DirectX Error occured at line %d in file %hs;\nMessage: %ws\n", line, file, errorMessage );\
+	OutputDebugString( buffer );\
+	throw std::exception( "DirectX Error" );\
+}
+#else
+#define ThrowIfFailed(hr) if ( FAILED( hr) )\
+{\
+	_com_error err( hr );\
+	const wchar_t* errorMessage = err.ErrorMessage( );\
+	wchar_t buffer[ 500 ];\
+	swprintf_s( buffer, L"DirectX Error occured; Message: %ws", errorMessage );\
+	MessageBox( NULL, buffer, L"Error", MB_ICONERROR | MB_OK );\
+	throw std::exception( "DirectX Error" );\
+}
+#endif
+
 #include <windows.h>
 #include <d3d11.h>
 #include <D3DX11.h>
@@ -76,25 +100,10 @@ namespace DX
 	extern Microsoft::WRL::ComPtr<ID3D11DepthStencilState> DSDisabled;
 	extern Microsoft::WRL::ComPtr<ID3D11BlendState> AdditiveBlend;
 	extern Microsoft::WRL::ComPtr<ID3D11BlendState> TransparencyBlend;
-	inline void ThrowIfFailed( HRESULT hr )
-	{
-		if ( FAILED( hr ) )
-		{
-			_com_error err( hr );
-			const wchar_t* errorMessage = err.ErrorMessage( );
-			wchar_t buffer[ 500 ];
-#if DEBUG || _DEBUG
-			int line = __LINE__;
-			const char* file = __FILE__;
-			swprintf_s( buffer, L"DirectX Error occured at line %d in file %hs;\nMessage: %ws\n", line, file, errorMessage );
-			OutputDebugString( buffer );
-#else
-			swprintf_s( buffer, L"DirectX Error occured; Message: %ws", errorMessage );
-			MessageBox( NULL, buffer, L"Error", MB_ICONERROR | MB_OK );
-#endif
-			throw std::exception( "DirectX Error" );
-		}
-	};
+
+	extern Microsoft::WRL::ComPtr<ID3D11SamplerState> AnisotropicWrapSampler;
+	extern Microsoft::WRL::ComPtr<ID3D11SamplerState> PointWrapSampler;
+
 	inline void OutputVDebugString( const wchar_t * format, ... )
 	{
 #if DEBUG || _DEBUG

@@ -23,7 +23,7 @@ void Utilities::Create( ID3D11Device * device )
 	ZeroMemoryAndDeclare( D3D11_SUBRESOURCE_DATA, texData );
 	texData.pSysMem = values;
 
-	DX::ThrowIfFailed(
+	ThrowIfFailed(
 		device->CreateTexture1D( &texDesc, &texData, &mRandomTexture )
 		);
 
@@ -32,7 +32,7 @@ void Utilities::Create( ID3D11Device * device )
 	srvDesc.Texture1D.MipLevels = texDesc.MipLevels;
 	srvDesc.Texture1D.MostDetailedMip = 0;
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION::D3D11_SRV_DIMENSION_TEXTURE1D;
-	DX::ThrowIfFailed(
+	ThrowIfFailed(
 		device->CreateShaderResourceView( mRandomTexture.Get( ), &srvDesc, &mRandomTextureSRV )
 		);
 

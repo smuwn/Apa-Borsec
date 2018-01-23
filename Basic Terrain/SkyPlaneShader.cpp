@@ -30,7 +30,7 @@ SkyPlaneShader::SkyPlaneShader( ID3D11Device * Device, ID3D11DeviceContext * Con
 		layout[ 1 ].SemanticIndex = 0;
 		layout[ 1 ].SemanticName = "TEXCOORD";
 		int numElements = ARRAYSIZE( layout );
-		DX::ThrowIfFailed(
+		ThrowIfFailed(
 			mDevice->CreateInputLayout( layout, numElements,
 				mBlobs[ 0 ]->GetBufferPointer( ), mBlobs[ 0 ]->GetBufferSize( ), &mLayout )
 			);
@@ -41,19 +41,6 @@ SkyPlaneShader::SkyPlaneShader( ID3D11Device * Device, ID3D11DeviceContext * Con
 			D3D11_USAGE::D3D11_USAGE_DYNAMIC, D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER,
 			sizeof( STextureInfo ), D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE );
 
-		ZeroMemoryAndDeclare( D3D11_SAMPLER_DESC, sampDesc );
-		sampDesc.AddressU =
-			sampDesc.AddressV =
-			sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_MODE::D3D11_TEXTURE_ADDRESS_WRAP;
-		sampDesc.ComparisonFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_ALWAYS;
-		sampDesc.Filter = D3D11_FILTER::D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-		sampDesc.MaxAnisotropy = 16;
-		sampDesc.MaxLOD = 0;
-		sampDesc.MinLOD = 0;
-		sampDesc.MipLODBias = 3;
-		DX::ThrowIfFailed(
-			mDevice->CreateSamplerState( &sampDesc, &mWrapSampler )
-			);
 	}
 	CATCH;
 }
@@ -68,7 +55,6 @@ SkyPlaneShader::~SkyPlaneShader( )
 
 	mVSPerObjectBuffer.Reset( );
 	mPSPerObjectBuffer.Reset( );
-	mWrapSampler.Reset( );
 }
 
 void SkyPlaneShader::Render( UINT IndexCount, SkyPlaneShader::STextureInfo const& TextureInfo,
@@ -91,7 +77,7 @@ void SkyPlaneShader::Render( UINT IndexCount, SkyPlaneShader::STextureInfo const
 	mContext->Unmap( mVSPerObjectBuffer.Get( ), 0 );
 	mContext->VSSetConstantBuffers( 0, 1, mVSPerObjectBuffer.GetAddressOf( ) );
 
-	mContext->PSSetSamplers( 0, 1, mWrapSampler.GetAddressOf( ) );
+	mContext->PSSetSamplers( 0, 1, DX::AnisotropicWrapSampler.GetAddressOf( ) );
 	if ( CloudTexture != nullptr && PerturbTexture != nullptr )
 	{
 		ID3D11ShaderResourceView * SRV = CloudTexture->GetTexture( );

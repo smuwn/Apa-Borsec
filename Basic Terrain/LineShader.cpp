@@ -23,7 +23,7 @@ LineShader::LineShader( ID3D11Device * Device, ID3D11DeviceContext * Context ) :
 		layout[ 0 ].SemanticIndex = 0;
 		layout[ 0 ].SemanticName = "POSITION";
 		UINT layoutCount = ARRAYSIZE( layout );
-		DX::ThrowIfFailed(
+		ThrowIfFailed(
 			mDevice->CreateInputLayout( layout, layoutCount,
 				mBlobs[ 0 ]->GetBufferPointer( ), mBlobs[ 0 ]->GetBufferSize( ), &mInputLayout )
 		);
@@ -56,7 +56,7 @@ void LineShader::Render( int VertexCount, DirectX::FXMMATRIX& View, DirectX::FXM
 	static DirectX::XMMATRIX WVP;
 	static D3D11_MAPPED_SUBRESOURCE Mapped;
 	WVP = View * Projection;
-	DX::ThrowIfFailed(
+	ThrowIfFailed(
 		mContext->Map( mPerObjectBuffer.Get( ), 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &Mapped )
 	);
 	( ( SPerObject* ) Mapped.pData )->WVP = DirectX::XMMatrixTranspose( WVP );

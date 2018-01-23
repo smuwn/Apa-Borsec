@@ -133,6 +133,9 @@
     <ClCompile Include="ParticleSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ProjectiveTexturingShader.cpp">
+      <Filter>Source Files\Shaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -231,6 +234,12 @@
     <ClInclude Include="ParticleSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ProjectiveTexturingShader.h">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Projector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="VertexShader.hlsl">
@@ -325,6 +334,12 @@
     </FxCompile>
     <FxCompile Include="FireworksRPixelShader.hlsl">
       <Filter>Shader Files\Particle Shaders\Fireworks</Filter>
+    </FxCompile>
+    <FxCompile Include="ProjectiveTexturingVertexShader.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="ProjectiveTexturingPixelShader.hlsl">
+      <Filter>Shader Files</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

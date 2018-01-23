@@ -10,36 +10,36 @@ namespace ShaderHelper
 		ID3D11Device * device, ID3DBlob ** ShaderBlob, ID3D11DeviceChild ** Shader )
 	{
 
-		DX::ThrowIfFailed( D3DReadFileToBlob( filePath, ShaderBlob ) );
+		ThrowIfFailed( D3DReadFileToBlob( filePath, ShaderBlob ) );
 
 		switch ( profile[ 0 ] )
 		{
 		case 'v': // Vertex Shader
-		DX::ThrowIfFailed(
+		ThrowIfFailed(
 			device->CreateVertexShader( ( *ShaderBlob )->GetBufferPointer( ), ( *ShaderBlob )->GetBufferSize( ), nullptr,
 				reinterpret_cast< ID3D11VertexShader** >( Shader ) )
 			);
 		break;
 		case 'h': // Hull shader
-		DX::ThrowIfFailed(
+		ThrowIfFailed(
 			device->CreateHullShader( ( *ShaderBlob )->GetBufferPointer( ), ( *ShaderBlob )->GetBufferSize( ), nullptr,
 				reinterpret_cast< ID3D11HullShader** > ( Shader ) )
 			);
 		break;
 		case 'd': // Domain Shader
-		DX::ThrowIfFailed(
+		ThrowIfFailed(
 			device->CreateDomainShader( ( *ShaderBlob )->GetBufferPointer( ), ( *ShaderBlob )->GetBufferSize( ), nullptr,
 				reinterpret_cast< ID3D11DomainShader** > ( Shader ) )
 			);
 		break;
 		case 'g': // Geometry Shader
-		DX::ThrowIfFailed(
+		ThrowIfFailed(
 			device->CreateGeometryShader( ( *ShaderBlob )->GetBufferPointer( ), ( *ShaderBlob )->GetBufferSize( ), nullptr,
 				reinterpret_cast< ID3D11GeometryShader** > ( Shader ) )
 			);
 		break;
 		case 'p': // Pixel Shader
-		DX::ThrowIfFailed(
+		ThrowIfFailed(
 			device->CreatePixelShader( ( *ShaderBlob )->GetBufferPointer( ), ( *ShaderBlob )->GetBufferSize( ), nullptr,
 				reinterpret_cast< ID3D11PixelShader** > ( Shader ) )
 			);
@@ -67,19 +67,19 @@ namespace ShaderHelper
 		ID3D11Device * device, ID3DBlob ** ShaderBlob, ID3D11DeviceChild ** Shader,
 		D3D11_SO_DECLARATION_ENTRY *& soe, unsigned int numLayout )
 	{
-		DX::ThrowIfFailed( D3DReadFileToBlob( filePath, ShaderBlob ) );
+		ThrowIfFailed( D3DReadFileToBlob( filePath, ShaderBlob ) );
 
 		D3D_FEATURE_LEVEL featureLevel = device->GetFeatureLevel( );
 		if ( featureLevel >= D3D_FEATURE_LEVEL_11_0 )
 		{
-			DX::ThrowIfFailed( device->CreateGeometryShaderWithStreamOutput( ( *ShaderBlob )->GetBufferPointer( ), ( *ShaderBlob )->GetBufferSize( ),
+			ThrowIfFailed( device->CreateGeometryShaderWithStreamOutput( ( *ShaderBlob )->GetBufferPointer( ), ( *ShaderBlob )->GetBufferSize( ),
 				soe, numLayout, nullptr, 0, D3D11_SO_NO_RASTERIZED_STREAM,
 				nullptr, reinterpret_cast< ID3D11GeometryShader** >( Shader )
 				) );
 		}
 		else
 		{
-			DX::ThrowIfFailed( device->CreateGeometryShaderWithStreamOutput( ( *ShaderBlob )->GetBufferPointer( ), ( *ShaderBlob )->GetBufferSize( ),
+			ThrowIfFailed( device->CreateGeometryShaderWithStreamOutput( ( *ShaderBlob )->GetBufferPointer( ), ( *ShaderBlob )->GetBufferSize( ),
 				soe, numLayout, nullptr, 0, 0,
 				nullptr, reinterpret_cast< ID3D11GeometryShader** >( Shader )
 				) );
@@ -111,13 +111,13 @@ namespace ShaderHelper
 		if ( data /*!= nullptr*/ )
 		{
 			buffData.pSysMem = data;
-			DX::ThrowIfFailed(
+			ThrowIfFailed(
 				device->CreateBuffer( &buffDesc, &buffData, FinalBuffer )
 				);
 		}
 		else
 		{
-			DX::ThrowIfFailed(
+			ThrowIfFailed(
 				device->CreateBuffer( &buffDesc, nullptr, FinalBuffer )
 				);
 		}

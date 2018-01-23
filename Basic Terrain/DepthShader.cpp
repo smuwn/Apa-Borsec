@@ -22,7 +22,7 @@ DepthShader::DepthShader( ID3D11Device * Device, ID3D11DeviceContext * Context )
 		layout[ 0 ].InstanceDataStepRate = 0;
 		layout[ 0 ].SemanticIndex = 0;
 		layout[ 0 ].SemanticName = "POSITION";
-		DX::ThrowIfFailed( mDevice->CreateInputLayout(
+		ThrowIfFailed( mDevice->CreateInputLayout(
 			layout, _countof( layout ), mBlobs[ 0 ]->GetBufferPointer( ),
 			mBlobs[ 0 ]->GetBufferSize( ), &mLayout
 			) );

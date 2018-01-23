@@ -33,7 +33,7 @@ CWaterShader::CWaterShader( ID3D11Device * Device, ID3D11DeviceContext * Context
 		layout[ 1 ].SemanticName = "TEXCOORD";
 		UINT numArray = ARRAYSIZE( layout );
 
-		DX::ThrowIfFailed(
+		ThrowIfFailed(
 			mDevice->CreateInputLayout( layout, numArray,
 				mBlobs[ 0 ]->GetBufferPointer( ), mBlobs[ 0 ]->GetBufferSize( ),
 				&mLayout )
@@ -52,18 +52,6 @@ CWaterShader::CWaterShader( ID3D11Device * Device, ID3D11DeviceContext * Context
 			D3D11_USAGE::D3D11_USAGE_DYNAMIC, D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER,
 			sizeof( SPSPerObject ), D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE );
 
-		ZeroMemoryAndDeclare( D3D11_SAMPLER_DESC, sampDesc );
-		sampDesc.AddressU =
-			sampDesc.AddressV =
-			sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_MODE::D3D11_TEXTURE_ADDRESS_WRAP;
-		sampDesc.Filter = D3D11_FILTER::D3D11_FILTER_ANISOTROPIC;
-		sampDesc.MaxAnisotropy = 16;
-		sampDesc.MaxLOD = 0;
-		sampDesc.MinLOD = 0;
-		sampDesc.MipLODBias = 0;
-		DX::ThrowIfFailed(
-			mDevice->CreateSamplerState( &sampDesc, &mWrapSampler )
-			);
 	}
 	CATCH;
 }
@@ -96,7 +84,7 @@ void CWaterShader::Render( UINT indexCount,
 	mContext->PSSetShader( mPixelShader.Get( ), nullptr, 0 );
 	mContext->IASetInputLayout( mLayout.Get( ) );
 
-	mContext->PSSetSamplers( 0, 1, mWrapSampler.GetAddressOf( ) );
+	mContext->PSSetSamplers( 0, 1, DX::PointWrapSampler.GetAddressOf( ) );
 	ID3D11ShaderResourceView * SRV[ 3 ] = { Reflection->GetTexture( ),Refraction->GetTexture( ), Normals->GetTexture( ) };
 	mContext->PSSetShaderResources( 0, 3, SRV );
 	

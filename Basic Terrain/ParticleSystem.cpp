@@ -61,7 +61,7 @@ void ParticleSystem::Render( CCamera * camera )
 	//mContext->CopyResource( mDebugBuffer.Get( ), mStreamOutBuffer.Get( ) );
 
 	//
-	//DX::ThrowIfFailed(
+	//ThrowIfFailed(
 	//	mContext->Map( mDebugBuffer.Get( ), 0, D3D11_MAP::D3D11_MAP_READ, 0, &mappedSubresource )
 	//	);
 

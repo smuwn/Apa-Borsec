@@ -23,7 +23,7 @@ CDefaultShader::CDefaultShader( ID3D11Device * device, ID3D11DeviceContext * con
 		layout[ 0 ].SemanticIndex = 0;
 		layout[ 0 ].SemanticName = "POSITION";
 		UINT layoutCount = ARRAYSIZE( layout );
-		DX::ThrowIfFailed(
+		ThrowIfFailed(
 			mDevice->CreateInputLayout(
 				layout, layoutCount, mBlobs[ 0 ]->GetBufferPointer( ), mBlobs[ 0 ]->GetBufferSize( ), &mInputLayout
 				)

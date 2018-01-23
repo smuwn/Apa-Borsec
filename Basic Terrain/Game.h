@@ -24,6 +24,8 @@
 #include "Utilities.h"
 #include "ParticleShader.h"
 #include "ParticleSystem.h"
+#include "Projector.h"
+#include "ProjectiveTexturingShader.h"
 
 #define GAME CGame::GetGameInstance( )
 #if defined UNICODE
@@ -62,6 +64,9 @@ private:
 
 	std::unique_ptr<CText> mFPSText;
 
+	std::unique_ptr<CModel> mModel;
+	std::unique_ptr<Projector> mProjector;
+
 #if DEBUG || _DEBUG
 	std::unique_ptr<RenderTexture> mRenderTextureDebug;
 	std::unique_ptr<CText> mDrawnFacesText;
@@ -91,6 +96,7 @@ private:
 	std::shared_ptr<CParticleShader> mFireShaders;
 	std::shared_ptr<CParticleShader> mRainShaders;
 	std::shared_ptr<CParticleShader> mFireworksShaders;
+	std::shared_ptr<ProjectiveTexturingShader> mProjectiveShaders;
 
 	WCHAR* mGPUDescription;
 

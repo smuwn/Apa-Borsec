@@ -22,7 +22,7 @@ SkyShader::SkyShader( ID3D11Device * Device, ID3D11DeviceContext * Context ) :
 		layout[ 0 ].InstanceDataStepRate = 0;
 		layout[ 0 ].SemanticIndex = 0;
 		layout[ 0 ].SemanticName = "POSITION";
-		DX::ThrowIfFailed(
+		ThrowIfFailed(
 			mDevice->CreateInputLayout( layout, ARRAYSIZE( layout ),
 				mBlobs[ 0 ]->GetBufferPointer( ), mBlobs[ 0 ]->GetBufferSize( ), &mLayout )
 			);

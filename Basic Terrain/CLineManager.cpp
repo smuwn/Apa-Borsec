@@ -29,7 +29,7 @@ CLineManager::~CLineManager( )
 void CLineManager::Begin( )
 {
 	static D3D11_MAPPED_SUBRESOURCE Mapped;
-	DX::ThrowIfFailed(
+	ThrowIfFailed(
 		mContext->Map( mVertBuffer.Get( ), 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &Mapped )
 	);
 	mAddress = Mapped.pData;

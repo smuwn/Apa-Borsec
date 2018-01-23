@@ -30,7 +30,7 @@ C2DShader::C2DShader( ID3D11Device * Device, ID3D11DeviceContext * Context ) :
 		layout[ 1 ].SemanticIndex = 0;
 		layout[ 1 ].SemanticName = "TEXCOORD";
 		UINT layoutCount = ARRAYSIZE( layout );
-		DX::ThrowIfFailed( 
+		ThrowIfFailed( 
 			mDevice->CreateInputLayout( layout, layoutCount,
 				mBlobs[0]->GetBufferPointer(), mBlobs[0]->GetBufferSize(), &mInputLayout )
 			);
@@ -43,19 +43,6 @@ C2DShader::C2DShader( ID3D11Device * Device, ID3D11DeviceContext * Context ) :
 			mDevice, &mColorBuffer, D3D11_USAGE::D3D11_USAGE_DYNAMIC,
 			D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER, sizeof( SColor ),
 			D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE
-			);
-		ZeroMemoryAndDeclare( D3D11_SAMPLER_DESC, sampDesc );
-		sampDesc.AddressU =
-			sampDesc.AddressV =
-			sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_MODE::D3D11_TEXTURE_ADDRESS_WRAP;
-		sampDesc.ComparisonFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_ALWAYS;
-		sampDesc.Filter = D3D11_FILTER::D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-		sampDesc.MaxAnisotropy = 16;
-		sampDesc.MaxLOD = 0;
-		sampDesc.MinLOD = 0;
-		sampDesc.MipLODBias = 3;
-		DX::ThrowIfFailed(
-			mDevice->CreateSamplerState( &sampDesc, &mSampler )
 			);
 	}
 	CATCH;
@@ -97,7 +84,7 @@ void C2DShader::Render( UINT IndexCount, DirectX::FXMMATRIX& World, DirectX::FXM
 	mContext->IASetInputLayout( mInputLayout.Get() );
 	mContext->VSSetShader( mVertexShader.Get( ), nullptr, 0 );
 	mContext->PSSetShader( mPixelShader.Get( ), nullptr, 0 );
-	mContext->PSSetSamplers( 0, 1, mSampler.GetAddressOf( ) );
+	mContext->PSSetSamplers( 0, 1, DX::PointWrapSampler.GetAddressOf( ) );
 
 	D3D11_MAPPED_SUBRESOURCE MappedSubresource;
 	DirectX::XMMATRIX WVP = DirectX::XMMatrixTranspose( World * Projection );

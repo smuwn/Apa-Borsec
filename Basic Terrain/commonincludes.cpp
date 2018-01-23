@@ -12,6 +12,10 @@ namespace DX
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> DSDisabled;
 	Microsoft::WRL::ComPtr<ID3D11BlendState> AdditiveBlend;
 	Microsoft::WRL::ComPtr<ID3D11BlendState> TransparencyBlend;
+
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> AnisotropicWrapSampler;
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> PointWrapSampler;
+
 	int GetComponentCountFromFormat( DXGI_FORMAT format )
 	{ // Please keep this folded
 		switch ( format )
@@ -317,5 +321,17 @@ namespace DX
 		blendDesc.RenderTarget[ 0 ].DestBlendAlpha = D3D11_BLEND::D3D11_BLEND_ZERO;
 		blendDesc.RenderTarget[ 0 ].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE::D3D11_COLOR_WRITE_ENABLE_ALL;
 		ThrowIfFailed( Device->CreateBlendState( &blendDesc, &TransparencyBlend ) );
+		ZeroMemoryAndDeclare( D3D11_SAMPLER_DESC, sampDesc );
+		sampDesc.AddressU =
+			sampDesc.AddressV =
+			sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_MODE::D3D11_TEXTURE_ADDRESS_WRAP;
+		sampDesc.Filter = D3D11_FILTER::D3D11_FILTER_ANISOTROPIC;
+		sampDesc.MaxAnisotropy = 16;
+		sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+		sampDesc.MinLOD = 0;
+		sampDesc.MipLODBias = 0;
+		ThrowIfFailed( Device->CreateSamplerState( &sampDesc, &AnisotropicWrapSampler ) );
+		sampDesc.Filter = D3D11_FILTER::D3D11_FILTER_MIN_LINEAR_MAG_MIP_POINT;
+		ThrowIfFailed( Device->CreateSamplerState( &sampDesc, &PointWrapSampler ) );
 	}
 }

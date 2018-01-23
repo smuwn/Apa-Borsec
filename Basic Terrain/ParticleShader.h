@@ -36,8 +36,6 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> mLayout;
 
-	Microsoft::WRL::ComPtr<ID3D11SamplerState> mWrapSampler;
-
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mEmitterInfoBuffer;
 
 	struct

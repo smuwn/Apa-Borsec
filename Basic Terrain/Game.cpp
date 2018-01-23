@@ -91,17 +91,17 @@ void CGame::InitWindow( bool bFullscreen )
 void CGame::InitD3D( bool bFullscreen )
 {
 	IDXGIFactory * Factory;
-	DX::ThrowIfFailed( CreateDXGIFactory( __uuidof( IDXGIFactory ),
+	ThrowIfFailed( CreateDXGIFactory( __uuidof( IDXGIFactory ),
 		reinterpret_cast< void** >( &Factory ) ) );
 	IDXGIAdapter * Adapter;
-	DX::ThrowIfFailed( Factory->EnumAdapters( 0, &Adapter ) );
+	ThrowIfFailed( Factory->EnumAdapters( 0, &Adapter ) );
 	IDXGIOutput * Output;
-	DX::ThrowIfFailed( Adapter->EnumOutputs( 0, &Output ) );
+	ThrowIfFailed( Adapter->EnumOutputs( 0, &Output ) );
 	UINT NumModes;
-	DX::ThrowIfFailed( Output->GetDisplayModeList( DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM,
+	ThrowIfFailed( Output->GetDisplayModeList( DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM,
 		DXGI_ENUM_MODES_INTERLACED, &NumModes, nullptr ) );
 	DXGI_MODE_DESC * Modes = new DXGI_MODE_DESC[ NumModes ];
-	DX::ThrowIfFailed( Output->GetDisplayModeList( DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM,
+	ThrowIfFailed( Output->GetDisplayModeList( DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM,
 		DXGI_ENUM_MODES_INTERLACED, &NumModes, Modes ) );
 	DXGI_MODE_DESC FinalMode;
 	bool bFound = false;
@@ -164,15 +164,15 @@ void CGame::InitD3D( bool bFullscreen )
 	UINT numFeatureLevels = ARRAYSIZE( featureLevels );
 	D3D_FEATURE_LEVEL featureLevel;
 
-	DX::ThrowIfFailed(
+	ThrowIfFailed(
 		D3D11CreateDeviceAndSwapChain( NULL, driver, NULL, flags,
 			featureLevels, numFeatureLevels, D3D11_SDK_VERSION, &swapDesc, &mSwapChain, &mDevice, &featureLevel, &mImmediateContext )
 	);
 
 	ID3D11Texture2D * backBufferResource;
-	DX::ThrowIfFailed( mSwapChain->GetBuffer( 0, __uuidof( ID3D11Texture2D ),
+	ThrowIfFailed( mSwapChain->GetBuffer( 0, __uuidof( ID3D11Texture2D ),
 		reinterpret_cast< void** >( &backBufferResource ) ) );
-	DX::ThrowIfFailed( 
+	ThrowIfFailed( 
 		mDevice->CreateRenderTargetView(
 			backBufferResource,nullptr, &mBackbuffer
 		)
@@ -187,10 +187,10 @@ void CGame::InitD3D( bool bFullscreen )
 	texDesc.Height = mHeight;
 	texDesc.SampleDesc.Count = 1;
 	texDesc.SampleDesc.Quality = 0;
-	DX::ThrowIfFailed(
+	ThrowIfFailed(
 		mDevice->CreateTexture2D( &texDesc, nullptr, &DSViewResource )
 		);
-	DX::ThrowIfFailed(
+	ThrowIfFailed(
 		mDevice->CreateDepthStencilView( DSViewResource,nullptr,&mDSView )
 		);
 	DSViewResource->Release( );
@@ -221,6 +221,7 @@ void CGame::InitShaders( )
 	mSkyShader = std::make_shared<SkyShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mSkyPlaneShader = std::make_shared<SkyPlaneShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mDepthShader = std::make_shared<DepthShader>( mDevice.Get( ), mImmediateContext.Get( ) );
+	mProjectiveShaders = std::make_shared<ProjectiveTexturingShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	try
 	{
 		mFireShaders = std::make_shared<CParticleShader>( mDevice.Get( ), mImmediateContext.Get( ) );
@@ -259,6 +260,16 @@ void CGame::InitModels( )
 	mFireworks = std::make_unique<ParticleSystem>( mDevice.Get( ), mImmediateContext.Get( ),
 		mFireworksShaders );
 	mFireworks->SetEmitPos( DirectX::XMFLOAT3( -8.f, 1.0f, -44.f ) );
+
+	mProjector = std::make_unique<Projector>( DirectX::XM_PIDIV2,
+		( float ) mWidth / mHeight, NearZ, FarZ );
+	mProjector->SetPosition( DirectX::XMVectorSet( -16.0f, 30.0f, 23.0f, 1.0f ) );
+	mProjector->SetDirection( DirectX::XMVectorSet( 0.0f, -1.0f, 0.0f, 0.0f ) );
+	mProjector->Construct( );
+	mModel = std::make_unique<CModel>( mDevice.Get( ), mImmediateContext.Get( ) );
+	mModel->Identity( );
+	mModel->Translate( -16.0f, 25.0f, 23.0f );
+	
 }
 
 void CGame::Init2D( )
@@ -341,6 +352,18 @@ void CGame::Update( )
 #if DEBUG || _DEBUG
 	if ( mInput->isSpecialKeyPressed( DIK_B ) )
 		bDrawWireframe = bDrawWireframe ? false : true;
+	if ( mInput->isKeyPressed( DIK_NUMPAD4 ) )
+		mModel->Translate( -1.f, 0.0f, 0.0f );
+	if ( mInput->isKeyPressed( DIK_NUMPAD6 ) )
+		mModel->Translate( 1.f, 0.0f, 0.0f );
+	if ( mInput->isKeyPressed( DIK_NUMPAD8 ) )
+	{
+		auto dir = mProjector->GetDirection( );
+		dir = DirectX::XMVector3TransformCoord( dir,
+			DirectX::XMMatrixRotationZ( 0.05f ) );
+		mProjector->SetDirection( dir );
+		mProjector->Construct( );
+	}
 #endif
 }
 
@@ -377,7 +400,24 @@ void CGame::Render( )
 		iter->Render( View, Projection, Frustum, Drawn, CamPos.y, bDrawWireframe );
 	}
 
+	ProjectiveTexturingShader::SConstantBuffer Info;
+	Info.Projection = DirectX::XMMatrixTranspose( Projection );
+	Info.View = DirectX::XMMatrixTranspose( View );
+	Info.World = DirectX::XMMatrixTranspose( mModel->GetWorld( ) );
+	Info.ProjectorView = DirectX::XMMatrixTranspose( mProjector->GetView( ) );
+	Info.ProjectorProjection = DirectX::XMMatrixTranspose( mProjector->GetProjection( ) );
+	mModel->Render( );
+	mProjectiveShaders->Render( mModel->GetIndexCount( ), Info, mFireTexture->GetTexture( ) );
+
 	mSkydome->Render( View, Projection, CamPos );
+
+	mRenderTextureDebug->PrepareForRendering( );
+	mRenderTextureDebug->ClearBuffer( );
+	for ( auto & iter : GameGlobals::gQuadTrees )
+	{
+		iter->Render( mProjector->GetView( ), mProjector->GetProjection( ), Frustum, Drawn, CamPos.y, bDrawWireframe );
+	}
+
 
 	EnableBackbuffer( );
 

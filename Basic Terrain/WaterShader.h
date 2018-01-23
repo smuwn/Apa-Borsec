@@ -44,8 +44,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mPSWaterBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mPSPerObjectBuffer;
 
-	Microsoft::WRL::ComPtr<ID3D11SamplerState> mWrapSampler;
-
 	ID3D11Device * mDevice;
 	ID3D11DeviceContext * mContext;
 public:
