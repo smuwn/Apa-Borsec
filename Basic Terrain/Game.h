@@ -65,7 +65,7 @@ private:
 	std::unique_ptr<CText> mFPSText;
 
 	std::unique_ptr<CModel> mModel;
-	std::unique_ptr<Projector> mProjector;
+	std::unique_ptr<Projector<DX::Projections::PerspectiveProjection>> mProjector;
 
 #if DEBUG || _DEBUG
 	std::unique_ptr<RenderTexture> mRenderTextureDebug;

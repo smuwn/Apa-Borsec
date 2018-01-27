@@ -261,8 +261,8 @@ void CGame::InitModels( )
 		mFireworksShaders );
 	mFireworks->SetEmitPos( DirectX::XMFLOAT3( -8.f, 1.0f, -44.f ) );
 
-	mProjector = std::make_unique<Projector>( DirectX::XM_PIDIV2,
-		( float ) mWidth / mHeight, NearZ, FarZ );
+	mProjector = std::make_unique<Projector<DX::Projections::PerspectiveProjection>>( );
+	mProjector->Initialize( FOV, float( mWidth ) / float( mHeight ), NearZ, FarZ );
 	mProjector->SetPosition( DirectX::XMVectorSet( -16.0f, 30.0f, 23.0f, 1.0f ) );
 	mProjector->SetDirection( DirectX::XMVectorSet( 0.0f, -1.0f, 0.0f, 0.0f ) );
 	mProjector->Construct( );

@@ -74,6 +74,7 @@ MessageBoxA(NULL,"Unexpected error occured", "Error", MB_ICONERROR| MB_OK); exit
 #include <sstream>
 #include <map>
 #include <unordered_map>
+#include <functional>
 
 #include "commonmath.h"
 
@@ -103,6 +104,12 @@ namespace DX
 
 	extern Microsoft::WRL::ComPtr<ID3D11SamplerState> AnisotropicWrapSampler;
 	extern Microsoft::WRL::ComPtr<ID3D11SamplerState> PointWrapSampler;
+
+	namespace Projections
+	{
+		struct PerspectiveProjection { };
+		struct OrtographicProjection { };
+	}
 
 	inline void OutputVDebugString( const wchar_t * format, ... )
 	{
