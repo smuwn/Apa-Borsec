@@ -19,7 +19,7 @@ protected:
 
 	DirectX::XMVECTOR mPosition;
 	DirectX::XMVECTOR mDirection;
-	DirectX::XMVECTOR mUp;
+	DirectX::XMVECTOR mUp = DirectX::XMVectorSet( 0.0f, 1.0f, 0.0f, 0.0f );
 
 	std::function<void( )> mConstructFunction;
 	

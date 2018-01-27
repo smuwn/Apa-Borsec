@@ -263,12 +263,12 @@ void CGame::InitModels( )
 
 	mProjector = std::make_unique<Projector<DX::Projections::PerspectiveProjection>>( );
 	mProjector->Initialize( FOV, float( mWidth ) / float( mHeight ), NearZ, FarZ );
-	mProjector->SetPosition( DirectX::XMVectorSet( -16.0f, 30.0f, 23.0f, 1.0f ) );
-	mProjector->SetDirection( DirectX::XMVectorSet( 0.0f, -1.0f, 0.0f, 0.0f ) );
+	mProjector->SetPosition( DirectX::XMVectorSet( -16.0f, 26.0f, 37.0f, 1.0f ) );
+	mProjector->SetDirection( DirectX::XMVectorSet( 0.0523662344, 0.210415691, -0.976208329, 1.00000000 ) );
 	mProjector->Construct( );
 	mModel = std::make_unique<CModel>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mModel->Identity( );
-	mModel->Translate( -16.0f, 25.0f, 23.0f );
+	mModel->Translate( -16.0f, 25.0f, 25.0f );
 	
 }
 
@@ -413,11 +413,19 @@ void CGame::Render( )
 
 	mRenderTextureDebug->PrepareForRendering( );
 	mRenderTextureDebug->ClearBuffer( );
+	Frustum = FrustumCulling::ConstructFrustum( mProjector->GetView( ), mProjector->GetProjection( ) );
 	for ( auto & iter : GameGlobals::gQuadTrees )
 	{
 		iter->Render( mProjector->GetView( ), mProjector->GetProjection( ), Frustum, Drawn, CamPos.y, bDrawWireframe );
 	}
 
+	Info.Projection = DirectX::XMMatrixTranspose( mProjector->GetProjection( ) );
+	Info.View = DirectX::XMMatrixTranspose( mProjector->GetView( ) );
+	Info.World = DirectX::XMMatrixTranspose( mModel->GetWorld( ) );
+	Info.ProjectorView = DirectX::XMMatrixTranspose( mProjector->GetView( ) );
+	Info.ProjectorProjection = DirectX::XMMatrixTranspose( mProjector->GetProjection( ) );
+	mModel->Render( );
+	mProjectiveShaders->Render( mModel->GetIndexCount( ), Info, mFireTexture->GetTexture( ) );
 
 	EnableBackbuffer( );
 
