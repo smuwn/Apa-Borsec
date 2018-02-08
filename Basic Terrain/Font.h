@@ -53,7 +53,7 @@ public:
 		UINT& VertexCount, UINT& IndexCount,
 		LPCSTR Message, float x, float y );
 public:
-	inline int GetHeight( ) { return mLineHeight; };
+	inline int GetHeight( ) const { return mLineHeight; };
 private:
 	void ReadFile( LPWSTR );
 	int GetKerning( int first, int second );

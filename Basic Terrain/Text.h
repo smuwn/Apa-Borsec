@@ -36,6 +36,7 @@ public:
 	void Render( DirectX::FXMMATRIX& Projection, LPCSTR Text, float X, float Y,
 		DirectX::XMFLOAT4 Color = DirectX::XMFLOAT4( 1.0f, 1.0f, 1.0f, 1.0f ) );
 	void ForceUpdate( );
+	const CFont* GetFont( ) const { return mFont.get( ); }
 private:
 	void InitializeBuffers( UINT length );
 	void Render( DirectX::FXMMATRIX& Projection, DirectX::XMFLOAT4& Color );

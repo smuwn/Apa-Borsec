@@ -222,22 +222,6 @@ void CGame::InitShaders( )
 	mSkyPlaneShader = std::make_shared<SkyPlaneShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mDepthShader = std::make_shared<DepthShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mProjectiveShaders = std::make_shared<ProjectiveTexturingShader>( mDevice.Get( ), mImmediateContext.Get( ) );
-	try
-	{
-		mFireShaders = std::make_shared<CParticleShader>( mDevice.Get( ), mImmediateContext.Get( ) );
-		mFireShaders->CreateStreamOutShaders( L"Shaders/FireSOVertexShader.cso", L"Shaders/FireSOGeometryShader.cso" );
-		mFireShaders->CreateRenderShaders( L"Shaders/FireRVertexShader.cso", L"Shaders/FireRGeometryShader.cso",
-			L"Shaders/FireRPixelShader.cso" );
-		mRainShaders = std::make_shared<CParticleShader>( mDevice.Get( ), mImmediateContext.Get( ) );
-		mRainShaders->CreateStreamOutShaders( L"Shaders/RainSOVertexShader.cso", L"Shaders/RainSOGeometryShader.cso" );
-		mRainShaders->CreateRenderShaders( L"Shaders/RainRVertexShader.cso", L"Shaders/RainRGeometryShader.cso",
-			L"Shaders/RainRPixelShader.cso" );
-		mFireworksShaders = std::make_shared<CParticleShader>( mDevice.Get( ), mImmediateContext.Get( ) );
-		mFireworksShaders->CreateStreamOutShaders( L"Shaders/FireworksSOVertexShader.cso", L"Shaders/FireworksSOGeometryShader.cso" );
-		mFireworksShaders->CreateRenderShaders( L"Shaders/FireworksRVertexShader.cso", L"Shaders/FireworksRGeometryShader.cso",
-			L"Shaders/FireworksRPixelShader.cso" );
-	}
-	CATCH;
 }
 
 void CGame::InitModels( )
@@ -252,20 +236,7 @@ void CGame::InitModels( )
 	mTerrain.reset( );
 	mSkydome = std::make_unique<Skydome>( mDevice.Get( ), mImmediateContext.Get( ),
 		mSkyShader, mSkyPlaneShader );
-	mFire = std::make_unique<ParticleSystem>( mDevice.Get( ), mImmediateContext.Get( ),
-		mFireShaders );
-	mFire->SetEmitPos( DirectX::XMFLOAT3( -7.f, 1.f, -45.f ) );
-	mRain = std::make_unique<ParticleSystem>( mDevice.Get( ), mImmediateContext.Get( ),
-		mRainShaders );
-	mFireworks = std::make_unique<ParticleSystem>( mDevice.Get( ), mImmediateContext.Get( ),
-		mFireworksShaders );
-	mFireworks->SetEmitPos( DirectX::XMFLOAT3( -8.f, 1.0f, -44.f ) );
 
-	mProjector = std::make_unique<Projector<DX::Projections::PerspectiveProjection>>( );
-	mProjector->Initialize( FOV, float( mWidth ) / float( mHeight ), NearZ, FarZ );
-	mProjector->SetPosition( DirectX::XMVectorSet( -16.0f, 26.0f, 37.0f, 1.0f ) );
-	mProjector->SetDirection( DirectX::XMVectorSet( 0.0523662344, 0.210415691, -0.976208329, 1.00000000 ) );
-	mProjector->Construct( );
 	mModel = std::make_unique<CModel>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mModel->Identity( );
 	mModel->Translate( -16.0f, 25.0f, 25.0f );
@@ -278,7 +249,11 @@ void CGame::Init2D( )
 		( LPWSTR ) L"Fonts/73Arial.fnt" );
 	mOpenSans32 = std::make_shared<CFont>( mDevice.Get( ), mImmediateContext.Get( ),
 		( LPWSTR ) L"Fonts/32OpenSans.fnt" );
+	mKristen16 = std::make_shared<CFont>( mDevice.Get( ), mImmediateContext.Get( ),
+		( LPWSTR ) L"Fonts/16Kristen.fnt" );
 	mFPSText = std::make_unique<CText>( mDevice.Get( ), mImmediateContext.Get( ),
+		m2DShader, mOpenSans32, mWidth, mHeight );
+	mCameraInfoText = std::make_unique<CText>( mDevice.Get( ), mImmediateContext.Get( ),
 		m2DShader, mOpenSans32, mWidth, mHeight );
 #if DEBUG || _DEBUG
 	mDrawnFacesText = std::make_unique<CText>( mDevice.Get( ), mImmediateContext.Get( ),
@@ -294,14 +269,6 @@ void CGame::Init2D( )
 
 void CGame::InitTextures( )
 {
-	try
-	{
-		mFireTexture = std::make_shared<CTexture>( ( LPWSTR ) L"Data/FireFlare.dds", mDevice.Get( ) );
-		mFire->SetTexture( mFireTexture->GetTexture( ) );
-		mFireworksTexture = std::make_shared<CTexture>( ( LPWSTR ) L"Data/Firework.jpg", mDevice.Get( ) );
-		mFireworks->SetTexture( mFireworksTexture->GetTexture( ) );
-	}
-	CATCH;
 #if DEBUG || _DEBUG
 	mRenderTextureDebug = std::make_unique<RenderTexture>( mDevice.Get( ), mImmediateContext.Get( ),
 		mWidth, mHeight, NearZ, FarZ );
@@ -345,25 +312,9 @@ void CGame::Update( )
 
 	mCamera->Frame( mTimer.GetFrameTime( ) );
 	mSkydome->Update( mTimer.GetFrameTime( ) );
-	mFire->Update( mTimer.GetFrameTime( ) );
-	mRain->Update( mTimer.GetFrameTime( ) );
-	mRain->SetEmitPos( mCamera->GetCamPos( ) );
-	mFireworks->Update( mTimer.GetFrameTime( ) );
 #if DEBUG || _DEBUG
 	if ( mInput->isSpecialKeyPressed( DIK_B ) )
 		bDrawWireframe = bDrawWireframe ? false : true;
-	if ( mInput->isKeyPressed( DIK_NUMPAD4 ) )
-		mModel->Translate( -1.f, 0.0f, 0.0f );
-	if ( mInput->isKeyPressed( DIK_NUMPAD6 ) )
-		mModel->Translate( 1.f, 0.0f, 0.0f );
-	if ( mInput->isKeyPressed( DIK_NUMPAD8 ) )
-	{
-		auto dir = mProjector->GetDirection( );
-		dir = DirectX::XMVector3TransformCoord( dir,
-			DirectX::XMMatrixRotationZ( 0.05f ) );
-		mProjector->SetDirection( dir );
-		mProjector->Construct( );
-	}
 #endif
 }
 
@@ -377,11 +328,12 @@ void CGame::Render( )
 
 
 	DirectX::XMMATRIX View, ReflectView, Projection;
-	DirectX::XMFLOAT3 CamPos, ReflectedCamPos;
+	DirectX::XMFLOAT3 CamPos, ReflectedCamPos, CamDir;
 	View = mCamera->GetView( );
 	ReflectView = mCamera->GetReflectView( );
 	Projection = mCamera->GetProjection( );
 	CamPos = mCamera->GetCamPos( );
+	CamDir = mCamera->GetCamDir( );
 	ReflectedCamPos = mCamera->GetReflectedCamPos( );
 	
 	FrustumCulling::ViewFrustum Frustum = FrustumCulling::ConstructFrustum( View, Projection );
@@ -400,42 +352,9 @@ void CGame::Render( )
 		iter->Render( View, Projection, Frustum, Drawn, CamPos.y, bDrawWireframe );
 	}
 
-	ProjectiveTexturingShader::SConstantBuffer Info;
-	Info.Projection = DirectX::XMMatrixTranspose( Projection );
-	Info.View = DirectX::XMMatrixTranspose( View );
-	Info.World = DirectX::XMMatrixTranspose( mModel->GetWorld( ) );
-	Info.ProjectorView = DirectX::XMMatrixTranspose( mProjector->GetView( ) );
-	Info.ProjectorProjection = DirectX::XMMatrixTranspose( mProjector->GetProjection( ) );
-	mModel->Render( );
-	mProjectiveShaders->Render( mModel->GetIndexCount( ), Info, mFireTexture->GetTexture( ) );
-
 	mSkydome->Render( View, Projection, CamPos );
 
-	mRenderTextureDebug->PrepareForRendering( );
-	mRenderTextureDebug->ClearBuffer( );
-	Frustum = FrustumCulling::ConstructFrustum( mProjector->GetView( ), mProjector->GetProjection( ) );
-	for ( auto & iter : GameGlobals::gQuadTrees )
-	{
-		iter->Render( mProjector->GetView( ), mProjector->GetProjection( ), Frustum, Drawn, CamPos.y, bDrawWireframe );
-	}
-
-	Info.Projection = DirectX::XMMatrixTranspose( mProjector->GetProjection( ) );
-	Info.View = DirectX::XMMatrixTranspose( mProjector->GetView( ) );
-	Info.World = DirectX::XMMatrixTranspose( mModel->GetWorld( ) );
-	Info.ProjectorView = DirectX::XMMatrixTranspose( mProjector->GetView( ) );
-	Info.ProjectorProjection = DirectX::XMMatrixTranspose( mProjector->GetProjection( ) );
-	mModel->Render( );
-	mProjectiveShaders->Render( mModel->GetIndexCount( ), Info, mFireTexture->GetTexture( ) );
-
 	EnableBackbuffer( );
-
-	// Render Particles
-	mImmediateContext->OMSetBlendState( DX::TransparencyBlend.Get( ), nullptr, 0xffffffff );
-	mFire->Render( mCamera.get( ) );
-	mFireworks->Render( mCamera.get( ) );
-	mImmediateContext->OMSetBlendState( nullptr, nullptr, 0xffffffff );
-
-	mRain->Render( mCamera.get( ) );
 
 
 	char buffer[ 500 ] = { 0 };
@@ -449,6 +368,13 @@ void CGame::Render( )
 	sprintf_s( buffer, "Drawn faces: %d", Drawn );
 	mDrawnFacesText->Render( mOrthoMatrix, buffer,
 		0, 33 );
+
+	sprintf_s( buffer, "Cam pos: (%.2f, %.2f, %.2f)\nCam dir: (%.2f, %.2f, %.2f)",
+		CamPos.x, CamPos.y, CamPos.y, CamDir.x, CamDir.y, CamDir.z );
+	mCameraInfoText->Render( mOrthoMatrix, buffer,
+		0, mHeight - 2 * ( float ) mCameraInfoText->GetFont( )->GetHeight( ),
+		DirectX::XMFLOAT4( 0.0f, 1.0f, 1.0f, 1.0f ) );
+
 #endif
 
 

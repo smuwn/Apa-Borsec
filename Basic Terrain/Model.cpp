@@ -24,12 +24,14 @@ void CModel::CreateTriangle( )
 {
 	SVertex vertices[ ] =
 	{
-		SVertex( DirectX::XMFLOAT3( 0.0f, 1.0f, 0.0f ),
-			DirectX::XMFLOAT3(0.0f,0.0f,-1.0f), DirectX::XMFLOAT2(0.5f, 0.0f) ),
-		SVertex( DirectX::XMFLOAT3( 1.0f,-1.0f, 0.0f ),
-			DirectX::XMFLOAT3( 0.0f,0.0f,-1.0f ), DirectX::XMFLOAT2( 1.0f, 1.0f ) ),
-		SVertex( DirectX::XMFLOAT3( -1.0f,-1.0f, 0.0f ),
-			DirectX::XMFLOAT3( 0.0f,0.0f,-1.0f ), DirectX::XMFLOAT2( 0.0f, 1.0f ) ),
+		SVertex( DirectX::XMFLOAT3( -1.0f, -1.0f, -1.0f ), DirectX::XMFLOAT2( 0.0f,1.0f ) ),
+		SVertex( DirectX::XMFLOAT3( -1.0f, +1.0f, -1.0f ), DirectX::XMFLOAT2( 0.0f,0.0f ) ),
+		SVertex( DirectX::XMFLOAT3( +1.0f, +1.0f, -1.0f ), DirectX::XMFLOAT2( 1.0f,0.0f ) ),
+		SVertex( DirectX::XMFLOAT3( +1.0f, -1.0f, -1.0f ), DirectX::XMFLOAT2( 1.0f,1.0f ) ),
+		SVertex( DirectX::XMFLOAT3( -1.0f, -1.0f, +1.0f ), DirectX::XMFLOAT2( 0.0f,1.0f ) ),
+		SVertex( DirectX::XMFLOAT3( -1.0f, +1.0f, +1.0f ), DirectX::XMFLOAT2( 0.0f,0.0f ) ),
+		SVertex( DirectX::XMFLOAT3( +1.0f, +1.0f, +1.0f ), DirectX::XMFLOAT2( 1.0f,0.0f ) ),
+		SVertex( DirectX::XMFLOAT3( +1.0f, -1.0f, +1.0f ), DirectX::XMFLOAT2( 1.0f,1.0f ) ),
 	};
 	mNumVertices = ARRAYSIZE( vertices );
 	ZeroMemoryAndDeclare( D3D11_BUFFER_DESC, vertBuffDesc );
@@ -43,7 +45,29 @@ void CModel::CreateTriangle( )
 		);
 	DWORD Indices[ ] =
 	{
-		0, 1, 2
+		// front face
+		0, 1, 2,
+		0, 2, 3,
+
+		// back face
+		4, 6, 5,
+		4, 7, 6,
+
+		// left face
+		4, 5, 1,
+		4, 1, 0,
+
+		// right face
+		3, 2, 6,
+		3, 6, 7,
+
+		// top face
+		1, 5, 6,
+		1, 6, 2,
+
+		// bottom face
+		4, 0, 3,
+		4, 3, 7,
 	};
 	mNumIndices = ARRAYSIZE( Indices );
 	ZeroMemoryAndDeclare( D3D11_BUFFER_DESC, indexBuffDesc );

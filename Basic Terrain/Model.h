@@ -11,6 +11,9 @@ public:
 		DirectX::XMFLOAT3 Pos;
 		DirectX::XMFLOAT3 Normal;
 		DirectX::XMFLOAT2 TexCoord;
+		SVertex( DirectX::XMFLOAT3 Pos, DirectX::XMFLOAT2 tex ) :
+			Pos( Pos ), Normal( Pos ), TexCoord( tex )
+		{ };
 		SVertex( DirectX::XMFLOAT3 Pos, DirectX::XMFLOAT3 Nor, DirectX::XMFLOAT2 tex ) :
 			Pos( Pos.x, Pos.y, Pos.z ),
 			Normal( Nor ), TexCoord( tex )

@@ -63,9 +63,9 @@ private:
 	std::shared_ptr<QuadTree> mQuadTree;
 
 	std::unique_ptr<CText> mFPSText;
+	std::unique_ptr<CText> mCameraInfoText;
 
 	std::unique_ptr<CModel> mModel;
-	std::unique_ptr<Projector<DX::Projections::PerspectiveProjection>> mProjector;
 
 #if DEBUG || _DEBUG
 	std::unique_ptr<RenderTexture> mRenderTextureDebug;
@@ -73,18 +73,11 @@ private:
 	std::unique_ptr<Square> mDebugSquare;
 #endif
 
-	std::unique_ptr<ParticleSystem> mFire;
-	std::shared_ptr<CTexture> mFireTexture;
-
-	std::unique_ptr<ParticleSystem> mRain;
-
-	std::unique_ptr<ParticleSystem> mFireworks;
-	std::shared_ptr<CTexture> mFireworksTexture;
-
 	std::shared_ptr<CInput> mInput;
 
 	std::shared_ptr<CFont> mArial73;
 	std::shared_ptr<CFont> mOpenSans32;
+	std::shared_ptr<CFont> mKristen16;
 
 	std::shared_ptr<CDefaultShader> mDefaultShader;
 	std::shared_ptr<C2DShader> m2DShader;
@@ -93,9 +86,6 @@ private:
 	std::shared_ptr<SkyShader> mSkyShader;
 	std::shared_ptr<SkyPlaneShader> mSkyPlaneShader;
 	std::shared_ptr<DepthShader> mDepthShader;
-	std::shared_ptr<CParticleShader> mFireShaders;
-	std::shared_ptr<CParticleShader> mRainShaders;
-	std::shared_ptr<CParticleShader> mFireworksShaders;
 	std::shared_ptr<ProjectiveTexturingShader> mProjectiveShaders;
 
 	WCHAR* mGPUDescription;
