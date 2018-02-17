@@ -3,13 +3,14 @@
 
 
 QuadTree::QuadTree( ID3D11Device * Device, ID3D11DeviceContext * Context,
-	std::shared_ptr<C3DShader> Shader,
+	std::shared_ptr<C3DShader> Shader, std::shared_ptr<ShadowMapShader> ShadowMapShader,
 	std::shared_ptr<CTerrain> Terrain, std::shared_ptr<CLineManager> Lines ) :
 	mTerrain( Terrain ),
 	mLines( Lines ),
 	mDevice( Device ),
 	mContext( Context ),
-	mShader( Shader )
+	mShader( Shader ),
+	mShadowMapShader( ShadowMapShader )
 {
 	try
 	{
@@ -290,9 +291,18 @@ void QuadTree::RenderNode( SNode * Node, DirectX::FXMMATRIX& View, DirectX::FXMM
 		Node->mVertexBuffer.GetAddressOf( ), &Stride, &Offset );
 	mContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 	
-	mShader->RenderVertices( Node->mTriangleCount * 3,
-		DirectX::XMMatrixIdentity( ), View, Projection, mGrass.get( ),
-		mSlope.get( ), mRock.get( ), 3 );
+	if ( mUse3DShaders )
+	{
+		mShader->RenderVertices( Node->mTriangleCount * 3,
+			DirectX::XMMatrixIdentity( ), View, Projection, mGrass.get( ),
+			mSlope.get( ), mRock.get( ), 3 );
+	}
+	else
+	{
+		DirectX::XMMATRIX WVP = View * Projection;
+		mShadowMapShader->RenderVertices( Node->mTriangleCount * 3,
+			WVP, TRUE, mGrass.get( )->GetTexture( ) );
+	}
 	DrawnVertices += Node->mTriangleCount;
 
 }

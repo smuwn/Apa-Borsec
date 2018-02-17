@@ -16,9 +16,13 @@ public:
 	{
 		DirectX::XMFLOAT4 Plane;
 	};
-	struct SLight
+	struct SLightVS
 	{
-		DirectX::XMFLOAT3 Dir;
+		DirectX::XMMATRIX ViewProjection;
+	};
+	struct SLightPS
+	{
+		DirectX::XMFLOAT3 Pos;
 		float pad;
 		DirectX::XMFLOAT4 Color;
 		DirectX::XMFLOAT4 Ambient;
@@ -36,14 +40,23 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mPerObjectBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mClippingPlaneBuffer;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> mLightBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> mLightVSBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> mLightPSBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> mTextureBuffer;
+	
+	ID3D11ShaderResourceView const * const mShadowMap = nullptr;
 
 	ID3D11Device * mDevice;
 	ID3D11DeviceContext * mContext;
 public:
 	C3DShader( ID3D11Device * Device, ID3D11DeviceContext * Context );
 	~C3DShader( );
+public:
+	void SetShadowMap( ID3D11ShaderResourceView * shadowMap )
+	{
+		ID3D11ShaderResourceView ** srv = const_cast< ID3D11ShaderResourceView** >( &mShadowMap );
+		*srv = shadowMap;
+	}
 public:
 	void Render( UINT IndexCount, DirectX::FXMMATRIX& World,
 		DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection,
@@ -52,7 +65,7 @@ public:
 		DirectX::FXMMATRIX& View, DirectX::FXMMATRIX& Projection,
 		CTexture * texture, CTexture * = nullptr, CTexture * = nullptr,
 		int = 1 );
-	void SetLight( SLight const& Light );
+	void SetLight( SLightVS const&, SLightPS const& );
 	void SetClippingPlane( SClippingPlane const& ClippingPlane );
 };
 

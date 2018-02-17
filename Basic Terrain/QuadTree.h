@@ -3,6 +3,7 @@
 #include "Terrain.h"
 #include "CLineManager.h"
 #include "FrustumHelper.h"
+#include "ShadowMapShader.h"
 
 class QuadTree sealed
 {
@@ -24,9 +25,12 @@ private:
 	std::shared_ptr<CTerrain> mTerrain;
 	std::shared_ptr<CLineManager> mLines;
 	std::shared_ptr<C3DShader> mShader;
+	std::shared_ptr<ShadowMapShader> mShadowMapShader;
 	std::shared_ptr<CTexture> mGrass;
 	std::shared_ptr<CTexture> mSlope;
 	std::shared_ptr<CTexture> mRock;
+
+	bool mUse3DShaders = true;
 
 	SNode * mParentNode;
 
@@ -42,7 +46,7 @@ private:
 
 public:
 	QuadTree( ID3D11Device * Device, ID3D11DeviceContext * Context,
-		std::shared_ptr<C3DShader> Shader,
+		std::shared_ptr<C3DShader> Shader, std::shared_ptr<ShadowMapShader> shadowMapShader,
 		std::shared_ptr<CTerrain> Terrain, std::shared_ptr<CLineManager> Lines );
 	~QuadTree( );
 public:
@@ -51,6 +55,9 @@ public:
 		bool bWireframe = false);
 	void RenderLines( );
 	bool GetHeightAt( float X, float Z, float& height );
+public:
+	inline void RenderShadowMap( ) { mUse3DShaders = false; };
+	inline void Render3D( ) { mUse3DShaders = true; };
 private:
 	void CalculateMeshDimensions( float& CenterX, float& CenterZ, float& width );
 	int NumTrianglesInside( float CenterX, float CenterZ, float width );

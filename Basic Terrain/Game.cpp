@@ -35,7 +35,6 @@ CGame::~CGame( )
 	mFPSText.reset( );
 	mTerrain.reset( );
 #if DEBUG || _DEBUG
-	mDrawnFacesText.reset( );
 	mDebugSquare.reset( );
 	mRenderTextureDebug.reset( );
 #endif
@@ -169,6 +168,31 @@ void CGame::InitD3D( bool bFullscreen )
 			featureLevels, numFeatureLevels, D3D11_SDK_VERSION, &swapDesc, &mSwapChain, &mDevice, &featureLevel, &mImmediateContext )
 	);
 
+#if DEBUG || _DEBUG
+
+	Microsoft::WRL::ComPtr<ID3D11Debug> debugObject;
+	HRESULT hr = mDevice.As<ID3D11Debug>( &debugObject );
+	if ( SUCCEEDED( hr ) )
+	{
+		Microsoft::WRL::ComPtr<ID3D11InfoQueue> debugQueue;
+		hr = debugObject.As<ID3D11InfoQueue>( &debugQueue );
+		if ( SUCCEEDED( hr ) )
+		{
+			D3D11_MESSAGE_ID hiddenMessages[ ] = 
+			{
+				D3D11_MESSAGE_ID::D3D11_MESSAGE_ID_DEVICE_DRAW_RENDERTARGETVIEW_NOT_SET
+			};
+			ZeroMemoryAndDeclare( D3D11_INFO_QUEUE_FILTER, hideFilter );
+			hideFilter.DenyList.NumIDs = ARRAYSIZE( hiddenMessages );
+			hideFilter.DenyList.pIDList = hiddenMessages;
+			debugQueue->AddStorageFilterEntries( &hideFilter );
+		}
+	}
+	if ( FAILED( hr ) )
+		DX::OutputVDebugString( L"Can't create a debug object.\n" );
+
+#endif
+
 	ID3D11Texture2D * backBufferResource;
 	ThrowIfFailed( mSwapChain->GetBuffer( 0, __uuidof( ID3D11Texture2D ),
 		reinterpret_cast< void** >( &backBufferResource ) ) );
@@ -210,10 +234,6 @@ void CGame::InitShaders( )
 	mDefaultShader = std::make_shared<CDefaultShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	m2DShader = std::make_shared<C2DShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	m3DShader = std::make_shared<C3DShader>( mDevice.Get( ), mImmediateContext.Get( ) );
-	mLight.Dir = DirectX::XMFLOAT3( 0.0f, -1.0f, 0.0f );
-	mLight.Color = DirectX::XMFLOAT4( 1.0f, 1.0f, 1.0f, 1.0f );
-	mLight.Ambient = DirectX::XMFLOAT4( 0.4f, 0.4f, 0.4f, 1.0f );
-	m3DShader->SetLight( mLight );
 	C3DShader::SClippingPlane plane;
 	plane.Plane = DirectX::XMFLOAT4( 0.0f, 0.0f, 0.0f, 1.0f ); // Disabled
 	m3DShader->SetClippingPlane( plane );
@@ -222,6 +242,8 @@ void CGame::InitShaders( )
 	mSkyPlaneShader = std::make_shared<SkyPlaneShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mDepthShader = std::make_shared<DepthShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mProjectiveShaders = std::make_shared<ProjectiveTexturingShader>( mDevice.Get( ), mImmediateContext.Get( ) );
+	mShadowMapShader = std::make_shared<ShadowMapShader>( mDevice.Get( ), mImmediateContext.Get( ) );
+	mModelShader = std::make_shared<ModelShader>( mDevice.Get( ), mImmediateContext.Get( ) );
 }
 
 void CGame::InitModels( )
@@ -231,7 +253,7 @@ void CGame::InitModels( )
 		( LPSTR ) "Data/heightmap.bmp", ( LPSTR ) "Data/heightmap.normals", ( LPSTR ) "Data/HMColor.bmp" );
 	mLineManager = std::make_shared<CLineManager>( mDevice.Get( ), mImmediateContext.Get( ), mLineShader);
 	mQuadTree = std::make_shared<QuadTree>( mDevice.Get( ), mImmediateContext.Get( ),
-		m3DShader, mTerrain, mLineManager );
+		m3DShader, mShadowMapShader, mTerrain, mLineManager );
 	GameGlobals::gQuadTrees.push_back( mQuadTree );
 	mTerrain.reset( );
 	mSkydome = std::make_unique<Skydome>( mDevice.Get( ), mImmediateContext.Get( ),
@@ -239,8 +261,32 @@ void CGame::InitModels( )
 
 	mModel = std::make_unique<CModel>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mModel->Identity( );
-	mModel->Translate( -16.0f, 25.0f, 25.0f );
-	
+	mModel->Translate( 7.05f, -4.0f, -35.51f );
+	mModel->SetShader( mModelShader );
+
+	mShadowMap = std::make_unique<BuildShadowMap<DX::Projections::PerspectiveProjection>>( 
+		mDevice.Get( ), mImmediateContext.Get( ), 2048.0f
+		);
+	mShadowMap->Initialize( FOV, float( mWidth ) / float( mHeight ), NearZ, FarZ );
+	mShadowMap->SetPosition( DirectX::XMVectorSet( -3.46f, 3.16f, -55.21f, 1.0f ) );
+	mShadowMap->SetDirection( DirectX::XMVectorSet( 0.11f, -0.58f, 0.86f, 0.0f ) );
+	mShadowMap->Construct( );
+	m3DShader->SetShadowMap( mShadowMap->GetShadowMapSRV( ) );
+	mModelShader->SetShadowMap( mShadowMap->GetShadowMapSRV( ) );
+	mCamera->SetPosition( DirectX::XMVectorSet( -3.46f, 1.16f, -55.21f, 1.0f ) );
+	mCamera->SetDirection( DirectX::XMVectorSet( 0.58f, -0.11f, 0.86f, 0.0f ) );
+	ModelShader::SLightPS lightPSInfo;
+	lightPSInfo.Color = DirectX::XMFLOAT4( 1.0f, 1.0f, 1.0f, 1.0f );
+	DirectX::XMStoreFloat3( &lightPSInfo.Position, mShadowMap->GetPosition( ) );
+	ModelShader::SLightVS lightVSInfo;
+	lightVSInfo.View = DirectX::XMMatrixTranspose( mShadowMap->GetView( ) );
+	lightVSInfo.Projection = DirectX::XMMatrixTranspose( mShadowMap->GetProjection( ) );
+	mModelShader->SetLight( lightVSInfo, lightPSInfo );
+	mLightVS.ViewProjection = DirectX::XMMatrixTranspose( mShadowMap->GetView( ) * mShadowMap->GetProjection( ) );
+	mLightPS.Ambient = DirectX::XMFLOAT4( 0.1f, 0.1f, 0.1f, 0.1f );
+	mLightPS.Color = lightPSInfo.Color;
+	mLightPS.Pos = lightPSInfo.Position;
+	m3DShader->SetLight( mLightVS, mLightPS );
 }
 
 void CGame::Init2D( )
@@ -253,15 +299,13 @@ void CGame::Init2D( )
 		( LPWSTR ) L"Fonts/16Kristen.fnt" );
 	mFPSText = std::make_unique<CText>( mDevice.Get( ), mImmediateContext.Get( ),
 		m2DShader, mOpenSans32, mWidth, mHeight );
-	mCameraInfoText = std::make_unique<CText>( mDevice.Get( ), mImmediateContext.Get( ),
-		m2DShader, mOpenSans32, mWidth, mHeight );
 #if DEBUG || _DEBUG
-	mDrawnFacesText = std::make_unique<CText>( mDevice.Get( ), mImmediateContext.Get( ),
-		m2DShader, mOpenSans32, mWidth, mHeight );
 	mDebugSquare = std::make_unique<Square>( mDevice.Get( ), mImmediateContext.Get( ), m2DShader,
 		mWidth, mHeight, 100, 100 );
 	mDebugSquare->TranslateTo( float( mWidth - mDebugSquare->GetWidth( ) ),
 		float( mHeight - mDebugSquare->GetHeight( ) ) );
+	mCamPosText = std::make_unique<CText>( mDevice.Get( ), mImmediateContext.Get( ),
+		m2DShader, mKristen16, mWidth, mHeight );
 #endif
 
 	mOrthoMatrix = DirectX::XMMatrixOrthographicLH( ( float ) mWidth, ( float ) mHeight, NearZ, FarZ );
@@ -310,16 +354,57 @@ void CGame::Update( )
 	mTimer.Frame( );
 	mInput->Frame( );
 
+	/// Rotate the light
+	//DirectX::XMVECTOR lightDirection = mShadowMap->GetDirection( );
+	//lightDirection = DirectX::XMVector3TransformCoord( lightDirection, DirectX::XMMatrixRotationY( 0.002f ) );
+	//mShadowMap->SetDirection( lightDirection );
+	//mShadowMap->Construct( );
+	//ModelShader::SLightPS lightPSInfo;
+	//lightPSInfo.Color = DirectX::XMFLOAT4( 1.0f, 1.0f, 1.0f, 1.0f );
+	//DirectX::XMStoreFloat3( &lightPSInfo.Position, mShadowMap->GetPosition( ) );
+	//ModelShader::SLightVS lightVSInfo;
+	//lightVSInfo.View = DirectX::XMMatrixTranspose( mShadowMap->GetView( ) );
+	//lightVSInfo.Projection = DirectX::XMMatrixTranspose( mShadowMap->GetProjection( ) );
+	//mModelShader->SetLight( lightVSInfo, lightPSInfo );
+	//mLightVS.ViewProjection = DirectX::XMMatrixTranspose( mShadowMap->GetView( ) * mShadowMap->GetProjection( ) );
+	//mLightPS.Ambient = DirectX::XMFLOAT4( 0.1f, 0.1f, 0.1f, 0.1f );
+	//mLightPS.Color = lightPSInfo.Color;
+	//mLightPS.Pos = lightPSInfo.Position;
+	//m3DShader->SetLight( mLightVS, mLightPS );
+
 	mCamera->Frame( mTimer.GetFrameTime( ) );
 	mSkydome->Update( mTimer.GetFrameTime( ) );
 #if DEBUG || _DEBUG
 	if ( mInput->isSpecialKeyPressed( DIK_B ) )
 		bDrawWireframe = bDrawWireframe ? false : true;
+	if ( mInput->isKeyPressed( DIK_NUMPAD4 ) )
+		mModel->Translate( -1.0f, 0.0f, 0.0f );
 #endif
+
 }
 
 void CGame::Render( )
 {
+	int Drawn = 0;
+	mShadowMap->PrepareForRendering( );
+	mShadowMap->ClearBuffer( );
+	DirectX::XMMATRIX shadowView = mShadowMap->GetView( );
+	DirectX::XMMATRIX shadowProjection = mShadowMap->GetProjection( );
+	float projectorY = DirectX::XMVectorGetY( mShadowMap->GetPosition( ) );
+
+	FrustumCulling::ViewFrustum shadowFrustum = FrustumCulling::ConstructFrustum( shadowView, shadowProjection );
+
+	mModel->Render( );
+	DirectX::XMMATRIX modelWorld = mModel->GetWorld( );
+	mShadowMapShader->RenderIndices( mModel->GetIndexCount( ), modelWorld * shadowView * shadowProjection, FALSE );
+	for ( auto & iter : GameGlobals::gQuadTrees )
+	{
+		iter->RenderShadowMap( );
+		iter->Render( shadowView, shadowProjection, shadowFrustum, Drawn, projectorY );
+		iter->Render3D( );
+	}
+	
+
 	EnableBackbuffer( );
 	ClearBackbuffer( );
 	C3DShader::SClippingPlane plane;
@@ -335,7 +420,7 @@ void CGame::Render( )
 	CamPos = mCamera->GetCamPos( );
 	CamDir = mCamera->GetCamDir( );
 	ReflectedCamPos = mCamera->GetReflectedCamPos( );
-	
+
 	FrustumCulling::ViewFrustum Frustum = FrustumCulling::ConstructFrustum( View, Projection );
 
 #if DEBUG || _DEBUG
@@ -346,14 +431,15 @@ void CGame::Render( )
 	mLineManager->Render( View, Projection );
 #endif
 	// Render Scene
-	int Drawn = 0;
+	mModel->Render( View, Projection );
+
 	for ( auto & iter : GameGlobals::gQuadTrees )
 	{
 		iter->Render( View, Projection, Frustum, Drawn, CamPos.y, bDrawWireframe );
 	}
 
 	mSkydome->Render( View, Projection, CamPos );
-
+	
 	EnableBackbuffer( );
 
 
@@ -363,20 +449,13 @@ void CGame::Render( )
 		DirectX::XMFLOAT4( 1.0f, 1.0f, 0.0f, 1.0f ) );
 
 #if DEBUG || _DEBUG
+	sprintf_s( buffer, "Cam pos: (%.2f,%.2f,%.2f)", CamPos.x, CamPos.y, CamPos.z );
+
+	mCamPosText->Render( mOrthoMatrix, buffer, 0, float( mHeight - 32 ),
+		DirectX::XMFLOAT4( 1.0f, 1.0f, 0.0f, 1.0f ) );
+
 	mDebugSquare->Render( mOrthoMatrix );
-
-	sprintf_s( buffer, "Drawn faces: %d", Drawn );
-	mDrawnFacesText->Render( mOrthoMatrix, buffer,
-		0, 33 );
-
-	sprintf_s( buffer, "Cam pos: (%.2f, %.2f, %.2f)\nCam dir: (%.2f, %.2f, %.2f)",
-		CamPos.x, CamPos.y, CamPos.y, CamDir.x, CamDir.y, CamDir.z );
-	mCameraInfoText->Render( mOrthoMatrix, buffer,
-		0, mHeight - 2 * ( float ) mCameraInfoText->GetFont( )->GetHeight( ),
-		DirectX::XMFLOAT4( 0.0f, 1.0f, 1.0f, 1.0f ) );
-
 #endif
-
 
 	mSwapChain->Present( 1, 0 );
 }
@@ -391,6 +470,7 @@ void CGame::EnableBackbuffer( )
 {
 	mImmediateContext->RSSetViewports( 1, &mFullscreenViewport );
 	mImmediateContext->OMSetRenderTargets( 1, mBackbuffer.GetAddressOf( ), mDSView.Get( ) );
+	mImmediateContext->RSSetState( DX::DefaultRS.Get( ) );
 }
 
 void CGame::ClearBackbuffer( )

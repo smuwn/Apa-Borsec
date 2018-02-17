@@ -65,6 +65,10 @@ public:
 	{ DirectX::XMFLOAT3 Dir; DirectX::XMStoreFloat3( &Dir, mDirection ); return Dir; };
 	inline DirectX::XMFLOAT3 GetCamRotation( )
 	{ return DirectX::XMFLOAT3( mPitch, mYaw, mRoll ); };
+	inline void SetPosition( DirectX::FXMVECTOR& position )
+	{ mPosition = position; };
+	inline void SetDirection( DirectX::FXMVECTOR& direction )
+	{ mDirection = direction; };
 public:
 	inline void* operator new ( size_t size )
 	{

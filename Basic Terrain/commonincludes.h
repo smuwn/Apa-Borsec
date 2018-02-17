@@ -104,6 +104,11 @@ namespace DX
 
 	extern Microsoft::WRL::ComPtr<ID3D11SamplerState> AnisotropicWrapSampler;
 	extern Microsoft::WRL::ComPtr<ID3D11SamplerState> PointWrapSampler;
+	extern Microsoft::WRL::ComPtr<ID3D11SamplerState> LinearWrapSampler;
+	extern Microsoft::WRL::ComPtr<ID3D11SamplerState> AnisotropicClampSampler;
+	extern Microsoft::WRL::ComPtr<ID3D11SamplerState> PointClampSampler;
+	extern Microsoft::WRL::ComPtr<ID3D11SamplerState> LinearClampSampler;
+	extern Microsoft::WRL::ComPtr<ID3D11SamplerState> ComparisonLinearClampSampler;
 
 	namespace Projections
 	{

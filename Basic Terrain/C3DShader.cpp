@@ -54,9 +54,12 @@ C3DShader::C3DShader( ID3D11Device * Device, ID3D11DeviceContext * Context ) :
 		ShaderHelper::CreateBuffer( mDevice, &mClippingPlaneBuffer,
 			D3D11_USAGE::D3D11_USAGE_DYNAMIC, D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER,
 			sizeof( SClippingPlane ), D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE );
-		ShaderHelper::CreateBuffer( mDevice, &mLightBuffer,
+		ShaderHelper::CreateBuffer( mDevice, &mLightPSBuffer,
 			D3D11_USAGE::D3D11_USAGE_DEFAULT, D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER,
-			sizeof( SLight ), 0 );
+			sizeof( SLightPS ), 0 );
+		ShaderHelper::CreateBuffer( mDevice, &mLightVSBuffer,
+			D3D11_USAGE::D3D11_USAGE_DEFAULT, D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER,
+			sizeof( SLightVS ), 0 );
 		ShaderHelper::CreateBuffer( mDevice, &mTextureBuffer,
 			D3D11_USAGE::D3D11_USAGE_DYNAMIC, D3D11_BIND_FLAG::D3D11_BIND_CONSTANT_BUFFER,
 			sizeof( STexture ), D3D11_CPU_ACCESS_FLAG::D3D11_CPU_ACCESS_WRITE );
@@ -94,14 +97,24 @@ void C3DShader::Render( UINT IndexCount, DirectX::FXMMATRIX & World, DirectX::FX
 
 	mContext->Unmap( mPerObjectBuffer.Get( ), 0 );
 	mContext->VSSetConstantBuffers( 0, 1, mPerObjectBuffer.GetAddressOf( ) );
+	mContext->VSSetConstantBuffers( 1, 1, mLightVSBuffer.GetAddressOf( ) );
+	mContext->VSSetConstantBuffers( 2, 1, mClippingPlaneBuffer.GetAddressOf( ) );
 	
 	mContext->PSSetSamplers( 0, 1, DX::AnisotropicWrapSampler.GetAddressOf( ) );
+	mContext->PSSetSamplers( 1, 1, DX::LinearClampSampler.GetAddressOf( ) );
+	mContext->PSSetSamplers( 2, 1, DX::ComparisonLinearClampSampler.GetAddressOf( ) );
 
-	mContext->PSSetConstantBuffers( 0, 1, mLightBuffer.GetAddressOf( ) );
+	mContext->PSSetConstantBuffers( 0, 1, mLightPSBuffer.GetAddressOf( ) );
 	ID3D11ShaderResourceView * SRV = texture->GetTexture( );
 	mContext->PSSetShaderResources( 0, 1, &SRV );
 
+	SRV = const_cast< ID3D11ShaderResourceView* >( mShadowMap );
+	mContext->PSSetShaderResources( 10, 1, &SRV );
+
 	mContext->DrawIndexed( IndexCount, 0, 0 );
+
+	ID3D11ShaderResourceView ** nullSRV = { nullptr };
+	mContext->PSSetShaderResources( 10, 1, nullptr );
 }
 
 void C3DShader::RenderVertices( UINT IndexCount, DirectX::FXMMATRIX & World, DirectX::FXMMATRIX & View, DirectX::FXMMATRIX & Projection,
@@ -123,7 +136,8 @@ void C3DShader::RenderVertices( UINT IndexCount, DirectX::FXMMATRIX & World, Dir
 	mContext->Unmap( mPerObjectBuffer.Get( ), 0 );
 	mContext->VSSetConstantBuffers( 0, 1, mPerObjectBuffer.GetAddressOf( ) );
 
-	mContext->VSSetConstantBuffers( 1, 1, mClippingPlaneBuffer.GetAddressOf( ) );
+	mContext->VSSetConstantBuffers( 1, 1, mLightVSBuffer.GetAddressOf( ) );
+	mContext->VSSetConstantBuffers( 2, 1, mClippingPlaneBuffer.GetAddressOf( ) );
 
 	bool bUseAlpha = false;
 	if ( texture2 != nullptr && texture3 != nullptr )
@@ -143,18 +157,27 @@ void C3DShader::RenderVertices( UINT IndexCount, DirectX::FXMMATRIX & World, Dir
 	mContext->PSSetConstantBuffers( 1, 1, mTextureBuffer.GetAddressOf( ) );
 
 	mContext->PSSetSamplers( 0, 1, DX::AnisotropicWrapSampler.GetAddressOf( ) );
+	mContext->PSSetSamplers( 1, 1, DX::LinearClampSampler.GetAddressOf( ) );
+	mContext->PSSetSamplers( 2, 1, DX::ComparisonLinearClampSampler.GetAddressOf( ) );
 
-	mContext->PSSetConstantBuffers( 0, 1, mLightBuffer.GetAddressOf( ) );
+	mContext->PSSetConstantBuffers( 0, 1, mLightPSBuffer.GetAddressOf( ) );
 	ID3D11ShaderResourceView * SRV = texture->GetTexture( );
 	mContext->PSSetShaderResources( 0, 1, &SRV );
 
+	SRV = const_cast< ID3D11ShaderResourceView* >( mShadowMap );
+	mContext->PSSetShaderResources( 10, 1, &SRV );
+
 	mContext->Draw( IndexCount, 0 );
+
+	ID3D11ShaderResourceView * nullSRV = nullptr;
+	mContext->PSSetShaderResources( 10, 1, &nullSRV );
 }
 
 
-void C3DShader::SetLight( C3DShader::SLight const& Light )
+void C3DShader::SetLight( SLightVS const& lightVS, SLightPS const& lightPS )
 {
-	mContext->UpdateSubresource( mLightBuffer.Get( ), 0, nullptr, &Light, 0, 0 );
+	mContext->UpdateSubresource( mLightPSBuffer.Get( ), 0, nullptr, &lightPS, 0, 0 );
+	mContext->UpdateSubresource( mLightVSBuffer.Get( ), 0, nullptr, &lightVS, 0, 0 );
 }
 
 void C3DShader::SetClippingPlane( C3DShader::SClippingPlane const & ClippingPlane )

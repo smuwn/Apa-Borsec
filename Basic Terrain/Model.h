@@ -2,6 +2,7 @@
 
 #include "commonincludes.h"
 #include "ShaderHelper.h"
+#include "ModelShader.h"
 
 ALIGN16 class CModel
 {
@@ -28,6 +29,8 @@ private:
 	UINT mNumIndices;
 
 	DirectX::XMMATRIX mWorld;
+	
+	std::shared_ptr<ModelShader> mShader;
 
 	ID3D11Device * mDevice;
 	ID3D11DeviceContext * mContext;
@@ -36,6 +39,8 @@ public:
 	~CModel( );
 public:
 	void Render( );
+	void Render( DirectX::FXMMATRIX& view, DirectX::FXMMATRIX& projection );
+	inline void SetShader( std::shared_ptr<ModelShader> shader ) { mShader = shader; };
 	inline UINT GetIndexCount( ) { return mNumIndices; };
 	inline UINT GetVertexCount( ) { return mNumVertices; };
 	inline DirectX::XMMATRIX& GetWorld( ) { return mWorld; };

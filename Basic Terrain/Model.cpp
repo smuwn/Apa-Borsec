@@ -89,3 +89,20 @@ void CModel::Render( )
 	mContext->IASetVertexBuffers( 0, 1, mVertexBuffer.GetAddressOf( ), &Stride, &Offsets );
 	mContext->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 }
+
+void CModel::Render( DirectX::FXMMATRIX & view, DirectX::FXMMATRIX & projection )
+{
+	Render( );
+	if ( mShader )
+	{
+		static ModelShader::SPerObjectVS objInfoVS;
+		static ModelShader::SPerObjectPS objInfoPS;
+		objInfoVS.Projection = DirectX::XMMatrixTranspose( projection );
+		objInfoVS.View = DirectX::XMMatrixTranspose( view );
+		objInfoVS.World = DirectX::XMMatrixTranspose( mWorld );
+		objInfoPS.Color = DirectX::XMFLOAT4( 1.0f, 1.0f, 0.0f, 1.0f );
+		mContext->RSSetState( DX::NoCulling.Get( ) );
+		mShader->Render( GetIndexCount( ), objInfoVS, objInfoPS );
+		mContext->RSSetState( DX::DefaultRS.Get( ) );
+	}
+}

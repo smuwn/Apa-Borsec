@@ -26,6 +26,9 @@
 #include "ParticleSystem.h"
 #include "Projector.h"
 #include "ProjectiveTexturingShader.h"
+#include "ShadowMapShader.h"
+#include "BuildShadowMap.h"
+#include "ModelShader.h"
 
 #define GAME CGame::GetGameInstance( )
 #if defined UNICODE
@@ -63,14 +66,14 @@ private:
 	std::shared_ptr<QuadTree> mQuadTree;
 
 	std::unique_ptr<CText> mFPSText;
-	std::unique_ptr<CText> mCameraInfoText;
 
 	std::unique_ptr<CModel> mModel;
 
 #if DEBUG || _DEBUG
 	std::unique_ptr<RenderTexture> mRenderTextureDebug;
-	std::unique_ptr<CText> mDrawnFacesText;
 	std::unique_ptr<Square> mDebugSquare;
+
+	std::unique_ptr<CText> mCamPosText;
 #endif
 
 	std::shared_ptr<CInput> mInput;
@@ -87,10 +90,16 @@ private:
 	std::shared_ptr<SkyPlaneShader> mSkyPlaneShader;
 	std::shared_ptr<DepthShader> mDepthShader;
 	std::shared_ptr<ProjectiveTexturingShader> mProjectiveShaders;
+	std::shared_ptr<ShadowMapShader> mShadowMapShader;
+	std::shared_ptr<ModelShader> mModelShader;
+
+	std::unique_ptr<Projector<DX::Projections::OrtographicProjection>> mProjector;
+	std::unique_ptr<BuildShadowMap<DX::Projections::PerspectiveProjection>> mShadowMap;
 
 	WCHAR* mGPUDescription;
 
-	C3DShader::SLight mLight;
+	C3DShader::SLightPS mLightPS;
+	C3DShader::SLightVS mLightVS;
 	
 	DirectX::XMMATRIX mOrthoMatrix;
 

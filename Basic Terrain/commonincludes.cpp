@@ -15,6 +15,11 @@ namespace DX
 
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> AnisotropicWrapSampler;
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> PointWrapSampler;
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> LinearWrapSampler;
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> AnisotropicClampSampler;
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> PointClampSampler;
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> LinearClampSampler;
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> ComparisonLinearClampSampler;
 
 	int GetComponentCountFromFormat( DXGI_FORMAT format )
 	{ // Please keep this folded
@@ -333,5 +338,23 @@ namespace DX
 		ThrowIfFailed( Device->CreateSamplerState( &sampDesc, &AnisotropicWrapSampler ) );
 		sampDesc.Filter = D3D11_FILTER::D3D11_FILTER_MIN_LINEAR_MAG_MIP_POINT;
 		ThrowIfFailed( Device->CreateSamplerState( &sampDesc, &PointWrapSampler ) );
+		sampDesc.Filter = D3D11_FILTER::D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+		ThrowIfFailed( Device->CreateSamplerState( &sampDesc, &LinearWrapSampler ) );
+		sampDesc.AddressU =
+			sampDesc.AddressV =
+			sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_MODE::D3D11_TEXTURE_ADDRESS_CLAMP;
+		sampDesc.Filter = D3D11_FILTER::D3D11_FILTER_ANISOTROPIC;
+		sampDesc.MaxAnisotropy = 16;
+		sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+		sampDesc.MinLOD = 0;
+		sampDesc.MipLODBias = 0;
+		ThrowIfFailed( Device->CreateSamplerState( &sampDesc, &AnisotropicClampSampler ) );
+		sampDesc.Filter = D3D11_FILTER::D3D11_FILTER_MIN_LINEAR_MAG_MIP_POINT;
+		ThrowIfFailed( Device->CreateSamplerState( &sampDesc, &PointClampSampler ) );
+		sampDesc.Filter = D3D11_FILTER::D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+		ThrowIfFailed( Device->CreateSamplerState( &sampDesc, &LinearClampSampler ) );
+		sampDesc.Filter = D3D11_FILTER::D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+		sampDesc.ComparisonFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_LESS_EQUAL;
+		ThrowIfFailed( Device->CreateSamplerState( &sampDesc, &ComparisonLinearClampSampler ) );
 	}
 }
