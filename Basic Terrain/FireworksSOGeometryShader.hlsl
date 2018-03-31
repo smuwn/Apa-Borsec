@@ -104,7 +104,7 @@ void main(
 				for ( int i = 0; i < 8; ++i )
 				{
 					GSOut newElem;
-					newElem.ParticlePos = input[ 0 ].ParticlePos;
+					newElem.ParticlePos = (float3)input[0].ParticlePos;
 					newElem.ParticleDir = GetRandomDirection( 0 );
 
 					newElem.Size = float2( 1.0f, 1.0f );

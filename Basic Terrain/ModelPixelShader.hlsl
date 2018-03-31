@@ -53,7 +53,7 @@ float CalcShadowMap( float3 projectedTexCoord )
 float4 main(PSIn input) : SV_TARGET
 {
 	float4 diffse = gObjectColor;
-	float4 color = float4( 0.0f, 0.0f, 0.0f, 0.0f );
+	float4 color = float4( 0.2f, 0.2f, 0.2f, 0.2f );
 
 	float3 projectedTexCoord;
 	projectedTexCoord.x = input.LightPositionH.x / input.LightPositionH.w / 2.0f + 0.5f;

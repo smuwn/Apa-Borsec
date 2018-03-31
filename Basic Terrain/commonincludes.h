@@ -127,6 +127,17 @@ namespace DX
 		OutputDebugStringW( Sequence );
 #endif
 	}
+	inline void OutputVDebugString(const char * format, ...)
+	{
+#if DEBUG || _DEBUG
+		static char Sequence[1024];
+		va_list args;
+		va_start(args, format);
+		_vsnprintf_s(Sequence, sizeof(Sequence), format, args);
+		va_end(args);
+		OutputDebugStringA(Sequence);
+#endif
+	}
 	/// <summary>Chechks if the objects exits before releasing it</summary>
 	inline void SafeRelease( IUnknown *& object )
 	{

@@ -41,6 +41,15 @@
     <Filter Include="Shader Files\Particle Shaders\Fireworks">
       <UniqueIdentifier>{4fe926c1-e1a3-421f-9486-5728a0fc6f68}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\FFT">
+      <UniqueIdentifier>{96579f31-c74a-4a96-b5ea-d6af02f0f797}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\FFT">
+      <UniqueIdentifier>{762c13b4-7129-40f3-8794-a4a63fa9f694}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader Files\FFT">
+      <UniqueIdentifier>{84343010-c315-466a-ae77-d33045ddc01f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="wmain.cpp">
@@ -141,6 +150,15 @@
     </ClCompile>
     <ClCompile Include="ModelShader.cpp">
       <Filter>Source Files\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="PrecomputeFFT.cpp">
+      <Filter>Source Files\FFT</Filter>
+    </ClCompile>
+    <ClCompile Include="TimeDependentFFT.cpp">
+      <Filter>Source Files\FFT</Filter>
+    </ClCompile>
+    <ClCompile Include="ComputeTwiddleIndices.cpp">
+      <Filter>Source Files\FFT</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -255,6 +273,18 @@
     <ClInclude Include="ModelShader.h">
       <Filter>Header Files\Shaders</Filter>
     </ClInclude>
+    <ClInclude Include="PrecomputeFFT.h">
+      <Filter>Header Files\FFT</Filter>
+    </ClInclude>
+    <ClInclude Include="TimeDependentFFT.h">
+      <Filter>Header Files\FFT</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureUtilities.h">
+      <Filter>Header Files\Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ComputeTwiddleIndices.h">
+      <Filter>Header Files\FFT</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="VertexShader.hlsl">
@@ -367,6 +397,15 @@
     </FxCompile>
     <FxCompile Include="ModelPixelShader.hlsl">
       <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="Compute~h0.hlsl">
+      <Filter>Shader Files\FFT</Filter>
+    </FxCompile>
+    <FxCompile Include="FFTComponentsComputeShader.hlsl">
+      <Filter>Shader Files\FFT</Filter>
+    </FxCompile>
+    <FxCompile Include="TwiddleIndicesComputeShader.hlsl">
+      <Filter>Shader Files\FFT</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

@@ -31,4 +31,29 @@ namespace Math
 
 		return u >= 0 && v >= 0 && u + v < 1;
 	}
+
+	/// <summary>Reverses the bits from an integer</summary>
+	inline int reverseInt(int n)
+	{
+		unsigned int output = n;
+		for (int i = sizeof(n) * 8 - 1; i; --i)
+		{
+			output <<= 1;
+			n >>= 1;
+			output |= n & 1;
+		}
+		return output;
+	}
+
+	/// <summary>Rotates the bits left</summary>
+	inline int rotateLeft(unsigned int n, unsigned int d)
+	{
+		return (n << d) | (n >> (32 - d));
+	}
+
+	/// <summary>Rotates the bits right</summary>
+	inline int rotateRight(unsigned int n, unsigned int d)
+	{
+		return (n >> d) | (n << (32 - d));
+	}
 }

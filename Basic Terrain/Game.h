@@ -29,6 +29,9 @@
 #include "ShadowMapShader.h"
 #include "BuildShadowMap.h"
 #include "ModelShader.h"
+#include "PrecomputeFFT.h"
+#include "TimeDependentFFT.h"
+#include "ComputeTwiddleIndices.h"
 
 #define GAME CGame::GetGameInstance( )
 #if defined UNICODE
@@ -76,6 +79,14 @@ private:
 	std::unique_ptr<CText> mCamPosText;
 #endif
 
+	std::unique_ptr<Square> mH0Square;
+	std::unique_ptr<Square> mMinusH0Square;
+	std::unique_ptr<Square> mTwiddleSquare;
+	
+	std::unique_ptr<Square> mDXSquare;
+	std::unique_ptr<Square> mDYSquare;
+	std::unique_ptr<Square> mDZSquare;
+
 	std::shared_ptr<CInput> mInput;
 
 	std::shared_ptr<CFont> mArial73;
@@ -92,6 +103,10 @@ private:
 	std::shared_ptr<ProjectiveTexturingShader> mProjectiveShaders;
 	std::shared_ptr<ShadowMapShader> mShadowMapShader;
 	std::shared_ptr<ModelShader> mModelShader;
+
+	std::unique_ptr<PrecomputeFFT> mComputeFFT;
+	std::unique_ptr<TimeDependentFFT> mTimeComputeFFT;
+	std::unique_ptr<ComputeTwiddleIndices> mTwiddleIndicesFFT;
 
 	std::unique_ptr<Projector<DX::Projections::OrtographicProjection>> mProjector;
 	std::unique_ptr<BuildShadowMap<DX::Projections::PerspectiveProjection>> mShadowMap;
@@ -122,6 +137,7 @@ private:
 private:
 	void InitWindow( bool bFullscreen );
 	void InitD3D( bool bFullscreen );
+	void Precompute();
 	void InitShaders( );
 	void InitModels( );
 	void Init2D( );

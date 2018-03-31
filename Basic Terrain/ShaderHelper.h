@@ -44,6 +44,10 @@ namespace ShaderHelper
 				reinterpret_cast< ID3D11PixelShader** > ( Shader ) )
 			);
 		break;
+		case 'c': // Compute Shader
+			device->CreateComputeShader((*ShaderBlob)->GetBufferPointer(), (*ShaderBlob)->GetBufferSize(), nullptr,
+				reinterpret_cast<ID3D11ComputeShader**>(Shader));
+		break;
 		}
 
 	}

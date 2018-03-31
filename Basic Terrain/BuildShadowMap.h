@@ -44,9 +44,9 @@ public:
 			ZeroMemoryAndDeclare( D3D11_RASTERIZER_DESC, rastDesc );
 			rastDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_NONE;
 			rastDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_SOLID;
-			rastDesc.DepthBias = 100;
+			rastDesc.DepthBias = 10;
 			rastDesc.DepthBiasClamp = 0.0f;
-			rastDesc.SlopeScaledDepthBias = 4.0f;
+			rastDesc.SlopeScaledDepthBias = 2.f;
 			ThrowIfFailed( mDevice->CreateRasterizerState( &rastDesc, &mRasterizer ) );
 		}
 		CATCH;
