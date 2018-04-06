@@ -12,7 +12,7 @@ PrecomputeFFT::PrecomputeFFT(ID3D11Device * device, ID3D11DeviceContext * contex
 		CreateNoiseTextures();
 		CreateAdditional();
 		mInfo.N = TextureSize;
-		mInfo.L = 1000;
+		mInfo.L = 100;
 		mInfo.A = 26;
 		mInfo.windDir = DirectX::XMFLOAT2(1.0f, 0.0f);
 		mInfo.windSpeed = 26;

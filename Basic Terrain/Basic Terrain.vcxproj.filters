@@ -160,6 +160,9 @@
     <ClCompile Include="ComputeTwiddleIndices.cpp">
       <Filter>Source Files\FFT</Filter>
     </ClCompile>
+    <ClCompile Include="ButterflySolver.cpp">
+      <Filter>Source Files\FFT</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -285,6 +288,9 @@
     <ClInclude Include="ComputeTwiddleIndices.h">
       <Filter>Header Files\FFT</Filter>
     </ClInclude>
+    <ClInclude Include="ButterflySolver.h">
+      <Filter>Header Files\FFT</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="VertexShader.hlsl">
@@ -405,6 +411,12 @@
       <Filter>Shader Files\FFT</Filter>
     </FxCompile>
     <FxCompile Include="TwiddleIndicesComputeShader.hlsl">
+      <Filter>Shader Files\FFT</Filter>
+    </FxCompile>
+    <FxCompile Include="ButterflySolver.hlsl">
+      <Filter>Shader Files\FFT</Filter>
+    </FxCompile>
+    <FxCompile Include="InversionComputeShader.hlsl">
       <Filter>Shader Files\FFT</Filter>
     </FxCompile>
   </ItemGroup>

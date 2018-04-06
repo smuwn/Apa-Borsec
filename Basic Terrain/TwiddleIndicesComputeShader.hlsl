@@ -21,7 +21,7 @@ int mod(uint x, uint y)
 	return x - y * floor(x / y);
 }
 
-[numthreads(2, 512, 1)]
+[numthreads(1, 16, 1)]
 void main( uint3 DTid : SV_DispatchThreadID )
 {
 	float k = DTid.y * mod(float(N) / pow(2, DTid.x + 1), N);
@@ -40,10 +40,10 @@ void main( uint3 DTid : SV_DispatchThreadID )
 	{
 		// top butterfly wing
 		if (butterflywing == 1)
-			ObjResult[DTid.xy] = float4(twiddle.real, twiddle.imaginary, indices[DTid.x], indices[DTid.y + 1]);
+			ObjResult[DTid.xy] = float4(twiddle.real, twiddle.imaginary, indices[DTid.y], indices[DTid.y + 1]);
 		// bottom butterfly wing
 		else
-			ObjResult[DTid.xy] = float4(twiddle.real, twiddle.imaginary, indices[DTid.x], indices[DTid.y - 1]);
+			ObjResult[DTid.xy] = float4(twiddle.real, twiddle.imaginary, indices[DTid.y - 1], indices[DTid.y]);
 	}
 	else
 	{

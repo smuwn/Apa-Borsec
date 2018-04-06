@@ -32,6 +32,7 @@
 #include "PrecomputeFFT.h"
 #include "TimeDependentFFT.h"
 #include "ComputeTwiddleIndices.h"
+#include "ButterflySolver.h"
 
 #define GAME CGame::GetGameInstance( )
 #if defined UNICODE
@@ -79,13 +80,7 @@ private:
 	std::unique_ptr<CText> mCamPosText;
 #endif
 
-	std::unique_ptr<Square> mH0Square;
-	std::unique_ptr<Square> mMinusH0Square;
-	std::unique_ptr<Square> mTwiddleSquare;
-	
-	std::unique_ptr<Square> mDXSquare;
-	std::unique_ptr<Square> mDYSquare;
-	std::unique_ptr<Square> mDZSquare;
+	std::unique_ptr<Square> mHeightmapSquare;
 
 	std::shared_ptr<CInput> mInput;
 
@@ -107,6 +102,7 @@ private:
 	std::unique_ptr<PrecomputeFFT> mComputeFFT;
 	std::unique_ptr<TimeDependentFFT> mTimeComputeFFT;
 	std::unique_ptr<ComputeTwiddleIndices> mTwiddleIndicesFFT;
+	std::unique_ptr<ButterflySolver> mSolverFFT;
 
 	std::unique_ptr<Projector<DX::Projections::OrtographicProjection>> mProjector;
 	std::unique_ptr<BuildShadowMap<DX::Projections::PerspectiveProjection>> mShadowMap;

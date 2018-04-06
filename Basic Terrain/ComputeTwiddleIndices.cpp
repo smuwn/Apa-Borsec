@@ -27,12 +27,10 @@ void ComputeTwiddleIndices::Compute()
 	mContext->CSSetConstantBuffers(0, 1, mIndicesBuffer.GetAddressOf());
 	mContext->CSSetUnorderedAccessViews(0, 1, mTwiddleIndicesTextureUAV.GetAddressOf(), nullptr);
 
-	UINT threadGroupX = (UINT)ceil(TextureSize / 2.0f);
-	UINT threadGroupY = (UINT)ceil(TextureSize / 512.0f);
+	UINT threadGroupX = (UINT)ceil(TextureSize / 1.0f);
+	UINT threadGroupY = (UINT)ceil(TextureSize / 16.0f);
 	UINT threadGroupZ = 1;
 	mContext->Dispatch(threadGroupX, threadGroupY, threadGroupZ);
-
-	D3DX11SaveTextureToFile(mContext, mTwiddleIndicesTexture.Get(), D3DX11_IMAGE_FILE_FORMAT::D3DX11_IFF_PNG, L"Twiddle.png");
 
 	ID3D11UnorderedAccessView * nullUAV[] = 
 	{

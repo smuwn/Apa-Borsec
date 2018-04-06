@@ -40,6 +40,21 @@ public:
 		return mTextureDZSRV.Get();
 	}
 
+	inline ID3D11UnorderedAccessView * GetTextureUAVDX() const
+	{
+		return mTextureDXUAV.Get();
+	}
+
+	inline ID3D11UnorderedAccessView * GetTextureUAVDY() const
+	{
+		return mTextureDYUAV.Get();
+	}
+
+	inline ID3D11UnorderedAccessView * GetTextureUAVDZ() const
+	{
+		return mTextureDZUAV.Get();
+	}
+
 	inline void SetComponents(ID3D11ShaderResourceView * h0k, ID3D11ShaderResourceView * h0minusk)
 	{
 		mH0SRV = h0k;

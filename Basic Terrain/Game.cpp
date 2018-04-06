@@ -238,6 +238,7 @@ void CGame::Precompute()
 	mTimeComputeFFT->SetComponents(mComputeFFT->GetH0(), mComputeFFT->GetH0Minus());
 	mTwiddleIndicesFFT = std::make_unique<ComputeTwiddleIndices>(mDevice.Get(), mImmediateContext.Get());
 	mTwiddleIndicesFFT->Compute();
+	mSolverFFT = std::make_unique<ButterflySolver>(mDevice.Get(), mImmediateContext.Get());
 }
 
 void CGame::InitShaders( )
@@ -319,33 +320,38 @@ void CGame::Init2D( )
 		m2DShader, mKristen16, mWidth, mHeight );
 #endif
 
-	mH0Square = std::make_unique<Square>(mDevice.Get(), mImmediateContext.Get(), m2DShader,
-		mWidth, mHeight, 200, 200);
-	mH0Square->TranslateTo(0, 50);
-	mH0Square->SetTexture(mComputeFFT->GetH0());
-	mMinusH0Square = std::make_unique<Square>(mDevice.Get(), mImmediateContext.Get(), m2DShader,
-		mWidth, mHeight, 200, 200);
-	mMinusH0Square->TranslateTo(205, 50);
-	mMinusH0Square->SetTexture(mComputeFFT->GetH0Minus());
-	mTwiddleSquare = std::make_unique<Square>(mDevice.Get(), mImmediateContext.Get(), m2DShader,
-		mWidth, mHeight, 200, 200);
-	mTwiddleSquare->TranslateTo(410, 50);
-	mTwiddleSquare->SetTexture(mTwiddleIndicesFFT->GetTwiddleTexture());
+	//mH0Square = std::make_unique<Square>(mDevice.Get(), mImmediateContext.Get(), m2DShader,
+	//	mWidth, mHeight, 200, 200);
+	//mH0Square->TranslateTo(0, 50);
+	//mH0Square->SetTexture(mComputeFFT->GetH0());
+	//mMinusH0Square = std::make_unique<Square>(mDevice.Get(), mImmediateContext.Get(), m2DShader,
+	//	mWidth, mHeight, 200, 200);
+	//mMinusH0Square->TranslateTo(205, 50);
+	//mMinusH0Square->SetTexture(mComputeFFT->GetH0Minus());
+	//mTwiddleSquare = std::make_unique<Square>(mDevice.Get(), mImmediateContext.Get(), m2DShader,
+	//	mWidth, mHeight, 200, 200);
+	//mTwiddleSquare->TranslateTo(410, 50);
+	//mTwiddleSquare->SetTexture(mTwiddleIndicesFFT->GetTwiddleTexture());
 
-	mDXSquare = std::make_unique<Square>(mDevice.Get(), mImmediateContext.Get(), m2DShader,
-		mWidth, mHeight, 200, 200);
-	mDXSquare->TranslateTo(0, 255);
-	mDXSquare->SetTexture(mTimeComputeFFT->GetTextureSRVDX());
+	//mDXSquare = std::make_unique<Square>(mDevice.Get(), mImmediateContext.Get(), m2DShader,
+	//	mWidth, mHeight, 200, 200);
+	//mDXSquare->TranslateTo(0, 255);
+	//mDXSquare->SetTexture(mTimeComputeFFT->GetTextureSRVDX());
 
-	mDYSquare = std::make_unique<Square>(mDevice.Get(), mImmediateContext.Get(), m2DShader,
-		mWidth, mHeight, 200, 200);
-	mDYSquare->TranslateTo(205, 255);
-	mDYSquare->SetTexture(mTimeComputeFFT->GetTextureSRVDY());
+	//mDYSquare = std::make_unique<Square>(mDevice.Get(), mImmediateContext.Get(), m2DShader,
+	//	mWidth, mHeight, 200, 200);
+	//mDYSquare->TranslateTo(205, 255);
+	//mDYSquare->SetTexture(mTimeComputeFFT->GetTextureSRVDY());
 
-	mDZSquare = std::make_unique<Square>(mDevice.Get(), mImmediateContext.Get(), m2DShader,
-		mWidth, mHeight, 200, 200);
-	mDZSquare->TranslateTo(410, 255);
-	mDZSquare->SetTexture(mTimeComputeFFT->GetTextureSRVDZ());
+	//mDZSquare = std::make_unique<Square>(mDevice.Get(), mImmediateContext.Get(), m2DShader,
+	//	mWidth, mHeight, 200, 200);
+	//mDZSquare->TranslateTo(410, 255);
+	//mDZSquare->SetTexture(mTimeComputeFFT->GetTextureSRVDZ());
+
+	mHeightmapSquare = std::make_unique<Square>(mDevice.Get(), mImmediateContext.Get(), m2DShader,
+		mWidth, mHeight, 400, 400);
+	mHeightmapSquare->TranslateTo(0, 50);
+	mHeightmapSquare->SetTexture(mSolverFFT->GetHeightmap());
 
 	mOrthoMatrix = DirectX::XMMatrixOrthographicLH( ( float ) mWidth, ( float ) mHeight, NearZ, FarZ );
 }
@@ -422,6 +428,9 @@ void CGame::Update( )
 	//mComputeFFT->Compute();
 	//mTwiddleIndicesFFT->Compute();
 	mTimeComputeFFT->Compute(mTimer.GetTotalTime(), mComputeFFT->GetInfo());
+
+	mSolverFFT->Compute(mTwiddleIndicesFFT->GetTwiddleTexture(),
+		mTimeComputeFFT->GetTextureSRVDY(), mTimeComputeFFT->GetTextureUAVDY());
 }
 
 void CGame::Render( )
@@ -483,12 +492,8 @@ void CGame::Render( )
 	
 	EnableBackbuffer( );
 
-	mH0Square->Render(mOrthoMatrix);
-	mMinusH0Square->Render(mOrthoMatrix);
-	mTwiddleSquare->Render(mOrthoMatrix);
-	mDXSquare->Render(mOrthoMatrix);
-	mDYSquare->Render(mOrthoMatrix);
-	mDZSquare->Render(mOrthoMatrix);
+
+	mHeightmapSquare->Render(mOrthoMatrix);
 
 	char buffer[ 500 ] = { 0 };
 	sprintf_s( buffer, "FPS: %d", mTimer.GetFPS( ) );

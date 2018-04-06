@@ -105,5 +105,4 @@ void main(uint3 DTid : SV_DispatchThreadID)
 	ObjXDisplacement[DTid.xy] = float4(hkt_dx.real, hkt_dx.imaginary, 0.0f, 1.0f);
 	ObjYDisplacement[DTid.xy] = float4(hkt_dy.real, hkt_dy.imaginary, 0.0f, 1.0f);
 	ObjZDisplacement[DTid.xy] = float4(hkt_dz.real, hkt_dz.imaginary, 0.0f, 1.0f);
-	
 }
