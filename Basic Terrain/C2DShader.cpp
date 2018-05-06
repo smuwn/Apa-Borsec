@@ -84,7 +84,7 @@ void C2DShader::Render( UINT IndexCount, DirectX::FXMMATRIX& World, DirectX::FXM
 	mContext->IASetInputLayout( mInputLayout.Get() );
 	mContext->VSSetShader( mVertexShader.Get( ), nullptr, 0 );
 	mContext->PSSetShader( mPixelShader.Get( ), nullptr, 0 );
-	mContext->PSSetSamplers( 0, 1, DX::PointWrapSampler.GetAddressOf( ) );
+	mContext->PSSetSamplers( 0, 1, DX::PointClampSampler.GetAddressOf( ) );
 
 	D3D11_MAPPED_SUBRESOURCE MappedSubresource;
 	DirectX::XMMATRIX WVP = DirectX::XMMatrixTranspose( World * Projection );
