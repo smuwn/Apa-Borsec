@@ -20,6 +20,7 @@ public:
 	struct SLightPS
 	{
 		DirectX::XMFLOAT4 Color;
+		DirectX::XMFLOAT4 Ambient;
 		DirectX::XMFLOAT3 Position;
 		float pad;
 	};

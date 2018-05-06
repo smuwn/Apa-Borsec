@@ -12,6 +12,7 @@ cbuffer cbPerObject : register( b0 )
 cbuffer cbLights : register( b1 )
 {
 	float4 gLightColor;
+    float4 gAmbientColor;
 	float3 gLightPosition;
 	float pad;
 }
@@ -53,7 +54,7 @@ float CalcShadowMap( float3 projectedTexCoord )
 float4 main(PSIn input) : SV_TARGET
 {
 	float4 diffse = gObjectColor;
-	float4 color = float4( 0.2f, 0.2f, 0.2f, 0.2f );
+	float4 color = gAmbientColor;
 
 	float3 projectedTexCoord;
 	projectedTexCoord.x = input.LightPositionH.x / input.LightPositionH.w / 2.0f + 0.5f;

@@ -4,6 +4,19 @@
 
 namespace Math
 {
+	//using namespace DirectX;
+	typedef DirectX::XMFLOAT2 float2;
+	typedef DirectX::XMFLOAT3 float3;
+	typedef DirectX::XMFLOAT4 float4;
+	using DirectX::XM_PI;
+	using DirectX::XM_2PI;
+	using DirectX::XM_1DIV2PI;
+	using DirectX::XM_1DIVPI;
+	using DirectX::XM_PIDIV2;
+	using DirectX::XM_PIDIV4;
+
+
+
 	inline bool isPointInTriangle( DirectX::XMFLOAT3 const& V1,
 		DirectX::XMFLOAT3 const& V2, DirectX::XMFLOAT3 const& V3,
 		DirectX::XMFLOAT3 const& Point )
@@ -30,6 +43,16 @@ namespace Math
 		v = ( dot00 * dot12 - dot01 * dot02 ) * invDenom;
 
 		return u >= 0 && v >= 0 && u + v < 1;
+	}
+
+	/// <summary>Generating gaussian random number with mean 0 and standard deviation 1.</summary>
+	inline float GaussRnd()
+	{
+		float u1 = rand() / (float)RAND_MAX;
+		float u2 = rand() / (float)RAND_MAX;
+		if (u1 < 1e-6f)
+			u1 = 1e-6f;
+		return sqrtf(-2 * logf(u1)) * cosf(2 * XM_PI * u2);
 	}
 
 	/// <summary>Reverses the bits from an integer</summary>

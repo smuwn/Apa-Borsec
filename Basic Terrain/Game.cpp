@@ -14,7 +14,6 @@ CGame::CGame( HINSTANCE hInstance, bool bFullscreen ) :
 	{
 		InitWindow( bFullscreen );
 		InitD3D( bFullscreen );
-		Precompute();
 		InitShaders( );
 		InitModels( );
 		Init2D( );
@@ -230,16 +229,6 @@ void CGame::InitD3D( bool bFullscreen )
 	mInput->Initialize( mhInstance, mhWnd );
 }
 
-void CGame::Precompute()
-{
-	mComputeFFT = std::make_unique<PrecomputeFFT>(mDevice.Get(), mImmediateContext.Get());
-	mComputeFFT->Compute();
-	mTimeComputeFFT = std::make_unique<TimeDependentFFT>(mDevice.Get(), mImmediateContext.Get());
-	mTimeComputeFFT->SetComponents(mComputeFFT->GetH0(), mComputeFFT->GetH0Minus());
-	mTwiddleIndicesFFT = std::make_unique<ComputeTwiddleIndices>(mDevice.Get(), mImmediateContext.Get());
-	mTwiddleIndicesFFT->Compute();
-}
-
 void CGame::InitShaders( )
 {
 	mDefaultShader = std::make_shared<CDefaultShader>( mDevice.Get( ), mImmediateContext.Get( ) );
@@ -272,7 +261,7 @@ void CGame::InitModels( )
 
 	mModel = std::make_unique<CModel>( mDevice.Get( ), mImmediateContext.Get( ) );
 	mModel->Identity( );
-	mModel->Translate( 7.05f, -4.0f, -30.51f );
+	mModel->Translate( 7.05f, 0.0f, -30.51f );
 	mModel->SetShader( mModelShader );
 
 	mShadowMap = std::make_unique<BuildShadowMap<DX::Projections::PerspectiveProjection>>( 
@@ -288,6 +277,7 @@ void CGame::InitModels( )
 	mCamera->SetDirection( DirectX::XMVectorSet( 0.58f, -0.11f, 0.86f, 0.0f ) );
 	ModelShader::SLightPS lightPSInfo;
 	lightPSInfo.Color = DirectX::XMFLOAT4( 1.0f, 1.0f, 1.0f, 1.0f );
+	lightPSInfo.Ambient = DirectX::XMFLOAT4(0.1f, 0.1f, 0.1f, 0.1f);
 	DirectX::XMStoreFloat3( &lightPSInfo.Position, mShadowMap->GetPosition( ) );
 	ModelShader::SLightVS lightVSInfo;
 	lightVSInfo.View = DirectX::XMMatrixTranspose( mShadowMap->GetView( ) );
@@ -318,34 +308,6 @@ void CGame::Init2D( )
 	mCamPosText = std::make_unique<CText>( mDevice.Get( ), mImmediateContext.Get( ),
 		m2DShader, mKristen16, mWidth, mHeight );
 #endif
-
-	mH0Square = std::make_unique<Square>(mDevice.Get(), mImmediateContext.Get(), m2DShader,
-		mWidth, mHeight, 200, 200);
-	mH0Square->TranslateTo(0, 50);
-	mH0Square->SetTexture(mComputeFFT->GetH0());
-	mMinusH0Square = std::make_unique<Square>(mDevice.Get(), mImmediateContext.Get(), m2DShader,
-		mWidth, mHeight, 200, 200);
-	mMinusH0Square->TranslateTo(205, 50);
-	mMinusH0Square->SetTexture(mComputeFFT->GetH0Minus());
-	mTwiddleSquare = std::make_unique<Square>(mDevice.Get(), mImmediateContext.Get(), m2DShader,
-		mWidth, mHeight, 200, 200);
-	mTwiddleSquare->TranslateTo(410, 50);
-	mTwiddleSquare->SetTexture(mTwiddleIndicesFFT->GetTwiddleTexture());
-
-	mDXSquare = std::make_unique<Square>(mDevice.Get(), mImmediateContext.Get(), m2DShader,
-		mWidth, mHeight, 200, 200);
-	mDXSquare->TranslateTo(0, 255);
-	mDXSquare->SetTexture(mTimeComputeFFT->GetTextureSRVDX());
-
-	mDYSquare = std::make_unique<Square>(mDevice.Get(), mImmediateContext.Get(), m2DShader,
-		mWidth, mHeight, 200, 200);
-	mDYSquare->TranslateTo(205, 255);
-	mDYSquare->SetTexture(mTimeComputeFFT->GetTextureSRVDY());
-
-	mDZSquare = std::make_unique<Square>(mDevice.Get(), mImmediateContext.Get(), m2DShader,
-		mWidth, mHeight, 200, 200);
-	mDZSquare->TranslateTo(410, 255);
-	mDZSquare->SetTexture(mTimeComputeFFT->GetTextureSRVDZ());
 
 	mOrthoMatrix = DirectX::XMMatrixOrthographicLH( ( float ) mWidth, ( float ) mHeight, NearZ, FarZ );
 }
@@ -419,9 +381,6 @@ void CGame::Update( )
 	if ( mInput->isKeyPressed( DIK_NUMPAD4 ) )
 		mModel->Translate( -1.0f, 0.0f, 0.0f );
 #endif
-	//mComputeFFT->Compute();
-	//mTwiddleIndicesFFT->Compute();
-	mTimeComputeFFT->Compute(mTimer.GetTotalTime(), mComputeFFT->GetInfo());
 }
 
 void CGame::Render( )
@@ -482,13 +441,6 @@ void CGame::Render( )
 	mSkydome->Render( View, Projection, CamPos );
 	
 	EnableBackbuffer( );
-
-	mH0Square->Render(mOrthoMatrix);
-	mMinusH0Square->Render(mOrthoMatrix);
-	mTwiddleSquare->Render(mOrthoMatrix);
-	mDXSquare->Render(mOrthoMatrix);
-	mDYSquare->Render(mOrthoMatrix);
-	mDZSquare->Render(mOrthoMatrix);
 
 	char buffer[ 500 ] = { 0 };
 	sprintf_s( buffer, "FPS: %d", mTimer.GetFPS( ) );

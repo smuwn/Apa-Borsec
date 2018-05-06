@@ -5,6 +5,7 @@
 #define ZeroMemoryAndDeclare(type, name) type name;\
 ZeroMemory(&name,sizeof(type));
 #define ZeroVariable(name) ZeroMemory(&name,sizeof(decltype(name)))
+#define PAD16(n) (((n)+15)/16*16)
 #define ALIGN16 __declspec(align(16))
 
 
